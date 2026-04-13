@@ -1,0 +1,26 @@
+{
+	"name": "finmove",
+	"version": "1.0.0",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"check": "biome check",
+		"check:type": "tsc --noEmit",
+		"fix": "biome check --write --unsafe",
+		"start": "bun run ./src/main.ts"
+	},
+	"dependencies": {
+		"@inkjs/ui": "2.0.0",
+		"ink": "7.0.0",
+		"react": "19.2.4",
+		"yaml": "2.8.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.10",
+		"@kcconfigs/biome": "1.0.0",
+		"@kcconfigs/tsconfig": "1.0.0",
+		"@types/bun": "latest",
+		"@types/react": "19.2.14",
+		"typescript": "6.0.2"
+	}
+}
