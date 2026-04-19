@@ -106,9 +106,6 @@ export function TripSettings(): JSX.Element {
 				reloadTrip();
 				goBack();
 			}}
-			onCancel={() => {
-				goBack();
-			}}
 		/>
 	);
 }

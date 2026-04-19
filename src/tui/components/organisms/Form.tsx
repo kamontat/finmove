@@ -28,7 +28,7 @@ export function Form({
 }: FormProps): JSX.Element {
 	const { setFocus, toggleFocus } = useFocus();
 	const { toggleHelp } = useHelp();
-	const { goExit } = useNavigation();
+	const { goBack, goExit } = useNavigation();
 
 	// Block useGlobalKeys (which checks focus === "input") so [q]/[esc]
 	// are handled here with onCancel instead of double-firing goBack().
@@ -110,12 +110,12 @@ export function Form({
 
 	useInput(
 		(input, key) => {
-			if (key.escape && onCancel) {
-				onCancel();
+			if (key.escape) {
+				(onCancel ?? goBack)();
 				return;
 			}
-			if (input === "q" && onCancel) {
-				onCancel();
+			if (input === "q") {
+				(onCancel ?? goBack)();
 				return;
 			}
 			if (key.upArrow) {

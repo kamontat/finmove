@@ -166,5 +166,5 @@ export function ExpenseForm(): JSX.Element {
 		goBack();
 	};
 
-	return <Form fields={fields} onSubmit={handleSubmit} onCancel={goBack} />;
+	return <Form fields={fields} onSubmit={handleSubmit} />;
 }
