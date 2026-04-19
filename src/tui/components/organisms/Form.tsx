@@ -3,6 +3,7 @@ import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
 import type { FormFieldConfig } from "../../models";
 import { useFocus } from "../../states/focus";
 import { useHelp } from "../../states/help";
+import { useNavigation } from "../../states/navigation";
 import { DateInput } from "../atoms/DateInput";
 import { DropdownSelect } from "../atoms/DropdownSelect";
 import { InlineSelect } from "../atoms/InlineSelect";
@@ -27,8 +28,11 @@ export function Form({
 }: FormProps): JSX.Element {
 	const { setFocus, toggleFocus } = useFocus();
 	const { toggleHelp } = useHelp();
+	const { goExit } = useNavigation();
 
-	// Form takes over input handling — disable global shortcuts
+	// Block useGlobalKeys (which checks focus === "input") so [q]/[esc]
+	// are handled here with onCancel instead of double-firing goBack().
+	// We forward [?], [tab], and [e] manually below.
 	useEffect(() => {
 		setFocus("input");
 	}, [setFocus]);
@@ -130,6 +134,8 @@ export function Form({
 				toggleHelp();
 			} else if (key.tab) {
 				toggleFocus();
+			} else if (input === "e") {
+				goExit();
 			}
 		},
 		{ isActive: !editing },
