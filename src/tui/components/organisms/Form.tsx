@@ -19,7 +19,7 @@ interface FormProps {
 export function Form({
 	fields,
 	onSubmit,
-	submitLabel = "Save",
+	submitLabel = "Submit",
 	submitKey = "s",
 }: FormProps): JSX.Element {
 	const { setFocus } = useFocus();
@@ -35,8 +35,6 @@ export function Form({
 	const [cursor, setCursor] = useState(0);
 	const [editing, setEditing] = useState(false);
 
-	const totalItems = fields.length + 1; // fields + submit row
-
 	const canSubmit = useMemo(() => {
 		return fields.every((field) => {
 			if (!field.required) return true;
@@ -44,6 +42,13 @@ export function Form({
 			return val !== "";
 		});
 	}, [fields, values]);
+
+	const totalItems = canSubmit ? fields.length + 1 : fields.length;
+
+	// Clamp cursor if submit row becomes unavailable
+	if (cursor >= totalItems) {
+		setCursor(totalItems - 1);
+	}
 
 	const handleSubmit = useCallback(() => {
 		if (!canSubmit) return;
@@ -207,14 +212,22 @@ export function Form({
 				);
 			})}
 
-			{/* Submit row */}
+			{/* Separator */}
+			<Box marginTop={1}>
+				<Text dimColor>{"─".repeat(20)}</Text>
+			</Box>
+
+			{/* Submit button */}
 			<Box>
 				{cursor === fields.length ? (
 					<Text
+						bold
+						inverse={canSubmit}
 						{...(canSubmit ? { color: "green" } : {})}
 						dimColor={!canSubmit}
 					>
-						{">"} [{submitKey}] {submitLabel}
+						{"  "}[{submitKey}] {submitLabel}
+						{"  "}
 					</Text>
 				) : (
 					<Text dimColor={!canSubmit}>
