@@ -24,32 +24,39 @@ Travel expense management tool. Bun runtime, TypeScript, React+Ink TUI.
 - **core/services/** — One function per file, grouped by domain (trip, owner, account, expense, currency, date, export). Each group has an `index.ts` barrel export.
 - **core/validators/** — Validation functions returning `string[]` error arrays.
 - **tui/components/** — Atomic design: `atoms/`, `molecules/`, `organisms/`. No `index.ts` re-exports in TUI — use direct file path imports.
-- **tui/screens/** — Screen content components. Each screen renders main box content only; layout is handled by the `Page` organism.
-- **tui/App.tsx** — Root router managing screen state, navigation history, focus, and keyboard shortcuts.
+- **tui/screens/** — Screen components. Each screen renders main box content and registers menu/hints via `useLayout()` hook. Layout is handled by `layouts/Default.tsx`.
+- **tui/layouts/** — Layout components. `Default.tsx` renders the standard Title/Main/Menu/Hint structure, reading from context providers.
+- **tui/models/** — Shared TUI types (SelectOption, HelpHint, FocusZone, RoutePath, etc.). Uses `index.ts` barrel re-export.
+- **tui/states/** — React Context providers and hooks for global state: `useNavigation()`, `useFocus()`, `useHelp()`, `useLayout()`, `useData()`.
+- **tui/hooks/** — Custom hooks. `useGlobalKeys` handles global keyboard shortcuts.
+- **tui/router.ts** — Route map: path string → component + metadata (title, defaultFocus, borderColor).
+- **tui/App.tsx** — Thin shell: wraps context providers and renders the Router, which looks up the current route and renders the Default layout with the screen component.
 
 ### File Naming
 
 - **Core** (`src/core/`): camelCase — `parseArgs.ts`, `convertToThb.ts`, `addOwner.ts`
 - **TUI** (`src/tui/`): PascalCase — `App.tsx`, `TripList.tsx`, `SelectInput.tsx`, `HelpBar.tsx`
 
-### UI Layout (Page Organism)
+### UI Layout (Default Layout)
 
-Every screen follows a 3-area layout via the `Page` organism:
+Every screen follows a standard Title/Main/Menu/Hint structure via `layouts/Default.tsx`. The layout reads from context providers — screens register their content via `useLayout()` hook rather than receiving props.
 
-1. **Title** — displayed above the main box
-2. **Main box** — bordered, contains interactive content (lists, forms, tables)
-3. **Menu** — bordered, horizontal `[key] label` items with arrow key navigation + shortcut keys
-4. **Help bar** — hidden by default, toggled with `[?]`
+1. **Title** — displayed above the main box, sourced from route metadata
+2. **Main box** — bordered, contains interactive content (lists, forms, tables). Border color is the route's `borderColor` default, overridable at runtime, and falls back to gray when unfocused.
+3. **Menu** — bordered, horizontal `[key] label` items with arrow key navigation + shortcut keys. Only rendered when the screen registers menu options.
+4. **Hint bar** — hidden by default, toggled with `[?]`
 
 Focus switches between main and menu via `[tab]`. Menu shortcuts always work regardless of focus.
 
 ### Keyboard Navigation
 
-- `[q]` — go back (or quit if no history). Disabled during text input (expense form, export, pending actions).
-- `[esc]` — go back during input flows (steps back through form fields), quit on non-input screens. Disabled during pending actions (handled by screen internally).
-- `[tab]` — switch focus between main box and menu. Disabled when no menu is visible.
-- `[?]` — toggle help bar.
+- `[q]` — go back (or quit if no history). Disabled during input mode.
+- `[esc]` — exit program. During input mode, handled by screen (e.g., step back in form).
+- `[tab]` — switch focus between main and menu. Disabled when no menu or in input mode.
+- `[?]` — toggle help bar. Disabled during input mode.
 - Shortcut keys (e.g., `[c]`, `[o]`, `[a]`) — always fire regardless of focus.
+
+Focus zones: `"main"` | `"menu"` | `"input"`. Screens enter input mode via `useFocus().setFocus("input")`.
 
 ### Data Storage
 
