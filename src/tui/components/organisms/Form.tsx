@@ -182,7 +182,9 @@ export function Form({
 										{...(placeholder !== undefined ? { placeholder } : {})}
 										{...(currentValue !== ""
 											? { defaultValue: currentValue }
-											: {})}
+											: field.defaultValue !== undefined
+												? { defaultValue: field.defaultValue }
+												: {})}
 										onSubmit={(val) => setValue(field.key, val)}
 										onCancel={cancelEdit}
 									/>

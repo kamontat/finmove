@@ -52,8 +52,8 @@ Focus switches between main and menu via `[tab]`. Menu shortcuts always work reg
 
 Reusable form organism that shows all fields at once. Two modes:
 
-- **View mode** (focus = "main"): `[↑↓]` navigate fields, `[Enter]` edit selected field, `[s]` submit. Global shortcuts work. Cursor cannot reach submit row until all required fields are filled.
-- **Edit mode** (focus = "input"): field-specific editor (text input, date picker, inline select for ≤3 options, dropdown for >3). `[Enter]` confirms, `[Esc]` discards. Global shortcuts disabled.
+- **View mode** (focus = "main"): `[↑↓]` navigate fields, `[Enter]` edit selected field, `[s]` submit. Global shortcuts work. Submit becomes reachable once all required fields have a value (user-entered or via `defaultValue`) and at least one field has been touched.
+- **Edit mode** (focus = "input"): field-specific editor (text input, date picker, inline select for ≤3 options, dropdown for >3). Editors pre-fill with `field.defaultValue` so edit forms can confirm-as-is without retyping. `[Enter]` confirms, `[Esc]` discards. Global shortcuts disabled.
 
 Fields configured via `FormFieldConfig` array (text, select, date types). Submit row rendered below a separator line with `[s] Submit`.
 
