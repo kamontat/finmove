@@ -97,15 +97,7 @@ export function TripSettingsCurrencies(): JSX.Element {
 			{ key: "q", label: "Back" },
 			{ key: "esc", label: "Exit" },
 		]);
-	}, [
-		trip,
-		mode,
-		setMenu,
-		setHints,
-		setFocus,
-		setBorderColor,
-		setTitleSuffix,
-	]);
+	}, [trip, mode, setMenu, setHints, setFocus, setBorderColor, setTitleSuffix]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
@@ -157,9 +149,7 @@ export function TripSettingsCurrencies(): JSX.Element {
 				<Form
 					fields={editFields}
 					onSubmit={(values) => {
-						const rate = Number.parseFloat(
-							values["exchangeRate"] ?? "",
-						);
+						const rate = Number.parseFloat(values["exchangeRate"] ?? "");
 						if (!Number.isNaN(rate)) {
 							const updated: Record<string, CurrencyConfig> = {
 								...currencies,

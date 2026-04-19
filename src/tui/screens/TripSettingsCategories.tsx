@@ -59,9 +59,7 @@ export function TripSettingsCategories(): JSX.Element {
 		setMenu(
 			[
 				{ label: "Add", value: "add", key: "a" },
-				...(hasItems
-					? [{ label: "Delete", value: "delete", key: "d" }]
-					: []),
+				...(hasItems ? [{ label: "Delete", value: "delete", key: "d" }] : []),
 			],
 			(value) => {
 				if (value === "add") {
@@ -81,15 +79,7 @@ export function TripSettingsCategories(): JSX.Element {
 			{ key: "q", label: "Back" },
 			{ key: "esc", label: "Exit" },
 		]);
-	}, [
-		trip,
-		mode,
-		setMenu,
-		setHints,
-		setFocus,
-		setBorderColor,
-		setTitleSuffix,
-	]);
+	}, [trip, mode, setMenu, setHints, setFocus, setBorderColor, setTitleSuffix]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
