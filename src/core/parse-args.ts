@@ -11,15 +11,21 @@ export function parseArgs(argv: string[]): AppArgs {
 
   for (let i = 0; i < argv.length; i++) {
     switch (argv[i]) {
-      case "--data-dir":
-        result.dataDir = argv[++i];
+      case "--data-dir": {
+        const val = argv[++i];
+        if (val !== undefined) result.dataDir = val;
         break;
-      case "--trip":
-        result.trip = argv[++i];
+      }
+      case "--trip": {
+        const val = argv[++i];
+        if (val !== undefined) result.trip = val;
         break;
-      case "--page":
-        result.page = argv[++i];
+      }
+      case "--page": {
+        const val = argv[++i];
+        if (val !== undefined) result.page = val;
         break;
+      }
     }
   }
 

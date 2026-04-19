@@ -9,7 +9,7 @@ function isExpenseOwnerSplitArray(
 function parsePercentage(value: string | number): number | null {
   if (typeof value === "number") return null; // not a percentage
   const match = value.match(/^(\d+(?:\.\d+)?)%$/);
-  if (match) return parseFloat(match[1]);
+  if (match?.[1]) return parseFloat(match[1]);
   return null;
 }
 
@@ -48,7 +48,7 @@ export function validateExpenses(
             );
           }
 
-          if (ownerSplit.split !== undefined) {
+          if (ownerSplit.split != null) {
             const pct = parsePercentage(ownerSplit.split);
             if (pct !== null) {
               hasPercentages = true;
