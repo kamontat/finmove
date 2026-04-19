@@ -12,7 +12,6 @@ import { NavigationMenu } from "../components/organisms/navigation-menu";
 
 interface AccountListProps {
 	trip: Trip;
-	onBack: () => void;
 	onTripUpdated: () => void;
 }
 
@@ -20,7 +19,6 @@ type Mode = "list" | "add-id" | "add-name" | "add-type" | "add-owners";
 
 export function AccountList({
 	trip,
-	onBack,
 	onTripUpdated,
 }: AccountListProps): JSX.Element {
 	const [mode, setMode] = useState<Mode>("list");
@@ -60,8 +58,8 @@ export function AccountList({
 				<TextLabel text="Account type:" bold />
 				<SelectInput
 					options={[
-						{ label: "Credit", value: "Credit" },
-						{ label: "Debit", value: "Debit" },
+						{ label: "Credit", value: "Credit", key: "c" },
+						{ label: "Debit", value: "Debit", key: "d" },
 					]}
 					onChange={(value) => {
 						setNewType(value as AccountType);
@@ -95,12 +93,12 @@ export function AccountList({
 	]);
 
 	const menuOptions = [
-		{ label: "Add account", value: "add" },
-		...trip.accounts.map((a) => ({
+		{ label: "Add", value: "add", key: "a" },
+		...trip.accounts.map((a, i) => ({
 			label: `Remove ${a.name}`,
 			value: `remove:${a.id}`,
+			key: String(i + 1),
 		})),
-		{ label: "Back", value: "__back__" },
 	];
 
 	return (
@@ -111,10 +109,8 @@ export function AccountList({
 			)}
 			{rows.length === 0 && <TextLabel text="No accounts yet." dimColor />}
 			<NavigationMenu
-				title="Actions"
 				options={menuOptions}
 				onSelect={(value) => {
-					if (value === "__back__") return onBack();
 					if (value === "add") return setMode("add-id");
 					if (value.startsWith("remove:")) {
 						removeAccount(trip, value.replace("remove:", ""));

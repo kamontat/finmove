@@ -5,7 +5,7 @@ import { SelectInput } from "../atoms/select-input";
 import { TextLabel } from "../atoms/text-label";
 
 interface NavigationMenuProps {
-	title: string;
+	title?: string;
 	options: SelectOption[];
 	onSelect: (value: string) => void;
 }
@@ -16,8 +16,8 @@ export function NavigationMenu({
 	onSelect,
 }: NavigationMenuProps): JSX.Element {
 	return (
-		<Box flexDirection="column" gap={1}>
-			<TextLabel text={title} bold color="cyan" />
+		<Box gap={1}>
+			{title !== undefined && <TextLabel text={`${title}:`} bold />}
 			<SelectInput options={options} onChange={onSelect} />
 		</Box>
 	);

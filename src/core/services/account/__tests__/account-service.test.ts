@@ -2,115 +2,113 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { stringify } from "yaml";
-import { getAccounts } from "../get-accounts";
-import { addAccount } from "../add-account";
-import { removeAccount } from "../remove-account";
-import { loadTrip } from "../../trip/load-trip";
-import { AccountType } from "../../../models";
 import type { Settings } from "../../../models";
+import { AccountType } from "../../../models";
+import { loadTrip } from "../../trip/load-trip";
+import { addAccount } from "../add-account";
+import { getAccounts } from "../get-accounts";
+import { removeAccount } from "../remove-account";
 
 const TEST_DIR = join(import.meta.dir, "__fixtures__");
 
 const sampleSettings: Settings = {
-  name: "Test",
-  startDate: "2026-01-01",
-  endDate: "2026-01-07",
-  countries: ["Japan"],
-  baseCurrency: "THB",
-  currencies: {},
-  categories: [],
-  tags: [],
-  exportPath: "./expenses.csv",
+	name: "Test",
+	startDate: "2026-01-01",
+	endDate: "2026-01-07",
+	countries: ["Japan"],
+	baseCurrency: "THB",
+	currencies: {},
+	categories: [],
+	tags: [],
+	exportPath: "./expenses.csv",
 };
 
 function setupTrip() {
-  const tripDir = join(TEST_DIR, "test-trip");
-  mkdirSync(tripDir, { recursive: true });
-  writeFileSync(join(tripDir, "settings.yaml"), stringify(sampleSettings));
-  writeFileSync(
-    join(tripDir, "owners.yaml"),
-    stringify({ owners: [{ id: "alice", name: "Alice" }] })
-  );
-  writeFileSync(
-    join(tripDir, "accounts.yaml"),
-    stringify({
-      accounts: [
-        { id: "a1", name: "Visa", type: "Credit", owners: ["alice"] },
-      ],
-    })
-  );
-  writeFileSync(join(tripDir, "expenses.yaml"), stringify({ expenses: [] }));
-  return tripDir;
+	const tripDir = join(TEST_DIR, "test-trip");
+	mkdirSync(tripDir, { recursive: true });
+	writeFileSync(join(tripDir, "settings.yaml"), stringify(sampleSettings));
+	writeFileSync(
+		join(tripDir, "owners.yaml"),
+		stringify({ owners: [{ id: "alice", name: "Alice" }] }),
+	);
+	writeFileSync(
+		join(tripDir, "accounts.yaml"),
+		stringify({
+			accounts: [{ id: "a1", name: "Visa", type: "Credit", owners: ["alice"] }],
+		}),
+	);
+	writeFileSync(join(tripDir, "expenses.yaml"), stringify({ expenses: [] }));
+	return tripDir;
 }
 
 beforeEach(() => {
-  mkdirSync(TEST_DIR, { recursive: true });
+	mkdirSync(TEST_DIR, { recursive: true });
 });
 
 afterEach(() => {
-  rmSync(TEST_DIR, { recursive: true, force: true });
+	rmSync(TEST_DIR, { recursive: true, force: true });
 });
 
 describe("getAccounts", () => {
-  test("returns accounts from trip", () => {
-    const tripDir = setupTrip();
-    const trip = loadTrip(tripDir);
-    const accounts = getAccounts(trip);
-    expect(accounts).toHaveLength(1);
-    expect(accounts[0].name).toBe("Visa");
-  });
+	test("returns accounts from trip", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		const accounts = getAccounts(trip);
+		expect(accounts).toHaveLength(1);
+		expect(accounts[0].name).toBe("Visa");
+	});
 });
 
 describe("addAccount", () => {
-  test("adds an account and persists to YAML", () => {
-    const tripDir = setupTrip();
-    let trip = loadTrip(tripDir);
-    addAccount(trip, {
-      id: "a2",
-      name: "Cash",
-      type: AccountType.Debit,
-      owners: ["alice"],
-    });
+	test("adds an account and persists to YAML", () => {
+		const tripDir = setupTrip();
+		let trip = loadTrip(tripDir);
+		addAccount(trip, {
+			id: "a2",
+			name: "Cash",
+			type: AccountType.Debit,
+			owners: ["alice"],
+		});
 
-    trip = loadTrip(tripDir);
-    expect(trip.accounts).toHaveLength(2);
-    expect(trip.accounts[1].name).toBe("Cash");
-  });
+		trip = loadTrip(tripDir);
+		expect(trip.accounts).toHaveLength(2);
+		expect(trip.accounts[1].name).toBe("Cash");
+	});
 
-  test("throws when adding duplicate account ID", () => {
-    const tripDir = setupTrip();
-    const trip = loadTrip(tripDir);
-    expect(() =>
-      addAccount(trip, {
-        id: "a1",
-        name: "Dup",
-        type: AccountType.Credit,
-        owners: ["alice"],
-      })
-    ).toThrow('Account with id "a1" already exists');
-  });
+	test("throws when adding duplicate account ID", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		expect(() =>
+			addAccount(trip, {
+				id: "a1",
+				name: "Dup",
+				type: AccountType.Credit,
+				owners: ["alice"],
+			}),
+		).toThrow('Account with id "a1" already exists');
+	});
 
-  test("throws when owner ID does not exist", () => {
-    const tripDir = setupTrip();
-    const trip = loadTrip(tripDir);
-    expect(() =>
-      addAccount(trip, {
-        id: "a3",
-        name: "Bad",
-        type: AccountType.Credit,
-        owners: ["nobody"],
-      })
-    ).toThrow('Owner "nobody" not found');
-  });
+	test("throws when owner ID does not exist", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		expect(() =>
+			addAccount(trip, {
+				id: "a3",
+				name: "Bad",
+				type: AccountType.Credit,
+				owners: ["nobody"],
+			}),
+		).toThrow('Owner "nobody" not found');
+	});
 });
 
 describe("removeAccount", () => {
-  test("removes an account and persists", () => {
-    const tripDir = setupTrip();
-    let trip = loadTrip(tripDir);
-    removeAccount(trip, "a1");
+	test("removes an account and persists", () => {
+		const tripDir = setupTrip();
+		let trip = loadTrip(tripDir);
+		removeAccount(trip, "a1");
 
-    trip = loadTrip(tripDir);
-    expect(trip.accounts).toHaveLength(0);
-  });
+		trip = loadTrip(tripDir);
+		expect(trip.accounts).toHaveLength(0);
+	});
 });

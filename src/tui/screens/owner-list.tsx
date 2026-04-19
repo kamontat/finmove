@@ -11,7 +11,6 @@ import { NavigationMenu } from "../components/organisms/navigation-menu";
 
 interface OwnerListProps {
 	trip: Trip;
-	onBack: () => void;
 	onTripUpdated: () => void;
 }
 
@@ -19,7 +18,6 @@ type Mode = "list" | "add-id" | "add-name" | "remove";
 
 export function OwnerList({
 	trip,
-	onBack,
 	onTripUpdated,
 }: OwnerListProps): JSX.Element {
 	const [mode, setMode] = useState<Mode>("list");
@@ -72,12 +70,12 @@ export function OwnerList({
 	const rows = trip.owners.map((o) => [o.id, o.name]);
 
 	const menuOptions = [
-		{ label: "Add owner", value: "add" },
-		...trip.owners.map((o) => ({
+		{ label: "Add", value: "add", key: "a" },
+		...trip.owners.map((o, i) => ({
 			label: `Remove ${o.name}`,
 			value: `remove:${o.id}`,
+			key: String(i + 1),
 		})),
-		{ label: "Back", value: "__back__" },
 	];
 
 	return (
@@ -86,10 +84,8 @@ export function OwnerList({
 			{rows.length > 0 && <DataTable headers={["ID", "Name"]} rows={rows} />}
 			{rows.length === 0 && <TextLabel text="No owners yet." dimColor />}
 			<NavigationMenu
-				title="Actions"
 				options={menuOptions}
 				onSelect={(value) => {
-					if (value === "__back__") return onBack();
 					if (value === "add") return setMode("add-id");
 					if (value.startsWith("remove:")) {
 						setRemoveId(value.replace("remove:", ""));

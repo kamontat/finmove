@@ -9,22 +9,16 @@ export type TripPage = "owners" | "accounts" | "expenses" | "export";
 interface TripMenuProps {
 	trip: Trip;
 	onNavigate: (page: TripPage) => void;
-	onBack: () => void;
 }
 
-export function TripMenu({
-	trip,
-	onNavigate,
-	onBack,
-}: TripMenuProps): JSX.Element {
+export function TripMenu({ trip, onNavigate }: TripMenuProps): JSX.Element {
 	const { settings } = trip;
 
 	const options = [
-		{ label: "Owners", value: "owners" },
-		{ label: "Accounts", value: "accounts" },
-		{ label: "Expenses", value: "expenses" },
-		{ label: "Export CSV", value: "export" },
-		{ label: "Back", value: "__back__" },
+		{ label: "Owners", value: "owners", key: "o" },
+		{ label: "Accounts", value: "accounts", key: "a" },
+		{ label: "Expenses", value: "expenses", key: "e" },
+		{ label: "Export CSV", value: "export", key: "x" },
 	];
 
 	return (
@@ -35,13 +29,8 @@ export function TripMenu({
 				dimColor
 			/>
 			<NavigationMenu
-				title="Menu"
 				options={options}
 				onSelect={(value) => {
-					if (value === "__back__") {
-						onBack();
-						return;
-					}
 					onNavigate(value as TripPage);
 				}}
 			/>

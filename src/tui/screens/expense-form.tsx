@@ -2,9 +2,11 @@ import { Box } from "ink";
 import type { JSX } from "react";
 import { useState } from "react";
 import type { Expense, Trip } from "../../core/models";
+import { today } from "../../core/services/date";
 import { addExpense, updateExpense } from "../../core/services/expense";
 import { SelectInput } from "../components/atoms/select-input";
 import { TextLabel } from "../components/atoms/text-label";
+import { DateField } from "../components/molecules/date-field";
 import { FormField } from "../components/molecules/form-field";
 
 interface ExpenseFormProps {
@@ -55,9 +57,10 @@ export function ExpenseForm({
 				<Box flexDirection="column">
 					<TextLabel text="Select account:" bold />
 					<SelectInput
-						options={trip.accounts.map((a) => ({
+						options={trip.accounts.map((a, i) => ({
 							label: `${a.name} (${a.type})`,
 							value: a.id,
+							key: String(i + 1),
 						}))}
 						onChange={(value) => {
 							setAccountId(value);
@@ -69,9 +72,9 @@ export function ExpenseForm({
 
 		case "date":
 			return (
-				<FormField
-					label="Date (YYYY-MM-DD):"
-					defaultValue={date}
+				<DateField
+					label="Date:"
+					defaultValue={date || today()}
 					onSubmit={(v) => {
 						setDate(v);
 						setStep("payee");
@@ -96,9 +99,10 @@ export function ExpenseForm({
 				<Box flexDirection="column">
 					<TextLabel text="Category:" bold />
 					<SelectInput
-						options={trip.settings.categories.map((c) => ({
+						options={trip.settings.categories.map((c, i) => ({
 							label: c,
 							value: c,
+							key: String(i + 1),
 						}))}
 						onChange={(value) => {
 							setCategory(value);
@@ -125,7 +129,11 @@ export function ExpenseForm({
 				<Box flexDirection="column">
 					<TextLabel text="Currency:" bold />
 					<SelectInput
-						options={allCurrencies.map((c) => ({ label: c, value: c }))}
+						options={allCurrencies.map((c, i) => ({
+							label: c,
+							value: c,
+							key: String(i + 1),
+						}))}
 						onChange={(value) => {
 							setCurrency(value);
 							setStep(value === "THB" ? "owners" : "exchangeRate");

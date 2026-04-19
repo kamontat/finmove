@@ -1,23 +1,18 @@
 import { Box } from "ink";
 import type { JSX } from "react";
 import type { Trip } from "../../core/models";
-import { removeExpense } from "../../core/services/expense";
 import { TextLabel } from "../components/atoms/text-label";
 import { DataTable } from "../components/organisms/data-table";
 import { NavigationMenu } from "../components/organisms/navigation-menu";
 
 interface ExpenseListProps {
 	trip: Trip;
-	onBack: () => void;
-	onTripUpdated: () => void;
 	onAddExpense: () => void;
 	onEditExpense: (expenseId: string) => void;
 }
 
 export function ExpenseList({
 	trip,
-	onBack,
-	onTripUpdated,
 	onAddExpense,
 	onEditExpense,
 }: ExpenseListProps): JSX.Element {
@@ -33,16 +28,12 @@ export function ExpenseList({
 	});
 
 	const menuOptions = [
-		{ label: "Add expense", value: "add" },
-		...trip.expenses.map((e) => ({
-			label: `Edit: ${e.date} ${e.payee} (${e.amount} ${e.currency})`,
+		{ label: "Add", value: "add", key: "a" },
+		...trip.expenses.map((e, i) => ({
+			label: `${e.payee}`,
 			value: `edit:${e.id}`,
+			key: String(i + 1),
 		})),
-		...trip.expenses.map((e) => ({
-			label: `Delete: ${e.date} ${e.payee}`,
-			value: `delete:${e.id}`,
-		})),
-		{ label: "Back", value: "__back__" },
 	];
 
 	return (
@@ -50,23 +41,17 @@ export function ExpenseList({
 			<TextLabel text="Expenses" bold color="cyan" />
 			{rows.length > 0 && (
 				<DataTable
-					headers={["Date", "Account", "Payee", "Category", "Amount"]}
-					rows={rows}
+					headers={["#", "Date", "Account", "Payee", "Category", "Amount"]}
+					rows={rows.map((r, i) => [String(i + 1), ...r])}
 				/>
 			)}
 			{rows.length === 0 && <TextLabel text="No expenses yet." dimColor />}
 			<NavigationMenu
-				title="Actions"
 				options={menuOptions}
 				onSelect={(value) => {
-					if (value === "__back__") return onBack();
 					if (value === "add") return onAddExpense();
 					if (value.startsWith("edit:"))
 						return onEditExpense(value.replace("edit:", ""));
-					if (value.startsWith("delete:")) {
-						removeExpense(trip, value.replace("delete:", ""));
-						onTripUpdated();
-					}
 				}}
 			/>
 		</Box>
