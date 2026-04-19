@@ -3,10 +3,10 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { stringify } from "yaml";
 import type { Settings } from "../../../models";
-import { loadTrip } from "../../trip/load-trip";
-import { addOwner } from "../add-owner";
-import { getOwners } from "../get-owners";
-import { removeOwner } from "../remove-owner";
+import { loadTrip } from "../../trip/loadTrip";
+import { addOwner } from "../addOwner";
+import { getOwners } from "../getOwners";
+import { removeOwner } from "../removeOwner";
 
 const TEST_DIR = join(import.meta.dir, "__fixtures__");
 

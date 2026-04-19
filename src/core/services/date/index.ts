@@ -1,2 +1,2 @@
-export { addDays } from "./add-days";
+export { addDays } from "./addDays";
 export { today } from "./today";

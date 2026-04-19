@@ -1,1 +1,1 @@
-export { convertToTHB } from "./convert-to-thb";
+export { convertToTHB } from "./convertToThb";

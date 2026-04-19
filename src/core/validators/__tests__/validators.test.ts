@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import type { Account, Expense, Owner, Settings } from "../../models";
-import { validateAccounts } from "../validate-accounts";
-import { validateExpenses } from "../validate-expenses";
-import { validateOwners } from "../validate-owners";
-import { validateSettings } from "../validate-settings";
+import { validateAccounts } from "../validateAccounts";
+import { validateExpenses } from "../validateExpenses";
+import { validateOwners } from "../validateOwners";
+import { validateSettings } from "../validateSettings";
 
 const validSettings: Settings = {
 	name: "Test",

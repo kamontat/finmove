@@ -1,7 +1,7 @@
 import { render } from "ink";
 import React from "react";
-import { parseArgs } from "./core/parse-args";
-import { App } from "./tui/app";
+import { parseArgs } from "./core/parseArgs";
+import { App } from "./tui/App";
 
 const args = parseArgs(process.argv.slice(2));
 console.clear();

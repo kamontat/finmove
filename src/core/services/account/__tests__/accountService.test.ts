@@ -4,10 +4,10 @@ import { join } from "node:path";
 import { stringify } from "yaml";
 import type { Settings } from "../../../models";
 import { AccountType } from "../../../models";
-import { loadTrip } from "../../trip/load-trip";
-import { addAccount } from "../add-account";
-import { getAccounts } from "../get-accounts";
-import { removeAccount } from "../remove-account";
+import { loadTrip } from "../../trip/loadTrip";
+import { addAccount } from "../addAccount";
+import { getAccounts } from "../getAccounts";
+import { removeAccount } from "../removeAccount";
 
 const TEST_DIR = join(import.meta.dir, "__fixtures__");
 

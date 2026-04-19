@@ -1,3 +1,3 @@
-export { addAccount } from "./add-account";
-export { getAccounts } from "./get-accounts";
-export { removeAccount } from "./remove-account";
+export { addAccount } from "./addAccount";
+export { getAccounts } from "./getAccounts";
+export { removeAccount } from "./removeAccount";

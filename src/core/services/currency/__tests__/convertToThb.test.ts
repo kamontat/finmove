@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { convertToTHB } from "../convert-to-thb";
+import { convertToTHB } from "../convertToThb";
 
 describe("convertToTHB", () => {
 	test("returns amount unchanged when currency is THB", () => {

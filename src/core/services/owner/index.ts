@@ -1,3 +1,3 @@
-export { addOwner } from "./add-owner";
-export { getOwners } from "./get-owners";
-export { removeOwner } from "./remove-owner";
+export { addOwner } from "./addOwner";
+export { getOwners } from "./getOwners";
+export { removeOwner } from "./removeOwner";

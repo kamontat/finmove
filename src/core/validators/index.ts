@@ -1,4 +1,4 @@
-export { validateAccounts } from "./validate-accounts";
-export { validateExpenses } from "./validate-expenses";
-export { validateOwners } from "./validate-owners";
-export { validateSettings } from "./validate-settings";
+export { validateAccounts } from "./validateAccounts";
+export { validateExpenses } from "./validateExpenses";
+export { validateOwners } from "./validateOwners";
+export { validateSettings } from "./validateSettings";

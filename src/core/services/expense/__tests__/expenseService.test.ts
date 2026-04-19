@@ -3,11 +3,11 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { stringify } from "yaml";
 import type { Expense, Settings } from "../../../models";
-import { loadTrip } from "../../trip/load-trip";
-import { addExpense } from "../add-expense";
-import { getExpenses } from "../get-expenses";
-import { removeExpense } from "../remove-expense";
-import { updateExpense } from "../update-expense";
+import { loadTrip } from "../../trip/loadTrip";
+import { addExpense } from "../addExpense";
+import { getExpenses } from "../getExpenses";
+import { removeExpense } from "../removeExpense";
+import { updateExpense } from "../updateExpense";
 
 const TEST_DIR = join(import.meta.dir, "__fixtures__");
 

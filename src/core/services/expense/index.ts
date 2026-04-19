@@ -1,6 +1,6 @@
-export { addExpense } from "./add-expense";
-export type { OwnerAmount } from "./calculate-splits";
-export { calculateSplits } from "./calculate-splits";
-export { getExpenses } from "./get-expenses";
-export { removeExpense } from "./remove-expense";
-export { updateExpense } from "./update-expense";
+export { addExpense } from "./addExpense";
+export type { OwnerAmount } from "./calculateSplits";
+export { calculateSplits } from "./calculateSplits";
+export { getExpenses } from "./getExpenses";
+export { removeExpense } from "./removeExpense";
+export { updateExpense } from "./updateExpense";

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { ExpenseOwnerSplit, Owner } from "../../../models";
-import { calculateSplits } from "../calculate-splits";
+import { calculateSplits } from "../calculateSplits";
 
 const allOwners: Owner[] = [
 	{ id: "alice", name: "Alice" },

@@ -1,7 +1,7 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { Trip } from "../../models";
-import { loadTrip } from "./load-trip";
+import { loadTrip } from "./loadTrip";
 
 export function listTrips(dataDir: string): Trip[] {
 	if (!existsSync(dataDir)) {

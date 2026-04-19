@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { parseArgs } from "../parse-args";
+import { parseArgs } from "../parseArgs";
 
 describe("parseArgs", () => {
 	test("returns defaults when no args", () => {

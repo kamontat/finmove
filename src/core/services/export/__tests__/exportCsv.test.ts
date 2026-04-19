@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { Trip } from "../../../models";
-import { exportCSV } from "../export-csv";
+import { exportCSV } from "../exportCsv";
 
 function makeTripFixture(): Trip {
 	return {

@@ -1,6 +1,6 @@
 import type { Trip } from "../../models";
-import { convertToTHB } from "../currency/convert-to-thb";
-import { calculateSplits } from "../expense/calculate-splits";
+import { convertToTHB } from "../currency/convertToThb";
+import { calculateSplits } from "../expense/calculateSplits";
 
 const HEADERS = [
 	"Account",

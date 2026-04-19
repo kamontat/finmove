@@ -3,10 +3,10 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { stringify } from "yaml";
 import type { Settings } from "../../../models";
-import { createTrip } from "../create-trip";
-import { listTrips } from "../list-trips";
-import { loadTrip } from "../load-trip";
-import { toDirName } from "../to-dir-name";
+import { createTrip } from "../createTrip";
+import { listTrips } from "../listTrips";
+import { loadTrip } from "../loadTrip";
+import { toDirName } from "../toDirName";
 
 const TEST_DIR = join(import.meta.dir, "__fixtures__");
 
