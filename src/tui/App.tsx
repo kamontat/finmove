@@ -5,7 +5,7 @@ import { useGlobalKeys } from "./hooks/useGlobalKeys";
 import { Default } from "./layouts/Default";
 import type { RoutePath } from "./models";
 import { routes } from "./router";
-import { DataProvider } from "./states/data";
+import { DataProvider, useData } from "./states/data";
 import { FocusProvider, useFocus } from "./states/focus";
 import { HelpProvider } from "./states/help";
 import { LayoutProvider, useLayout } from "./states/layout";
@@ -33,10 +33,15 @@ function resolveInitialRoute(args: AppArgs): {
 	return { path: "/trips", props: { dataDir: args.dataDir } };
 }
 
+function expenseFormLabel(props: Record<string, unknown>): string {
+	return props["expenseId"] ? "Edit" : "New";
+}
+
 function Router(): JSX.Element {
 	const { currentRoute } = useNavigation();
 	const { setMenuAvailable } = useFocus();
-	const { menuOptions } = useLayout();
+	const { menuOptions, titleSuffix } = useLayout();
+	const { trip } = useData();
 
 	useGlobalKeys();
 
@@ -49,10 +54,30 @@ function Router(): JSX.Element {
 	const routeConfig = routes[currentRoute.path];
 	const Component = routeConfig.component;
 
-	const title =
-		typeof routeConfig.title === "function"
-			? routeConfig.title(currentRoute.props)
-			: routeConfig.title;
+	// Build breadcrumb title from route hierarchy
+	const breadcrumbs: string[] = [];
+	const path = currentRoute.path;
+
+	if (path === "/trips") {
+		breadcrumbs.push("Trips");
+	} else {
+		breadcrumbs.push("Trips");
+		if (trip) {
+			breadcrumbs.push(trip.settings.name);
+		}
+		if (path === "/trips/owners") breadcrumbs.push("Owners");
+		else if (path === "/trips/accounts") breadcrumbs.push("Accounts");
+		else if (path === "/trips/expenses") breadcrumbs.push("Expenses");
+		else if (path === "/trips/expenses/form")
+			breadcrumbs.push("Expenses", expenseFormLabel(currentRoute.props));
+		else if (path === "/trips/export") breadcrumbs.push("Export");
+	}
+
+	if (titleSuffix) {
+		breadcrumbs.push(titleSuffix);
+	}
+
+	const title = breadcrumbs.join(" > ");
 
 	return (
 		<Default
