@@ -46,17 +46,24 @@ export function TripSettings(): JSX.Element {
 			],
 			(value) => {
 				const tripDirPath = trip.dirPath;
+				const tripName = trip.settings.name;
 				if (value === "edit") {
 					setMode("edit");
 					setFocus("main");
 				} else if (value === "countries") {
-					goTo("/trips/settings/countries", { props: { tripDirPath } });
+					goTo("/trips/settings/countries", {
+						props: { tripDirPath, tripName },
+					});
 				} else if (value === "categories") {
-					goTo("/trips/settings/categories", { props: { tripDirPath } });
+					goTo("/trips/settings/categories", {
+						props: { tripDirPath, tripName },
+					});
 				} else if (value === "tags") {
-					goTo("/trips/settings/tags", { props: { tripDirPath } });
+					goTo("/trips/settings/tags", { props: { tripDirPath, tripName } });
 				} else if (value === "currencies") {
-					goTo("/trips/settings/currencies", { props: { tripDirPath } });
+					goTo("/trips/settings/currencies", {
+						props: { tripDirPath, tripName },
+					});
 				}
 			},
 		);

@@ -13,6 +13,7 @@ export function TripMenu(): JSX.Element {
 		if (!trip) return;
 
 		const tripDirPath = trip.dirPath;
+		const tripName = trip.settings.name;
 
 		setMenu(
 			[
@@ -32,7 +33,7 @@ export function TripMenu(): JSX.Element {
 				} else if (value === "export") {
 					goTo("/trips/export", { props: { tripDirPath } });
 				} else if (value === "settings") {
-					goTo("/trips/settings", { props: { tripDirPath } });
+					goTo("/trips/settings", { props: { tripDirPath, tripName } });
 				}
 			},
 		);

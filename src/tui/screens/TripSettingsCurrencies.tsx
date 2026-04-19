@@ -135,7 +135,13 @@ export function TripSettingsCurrencies(): JSX.Element {
 
 	if (mode === "edit") {
 		if (editTarget) {
-			const currentRate = currencies[editTarget]?.exchangeRate ?? 0;
+			if (!currencies[editTarget]) {
+				setEditTarget(null);
+				setMode("list");
+				setFocus("menu");
+				return <Text dimColor>Currency no longer exists.</Text>;
+			}
+			const currentRate = currencies[editTarget].exchangeRate;
 			const editFields: FormFieldConfig[] = [
 				{
 					key: "exchangeRate",
