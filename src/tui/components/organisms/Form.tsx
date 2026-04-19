@@ -1,0 +1,227 @@
+import { Box, Text, useInput } from "ink";
+import { type JSX, useCallback, useMemo, useState } from "react";
+import type { FormFieldConfig } from "../../models";
+import { useFocus } from "../../states/focus";
+import { DateInput } from "../atoms/DateInput";
+import { DropdownSelect } from "../atoms/DropdownSelect";
+import { InlineSelect } from "../atoms/InlineSelect";
+import { TextInput } from "../atoms/TextInput";
+
+const INLINE_SELECT_THRESHOLD = 3;
+
+interface FormProps {
+	fields: FormFieldConfig[];
+	onSubmit: (values: Record<string, string>) => void;
+	submitLabel?: string;
+	submitKey?: string;
+}
+
+export function Form({
+	fields,
+	onSubmit,
+	submitLabel = "Save",
+	submitKey = "s",
+}: FormProps): JSX.Element {
+	const { setFocus } = useFocus();
+
+	const [values, setValues] = useState<Record<string, string>>(() => {
+		const initial: Record<string, string> = {};
+		for (const field of fields) {
+			initial[field.key] = "";
+		}
+		return initial;
+	});
+
+	const [cursor, setCursor] = useState(0);
+	const [editing, setEditing] = useState(false);
+
+	const totalItems = fields.length + 1; // fields + submit row
+
+	const canSubmit = useMemo(() => {
+		return fields.every((field) => {
+			if (!field.required) return true;
+			const val = values[field.key] ?? "";
+			return val !== "";
+		});
+	}, [fields, values]);
+
+	const handleSubmit = useCallback(() => {
+		if (!canSubmit) return;
+		const result: Record<string, string> = {};
+		for (const field of fields) {
+			const val = values[field.key] ?? "";
+			if (val !== "") {
+				result[field.key] = val;
+			} else if (field.type === "text" && field.placeholder !== undefined) {
+				result[field.key] = field.placeholder;
+			} else if (field.defaultValue !== undefined) {
+				result[field.key] = field.defaultValue;
+			} else {
+				result[field.key] = "";
+			}
+		}
+		onSubmit(result);
+	}, [canSubmit, fields, values, onSubmit]);
+
+	const enterEdit = useCallback(() => {
+		setEditing(true);
+		setFocus("input");
+	}, [setFocus]);
+
+	const exitEdit = useCallback(() => {
+		setEditing(false);
+		setFocus("main");
+	}, [setFocus]);
+
+	const setValue = useCallback(
+		(key: string, value: string) => {
+			setValues((prev) => ({ ...prev, [key]: value }));
+			exitEdit();
+		},
+		[exitEdit],
+	);
+
+	const cancelEdit = useCallback(() => {
+		exitEdit();
+	}, [exitEdit]);
+
+	useInput(
+		(input, key) => {
+			if (key.upArrow) {
+				setCursor((c) => (c > 0 ? c - 1 : totalItems - 1));
+			} else if (key.downArrow) {
+				setCursor((c) => (c < totalItems - 1 ? c + 1 : 0));
+			} else if (key.return) {
+				if (cursor === fields.length) {
+					handleSubmit();
+				} else {
+					enterEdit();
+				}
+			} else if (input === submitKey && canSubmit) {
+				handleSubmit();
+			}
+		},
+		{ isActive: !editing },
+	);
+
+	return (
+		<Box flexDirection="column">
+			{fields.map((field, index) => {
+				const isCursor = cursor === index;
+				const currentValue = values[field.key] ?? "";
+				const isEditing = editing && isCursor;
+
+				// Determine display label for the value
+				let displayValue = currentValue;
+				if (field.type === "select" && currentValue !== "") {
+					const found = field.options.find((o) => o.value === currentValue);
+					displayValue = found?.label ?? currentValue;
+				}
+
+				// Placeholder display
+				let placeholder: string | undefined;
+				if (field.type === "text") {
+					placeholder = field.placeholder;
+				}
+				const hasValue = currentValue !== "";
+				const optionalSuffix = !field.required ? " (optional)" : "";
+
+				return (
+					<Box key={field.key} flexDirection="column">
+						{/* Label row */}
+						<Text>
+							{isCursor ? (
+								<Text color="cyan" bold>
+									{">"} {field.label}
+									{optionalSuffix}: {hasValue ? displayValue : ""}
+								</Text>
+							) : (
+								<Text dimColor>
+									{"  "}
+									{field.label}
+									{optionalSuffix}:{" "}
+									{hasValue
+										? displayValue
+										: placeholder !== undefined
+											? `(${placeholder})`
+											: field.defaultValue !== undefined
+												? `(${field.defaultValue})`
+												: ""}
+								</Text>
+							)}
+						</Text>
+
+						{/* Edit row — shown only when this field is being edited */}
+						{isEditing && (
+							<Box marginLeft={4}>
+								{field.type === "text" && (
+									<TextInput
+										{...(placeholder !== undefined ? { placeholder } : {})}
+										{...(currentValue !== ""
+											? { defaultValue: currentValue }
+											: {})}
+										onSubmit={(val) => setValue(field.key, val)}
+										onCancel={cancelEdit}
+									/>
+								)}
+								{field.type === "date" && (
+									<DateInput
+										defaultValue={
+											currentValue !== ""
+												? currentValue
+												: (field.defaultValue ?? "2026-01-01")
+										}
+										onSubmit={(val) => setValue(field.key, val)}
+										onCancel={cancelEdit}
+									/>
+								)}
+								{field.type === "select" &&
+									field.options.length <= INLINE_SELECT_THRESHOLD && (
+										<InlineSelect
+											options={field.options}
+											{...(currentValue !== ""
+												? { defaultValue: currentValue }
+												: field.defaultValue !== undefined
+													? { defaultValue: field.defaultValue }
+													: {})}
+											onSubmit={(val) => setValue(field.key, val)}
+											onCancel={cancelEdit}
+										/>
+									)}
+								{field.type === "select" &&
+									field.options.length > INLINE_SELECT_THRESHOLD && (
+										<DropdownSelect
+											options={field.options}
+											{...(currentValue !== ""
+												? { defaultValue: currentValue }
+												: field.defaultValue !== undefined
+													? { defaultValue: field.defaultValue }
+													: {})}
+											onSubmit={(val) => setValue(field.key, val)}
+											onCancel={cancelEdit}
+										/>
+									)}
+							</Box>
+						)}
+					</Box>
+				);
+			})}
+
+			{/* Submit row */}
+			<Box>
+				{cursor === fields.length ? (
+					<Text
+						{...(canSubmit ? { color: "green" } : {})}
+						dimColor={!canSubmit}
+					>
+						{">"} [{submitKey}] {submitLabel}
+					</Text>
+				) : (
+					<Text dimColor={!canSubmit}>
+						{"  "}[{submitKey}] {submitLabel}
+					</Text>
+				)}
+			</Box>
+		</Box>
+	);
+}
