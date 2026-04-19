@@ -155,7 +155,14 @@ export function Form({
 							{isCursor ? (
 								<Text color="cyan" bold>
 									{">"} {field.label}
-									{optionalSuffix}: {hasValue ? displayValue : ""}
+									{optionalSuffix}:{" "}
+									{hasValue
+										? displayValue
+										: placeholder !== undefined
+											? `(${placeholder})`
+											: field.defaultValue !== undefined
+												? `(${field.defaultValue})`
+												: ""}
 								</Text>
 							) : (
 								<Text dimColor>
