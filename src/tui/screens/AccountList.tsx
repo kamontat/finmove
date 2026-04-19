@@ -207,32 +207,37 @@ export function AccountList(): JSX.Element {
 			return <Text dimColor>No accounts yet.</Text>;
 		}
 		return (
-			<VerticalSelect
-				options={trip.accounts.map((a) => ({
-					label: a.name,
-					value: a.id,
-					detail: `(${a.type})`,
-				}))}
-				onChange={(value) => {
-					if (trip) {
-						removeAccount(trip, value);
-						reloadTrip();
-						if (trip.accounts.length === 0) {
-							setMode("list");
-							setBorderColor(null);
-							setFocus("menu");
+			<Box flexDirection="column">
+				<Text bold color="red">
+					Select an account to remove:
+				</Text>
+				<VerticalSelect
+					options={trip.accounts.map((a) => ({
+						label: a.name,
+						value: a.id,
+						detail: `(${a.type})`,
+					}))}
+					onChange={(value) => {
+						if (trip) {
+							removeAccount(trip, value);
+							reloadTrip();
+							if (trip.accounts.length === 0) {
+								setMode("list");
+								setBorderColor(null);
+								setFocus("menu");
+							}
 						}
-					}
-				}}
-				onCancel={() => {
-					setMode("list");
-					setBorderColor(null);
-					setFocus("menu");
-				}}
-				onEscape={goExit}
-				color="red"
-				isActive
-			/>
+					}}
+					onCancel={() => {
+						setMode("list");
+						setBorderColor(null);
+						setFocus("menu");
+					}}
+					onEscape={goExit}
+					color="red"
+					isActive
+				/>
+			</Box>
 		);
 	}
 

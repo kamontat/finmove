@@ -146,32 +146,37 @@ export function OwnerList(): JSX.Element {
 			return <Text dimColor>No owners yet.</Text>;
 		}
 		return (
-			<VerticalSelect
-				options={trip.owners.map((o) => ({
-					label: o.name,
-					value: o.id,
-					detail: `(${o.id})`,
-				}))}
-				onChange={(value) => {
-					if (trip) {
-						removeOwner(trip, value);
-						reloadTrip();
-						if (trip.owners.length === 0) {
-							setMode("list");
-							setBorderColor(null);
-							setFocus("menu");
+			<Box flexDirection="column">
+				<Text bold color="red">
+					Select an owner to remove:
+				</Text>
+				<VerticalSelect
+					options={trip.owners.map((o) => ({
+						label: o.name,
+						value: o.id,
+						detail: `(${o.id})`,
+					}))}
+					onChange={(value) => {
+						if (trip) {
+							removeOwner(trip, value);
+							reloadTrip();
+							if (trip.owners.length === 0) {
+								setMode("list");
+								setBorderColor(null);
+								setFocus("menu");
+							}
 						}
-					}
-				}}
-				onCancel={() => {
-					setMode("list");
-					setBorderColor(null);
-					setFocus("menu");
-				}}
-				onEscape={goExit}
-				color="red"
-				isActive
-			/>
+					}}
+					onCancel={() => {
+						setMode("list");
+						setBorderColor(null);
+						setFocus("menu");
+					}}
+					onEscape={goExit}
+					color="red"
+					isActive
+				/>
+			</Box>
 		);
 	}
 

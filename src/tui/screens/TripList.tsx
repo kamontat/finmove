@@ -199,39 +199,46 @@ export function TripList(): JSX.Element {
 	if (mode === "select-for-duplicate" || mode === "select-for-delete") {
 		const isDelete = mode === "select-for-delete";
 		return (
-			<VerticalSelect
-				options={trips.map((t) => ({
-					label: t.settings.name,
-					value: t.dirPath,
-					detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
-				}))}
-				onChange={(value) => {
-					const trip = trips.find((t) => t.dirPath === value);
-					if (!trip) return;
-					setTargetTrip(trip);
-					if (isDelete) {
-						deleteTrip(value);
-						const updated = listTrips(dataDir);
-						setTrips(updated);
-						if (updated.length === 0) {
-							setMode("list");
-							setBorderColor(null);
-							setFocus("menu");
+			<Box flexDirection="column">
+				<Text bold color={isDelete ? "red" : "cyan"}>
+					{isDelete
+						? "Select a trip to delete:"
+						: "Select a trip to duplicate:"}
+				</Text>
+				<VerticalSelect
+					options={trips.map((t) => ({
+						label: t.settings.name,
+						value: t.dirPath,
+						detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
+					}))}
+					onChange={(value) => {
+						const trip = trips.find((t) => t.dirPath === value);
+						if (!trip) return;
+						setTargetTrip(trip);
+						if (isDelete) {
+							deleteTrip(value);
+							const updated = listTrips(dataDir);
+							setTrips(updated);
+							if (updated.length === 0) {
+								setMode("list");
+								setBorderColor(null);
+								setFocus("menu");
+							}
+						} else {
+							setMode("duplicate");
+							setFocus("main");
 						}
-					} else {
-						setMode("duplicate");
-						setFocus("main");
-					}
-				}}
-				onCancel={() => {
-					setMode("list");
-					setBorderColor(null);
-					setFocus("menu");
-				}}
-				onEscape={goExit}
-				{...(isDelete ? { color: "red" } : {})}
-				isActive
-			/>
+					}}
+					onCancel={() => {
+						setMode("list");
+						setBorderColor(null);
+						setFocus("menu");
+					}}
+					onEscape={goExit}
+					{...(isDelete ? { color: "red" } : {})}
+					isActive
+				/>
+			</Box>
 		);
 	}
 
