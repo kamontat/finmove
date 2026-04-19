@@ -1,13 +1,47 @@
 import { Text } from "ink";
 import type { JSX } from "react";
-import type { Trip } from "../../core/models";
+import { useEffect } from "react";
 import { DataTable } from "../components/organisms/DataTable";
+import { useData } from "../states/data";
+import { useFocus } from "../states/focus";
+import { useLayout } from "../states/layout";
+import { useNavigation } from "../states/navigation";
 
-interface ExpenseListProps {
-	trip: Trip;
-}
+export function ExpenseList(): JSX.Element {
+	const { trip } = useData();
+	const { goTo } = useNavigation();
+	const { setMenu, setHints } = useLayout();
+	const { setMenuAvailable } = useFocus();
 
-export function ExpenseList({ trip }: ExpenseListProps): JSX.Element {
+	useEffect(() => {
+		if (!trip) return;
+
+		const tripDirPath = trip.dirPath;
+
+		const menuOptions = [
+			{ label: "Add", value: "add", key: "a" },
+			...trip.expenses.map((e) => ({
+				label: `Edit: ${e.payee}`,
+				value: `edit:${e.id}`,
+			})),
+		];
+
+		setMenu(menuOptions, (value) => {
+			if (value === "add") {
+				goTo("/trips/expenses/form", { props: { tripDirPath } });
+			} else if (value.startsWith("edit:")) {
+				const expenseId = value.replace("edit:", "");
+				goTo("/trips/expenses/form", { props: { tripDirPath, expenseId } });
+			}
+		});
+		setHints([{ key: "?", label: "help" }]);
+		setMenuAvailable(true);
+	}, [trip, setMenu, setHints, setMenuAvailable, goTo]);
+
+	if (!trip) {
+		return <Text dimColor>Loading...</Text>;
+	}
+
 	if (trip.expenses.length === 0) {
 		return <Text dimColor>No expenses yet.</Text>;
 	}
