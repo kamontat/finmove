@@ -97,15 +97,17 @@ export function OwnerList(): JSX.Element {
 				onSubmit={(values) => {
 					const name = values["name"] ?? "";
 					if (trip) {
-						addOwner(trip, {
-							id: toSlug(name),
-							name,
-						});
+						addOwner(trip, { id: toSlug(name), name });
 						reloadTrip();
 					}
 					setMode("list");
 					setFocus("menu");
 				}}
+				onCancel={() => {
+					setMode("list");
+					setFocus("menu");
+				}}
+				onEscape={goExit}
 			/>
 		);
 	}
@@ -136,6 +138,12 @@ export function OwnerList(): JSX.Element {
 						setMode("list");
 						setFocus("menu");
 					}}
+					onCancel={() => {
+						setEditTarget(null);
+						setMode("list");
+						setFocus("menu");
+					}}
+					onEscape={goExit}
 				/>
 			</Box>
 		);

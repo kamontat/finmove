@@ -190,6 +190,11 @@ export function TripList(): JSX.Element {
 							props: { tripDirPath: newTrip.dirPath, tripName: name, dataDir },
 						});
 					}}
+					onCancel={() => {
+						setMode("list");
+						setFocus("menu");
+					}}
+					onEscape={goExit}
 				/>
 			</Box>
 		);
@@ -268,6 +273,12 @@ export function TripList(): JSX.Element {
 						setMode("list");
 						setFocus("menu");
 					}}
+					onCancel={() => {
+						setTargetTrip(null);
+						setMode("list");
+						setFocus("menu");
+					}}
+					onEscape={goExit}
 				/>
 			</Box>
 		);

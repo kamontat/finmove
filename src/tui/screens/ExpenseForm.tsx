@@ -13,7 +13,7 @@ import { useNavigation } from "../states/navigation";
 
 export function ExpenseForm(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { goBack, currentRoute } = useNavigation();
+	const { goBack, goExit, currentRoute } = useNavigation();
 	const { setFocus } = useFocus();
 	const { setHints } = useLayout();
 
@@ -166,5 +166,12 @@ export function ExpenseForm(): JSX.Element {
 		goBack();
 	};
 
-	return <Form fields={fields} onSubmit={handleSubmit} />;
+	return (
+		<Form
+			fields={fields}
+			onSubmit={handleSubmit}
+			onCancel={goBack}
+			onEscape={goExit}
+		/>
+	);
 }
