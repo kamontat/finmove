@@ -2,7 +2,7 @@ import { Box } from "ink";
 import type { JSX } from "react";
 import { useState } from "react";
 import type { Expense, Trip } from "../../core/models";
-import { addExpense } from "../../core/services/expense";
+import { addExpense, updateExpense } from "../../core/services/expense";
 import { SelectInput } from "../components/atoms/select-input";
 import { TextLabel } from "../components/atoms/text-label";
 import { FormField } from "../components/molecules/form-field";
@@ -200,7 +200,11 @@ export function ExpenseForm({
 							tags,
 						};
 
-						addExpense(trip, expense);
+						if (existingExpense) {
+							updateExpense(trip, expense);
+						} else {
+							addExpense(trip, expense);
+						}
 						onDone();
 					}}
 				/>
