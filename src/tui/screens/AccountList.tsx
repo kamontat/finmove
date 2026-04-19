@@ -1,17 +1,51 @@
-import { Box, Text } from "ink";
+import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import { AccountType } from "../../core/models";
+import type { AccountType } from "../../core/models";
 import { addAccount, removeAccount } from "../../core/services/account";
-import { SelectInput } from "../components/atoms/SelectInput";
-import { TextLabel } from "../components/atoms/TextLabel";
-import { FormField } from "../components/molecules/FormField";
 import { DataTable } from "../components/organisms/DataTable";
+import { Form } from "../components/organisms/Form";
+import type { FormFieldConfig } from "../models";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 
-type Mode = "list" | "add-id" | "add-name" | "add-type" | "add-owners";
+type Mode = "list" | "add";
+
+const ADD_FIELDS: FormFieldConfig[] = [
+	{
+		key: "id",
+		label: "Account ID (slug)",
+		type: "text",
+		required: true,
+		placeholder: "e.g. alice-credit",
+	},
+	{
+		key: "name",
+		label: "Account Display Name",
+		type: "text",
+		required: true,
+		placeholder: "e.g. Alice's Visa",
+	},
+	{
+		key: "type",
+		label: "Account Type",
+		type: "select",
+		required: true,
+		options: [
+			{ label: "Credit", value: "Credit" },
+			{ label: "Debit", value: "Debit" },
+		],
+		defaultValue: "Credit",
+	},
+	{
+		key: "owners",
+		label: "Owner IDs (comma-separated)",
+		type: "text",
+		required: true,
+		placeholder: "e.g. alice,bob",
+	},
+];
 
 export function AccountList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
@@ -19,9 +53,6 @@ export function AccountList(): JSX.Element {
 	const { setMenu, setHints } = useLayout();
 
 	const [mode, setMode] = useState<Mode>("list");
-	const [newId, setNewId] = useState("");
-	const [newName, setNewName] = useState("");
-	const [newType, setNewType] = useState<AccountType>(AccountType.Credit);
 
 	useEffect(() => {
 		if (!trip || mode !== "list") {
@@ -39,8 +70,8 @@ export function AccountList(): JSX.Element {
 
 		setMenu(menuOptions, (value) => {
 			if (value === "add") {
-				setMode("add-id");
-				setFocus("input");
+				setMode("add");
+				setFocus("main");
 			} else if (value.startsWith("remove:")) {
 				const id = value.replace("remove:", "");
 				removeAccount(trip, id);
@@ -50,62 +81,18 @@ export function AccountList(): JSX.Element {
 		setHints([{ key: "?", label: "help" }]);
 	}, [trip, mode, setMenu, setHints, setFocus, reloadTrip]);
 
-	if (mode === "add-id") {
+	if (mode === "add") {
 		return (
-			<FormField
-				label="Account ID (slug):"
-				placeholder="e.g. alice-credit"
-				onSubmit={(id) => {
-					setNewId(id);
-					setMode("add-name");
-				}}
-			/>
-		);
-	}
-
-	if (mode === "add-name") {
-		return (
-			<FormField
-				label="Account display name:"
-				placeholder="e.g. Alice's Visa"
-				onSubmit={(name) => {
-					setNewName(name);
-					setMode("add-type");
-				}}
-			/>
-		);
-	}
-
-	if (mode === "add-type") {
-		return (
-			<Box flexDirection="column">
-				<TextLabel text="Account type:" bold />
-				<SelectInput
-					options={[
-						{ label: "Credit", value: "Credit", key: "c" },
-						{ label: "Debit", value: "Debit", key: "d" },
-					]}
-					onChange={(value) => {
-						setNewType(value as AccountType);
-						setMode("add-owners");
-					}}
-				/>
-			</Box>
-		);
-	}
-
-	if (mode === "add-owners") {
-		return (
-			<FormField
-				label="Owner IDs (comma-separated):"
-				placeholder="e.g. alice,bob"
-				onSubmit={(ownersStr) => {
+			<Form
+				fields={ADD_FIELDS}
+				onSubmit={(values) => {
+					const ownersStr = values["owners"] ?? "";
 					const owners = ownersStr.split(",").map((s) => s.trim());
 					if (trip) {
 						addAccount(trip, {
-							id: newId,
-							name: newName,
-							type: newType,
+							id: values["id"] ?? "",
+							name: values["name"] ?? "",
+							type: (values["type"] ?? "Credit") as AccountType,
 							owners,
 						});
 						reloadTrip();
@@ -113,6 +100,8 @@ export function AccountList(): JSX.Element {
 					setMode("list");
 					setFocus("menu");
 				}}
+				submitLabel="Add Account"
+				submitKey="a"
 			/>
 		);
 	}
