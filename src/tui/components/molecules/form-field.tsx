@@ -1,23 +1,29 @@
 import { Box } from "ink";
-import { TextLabel } from "../atoms/text-label";
+import type { JSX } from "react";
 import { TextInput } from "../atoms/text-input";
+import { TextLabel } from "../atoms/text-label";
 
 interface FormFieldProps {
-  label: string;
-  placeholder?: string;
-  defaultValue?: string;
-  onSubmit: (value: string) => void;
+	label: string;
+	placeholder?: string;
+	defaultValue?: string;
+	onSubmit: (value: string) => void;
 }
 
-export function FormField({ label, placeholder, defaultValue, onSubmit }: FormFieldProps) {
-  return (
-    <Box flexDirection="column">
-      <TextLabel text={label} bold />
-      <TextInput
-        {...(placeholder !== undefined ? { placeholder } : {})}
-        {...(defaultValue !== undefined ? { defaultValue } : {})}
-        onSubmit={onSubmit}
-      />
-    </Box>
-  );
+export function FormField({
+	label,
+	placeholder,
+	defaultValue,
+	onSubmit,
+}: FormFieldProps): JSX.Element {
+	return (
+		<Box flexDirection="column">
+			<TextLabel text={label} bold />
+			<TextInput
+				{...(placeholder !== undefined ? { placeholder } : {})}
+				{...(defaultValue !== undefined ? { defaultValue } : {})}
+				onSubmit={onSubmit}
+			/>
+		</Box>
+	);
 }
