@@ -2,14 +2,31 @@ import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { addOwner, removeOwner } from "../../core/services/owner";
-import { ConfirmPrompt } from "../components/molecules/ConfirmPrompt";
-import { FormField } from "../components/molecules/FormField";
 import { DataTable } from "../components/organisms/DataTable";
+import { Form } from "../components/organisms/Form";
+import type { FormFieldConfig } from "../models";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 
-type Mode = "list" | "add-id" | "add-name" | "remove";
+type Mode = "list" | "add";
+
+const ADD_FIELDS: FormFieldConfig[] = [
+	{
+		key: "id",
+		label: "Owner ID (slug)",
+		type: "text",
+		required: true,
+		placeholder: "e.g. alice",
+	},
+	{
+		key: "name",
+		label: "Owner Display Name",
+		type: "text",
+		required: true,
+		placeholder: "e.g. Alice",
+	},
+];
 
 export function OwnerList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
@@ -17,8 +34,6 @@ export function OwnerList(): JSX.Element {
 	const { setMenu, setHints } = useLayout();
 
 	const [mode, setMode] = useState<Mode>("list");
-	const [newId, setNewId] = useState("");
-	const [removeId, setRemoveId] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (!trip || mode !== "list") {
@@ -36,61 +51,34 @@ export function OwnerList(): JSX.Element {
 
 		setMenu(menuOptions, (value) => {
 			if (value === "add") {
-				setMode("add-id");
-				setFocus("input");
+				setMode("add");
+				setFocus("main");
 			} else if (value.startsWith("remove:")) {
 				const id = value.replace("remove:", "");
-				setRemoveId(id);
-				setMode("remove");
-				setFocus("input");
+				removeOwner(trip, id);
+				reloadTrip();
 			}
 		});
 		setHints([{ key: "?", label: "help" }]);
-	}, [trip, mode, setMenu, setHints, setFocus]);
+	}, [trip, mode, setMenu, setHints, setFocus, reloadTrip]);
 
-	if (mode === "add-id") {
+	if (mode === "add") {
 		return (
-			<FormField
-				label="Owner ID (slug):"
-				placeholder="e.g. alice"
-				onSubmit={(id) => {
-					setNewId(id);
-					setMode("add-name");
-				}}
-			/>
-		);
-	}
-
-	if (mode === "add-name") {
-		return (
-			<FormField
-				label="Owner display name:"
-				placeholder="e.g. Alice"
-				onSubmit={(name) => {
+			<Form
+				fields={ADD_FIELDS}
+				onSubmit={(values) => {
 					if (trip) {
-						addOwner(trip, { id: newId, name });
+						addOwner(trip, {
+							id: values["id"] ?? "",
+							name: values["name"] ?? "",
+						});
 						reloadTrip();
 					}
 					setMode("list");
 					setFocus("menu");
 				}}
-			/>
-		);
-	}
-
-	if (mode === "remove" && removeId) {
-		return (
-			<ConfirmPrompt
-				message={`Remove owner "${removeId}"?`}
-				onConfirm={(yes) => {
-					if (yes && trip) {
-						removeOwner(trip, removeId);
-						reloadTrip();
-					}
-					setRemoveId(null);
-					setMode("list");
-					setFocus("menu");
-				}}
+				submitLabel="Add Owner"
+				submitKey="a"
 			/>
 		);
 	}
