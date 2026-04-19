@@ -1,24 +1,16 @@
-import { Text, useInput } from "ink";
+import { Text } from "ink";
 import type { JSX } from "react";
-import { useState } from "react";
+import type { HelpHint } from "../../models";
+import { useHelp } from "../../states/help";
 
-export interface HelpHint {
-	key: string;
-	label: string;
-}
+export type { HelpHint } from "../../models";
 
 interface HelpBarProps {
 	hints: HelpHint[];
 }
 
 export function HelpBar({ hints }: HelpBarProps): JSX.Element {
-	const [visible, setVisible] = useState(false);
-
-	useInput((input) => {
-		if (input === "?") {
-			setVisible((v) => !v);
-		}
-	});
+	const { visible } = useHelp();
 
 	if (!visible) {
 		return <Text dimColor>[?] Help</Text>;
