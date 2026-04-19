@@ -34,3 +34,30 @@ export interface VerticalOption {
 	value: string;
 	detail?: string;
 }
+
+// --- Form ---
+
+interface FormFieldBase {
+	key: string;
+	label: string;
+	required?: boolean;
+}
+
+export type TextFormField = FormFieldBase & {
+	type: "text";
+	defaultValue?: string;
+	placeholder?: string;
+};
+
+export type SelectFormField = FormFieldBase & {
+	type: "select";
+	options: SelectOption[];
+	defaultValue?: string;
+};
+
+export type DateFormField = FormFieldBase & {
+	type: "date";
+	defaultValue?: string;
+};
+
+export type FormFieldConfig = TextFormField | SelectFormField | DateFormField;
