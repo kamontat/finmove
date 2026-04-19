@@ -12,17 +12,17 @@ import { useLayout } from "../states/layout";
 
 type Mode = "list" | "add";
 
+function toSlug(name: string): string {
+	return name
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-|-$/g, "");
+}
+
 const ADD_FIELDS: FormFieldConfig[] = [
 	{
-		key: "id",
-		label: "Account ID (slug)",
-		type: "text",
-		required: true,
-		placeholder: "e.g. alice-credit",
-	},
-	{
 		key: "name",
-		label: "Account Display Name",
+		label: "Display name",
 		type: "text",
 		required: true,
 		placeholder: "e.g. Alice's Visa",
@@ -100,12 +100,13 @@ export function AccountList(): JSX.Element {
 			<Form
 				fields={ADD_FIELDS}
 				onSubmit={(values) => {
+					const name = values["name"] ?? "";
 					const ownersStr = values["owners"] ?? "";
 					const owners = ownersStr.split(",").map((s) => s.trim());
 					if (trip) {
 						addAccount(trip, {
-							id: values["id"] ?? "",
-							name: values["name"] ?? "",
+							id: toSlug(name),
+							name,
 							type: (values["type"] ?? "Credit") as AccountType,
 							owners,
 						});

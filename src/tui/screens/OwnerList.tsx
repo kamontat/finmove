@@ -11,17 +11,17 @@ import { useLayout } from "../states/layout";
 
 type Mode = "list" | "add";
 
+function toSlug(name: string): string {
+	return name
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-|-$/g, "");
+}
+
 const ADD_FIELDS: FormFieldConfig[] = [
 	{
-		key: "id",
-		label: "Owner ID (slug)",
-		type: "text",
-		required: true,
-		placeholder: "e.g. alice",
-	},
-	{
 		key: "name",
-		label: "Owner Display Name",
+		label: "Display name",
 		type: "text",
 		required: true,
 		placeholder: "e.g. Alice",
@@ -81,10 +81,11 @@ export function OwnerList(): JSX.Element {
 			<Form
 				fields={ADD_FIELDS}
 				onSubmit={(values) => {
+					const name = values["name"] ?? "";
 					if (trip) {
 						addOwner(trip, {
-							id: values["id"] ?? "",
-							name: values["name"] ?? "",
+							id: toSlug(name),
+							name,
 						});
 						reloadTrip();
 					}
