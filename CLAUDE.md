@@ -23,7 +23,7 @@ Travel expense management tool. Bun runtime, TypeScript, React+Ink TUI.
 - **core/models/** — TypeScript types and enums. One type per file, `index.ts` re-exports all.
 - **core/services/** — One function per file, grouped by domain (trip, owner, account, expense, currency, date, export). Each group has an `index.ts` barrel export.
 - **core/validators/** — Validation functions returning `string[]` error arrays.
-- **tui/components/** — Atomic design: `atoms/`, `molecules/`, `organisms/`. No `index.ts` re-exports in TUI — use direct file path imports.
+- **tui/components/** — Atomic design: `atoms/`, `molecules/`, `organisms/`. No `index.ts` re-exports in TUI — use direct file path imports. Key organisms: `Form` (reusable form with view/edit modes), `DataTable`, `NavigationMenu`.
 - **tui/screens/** — Screen components. Each screen renders main box content and registers menu/hints via `useLayout()` hook. Layout is handled by `layouts/Default.tsx`.
 - **tui/layouts/** — Layout components. `Default.tsx` renders the standard Title/Main/Menu/Hint structure, reading from context providers.
 - **tui/models/** — Shared TUI types (SelectOption, HelpHint, FocusZone, RoutePath, etc.). Uses `index.ts` barrel re-export.
@@ -48,12 +48,22 @@ Every screen follows a standard Title/Main/Menu/Hint structure via `layouts/Defa
 
 Focus switches between main and menu via `[tab]`. Menu shortcuts always work regardless of focus.
 
+### Form Component (organisms/Form.tsx)
+
+Reusable form organism that shows all fields at once. Two modes:
+
+- **View mode** (focus = "main"): `[↑↓]` navigate fields, `[Enter]` edit selected field, `[s]` submit. Global shortcuts work. Cursor cannot reach submit row until all required fields are filled.
+- **Edit mode** (focus = "input"): field-specific editor (text input, date picker, inline select for ≤3 options, dropdown for >3). `[Enter]` confirms, `[Esc]` discards. Global shortcuts disabled.
+
+Fields configured via `FormFieldConfig` array (text, select, date types). Submit row rendered below a separator line with `[s] Submit`.
+
 ### Keyboard Navigation
 
 - `[q]` — go back (or quit if no history). Disabled during input mode.
-- `[esc]` — exit program. During input mode, handled by screen (e.g., step back in form).
+- `[esc]` — exit program. During input mode, handled by screen (e.g., discard edit in form).
 - `[tab]` — switch focus between main and menu. Disabled when no menu or in input mode.
-- `[?]` — toggle help bar. Disabled during input mode.
+- `[?]` — toggle help bar showing keyboard shortcuts. Disabled during input mode.
+- `[s]` — submit form (when on a Form screen and all required fields filled).
 - Shortcut keys (e.g., `[c]`, `[o]`, `[a]`) — always fire regardless of focus.
 
 Focus zones: `"main"` | `"menu"` | `"input"`. Screens enter input mode via `useFocus().setFocus("input")`.
@@ -67,7 +77,7 @@ Each trip is a directory (default under `./data/`) containing four YAML files: `
 - Expenses store original currency + amount; conversion to THB happens at export time using per-expense or trip-level fallback exchange rates.
 - Expenses can have multiple owners with equal, percentage, or fixed-amount splits.
 - CSV export produces one row per owner per expense (not one row per expense).
-- Trips can be duplicated (copies all YAML files, updates name in settings) or deleted.
+- Trips can be duplicated (copies all YAML files, updates name in settings) or deleted. Creating or duplicating a trip with a name that produces an existing directory slug is prevented with an error message.
 
 ## Conventions
 
