@@ -98,14 +98,23 @@ export function TripList(): JSX.Element {
 		setError(null);
 		if (mode !== "list") {
 			setMenu([], () => {});
-			setBorderColor(null);
 			if (mode === "create" || mode === "duplicate") {
+				setBorderColor(null);
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
 					{ key: "Enter", label: "Edit field" },
 					{ key: "q", label: "Back" },
 					{ key: "esc", label: "Exit" },
 				]);
+			} else if (mode === "select-for-delete") {
+				setBorderColor("red");
+				setHints([
+					{ key: "↑↓", label: "Navigate" },
+					{ key: "Enter", label: "Delete selected" },
+					{ key: "esc", label: "Back to list" },
+				]);
+			} else {
+				setBorderColor(null);
 			}
 			return;
 		}
@@ -126,7 +135,7 @@ export function TripList(): JSX.Element {
 				} else if (value === "delete" && trips.length > 0) {
 					setMode("select-for-delete");
 					setBorderColor("red");
-					setFocus("main");
+					setFocus("input");
 				}
 			},
 		);
@@ -194,10 +203,13 @@ export function TripList(): JSX.Element {
 					setTargetTrip(trip);
 					if (isDelete) {
 						deleteTrip(value);
-						refreshTrips();
-						setMode("list");
-						setBorderColor(null);
-						setFocus("menu");
+						const updated = listTrips(dataDir);
+						setTrips(updated);
+						if (updated.length === 0) {
+							setMode("list");
+							setBorderColor(null);
+							setFocus("menu");
+						}
 					} else {
 						setMode("duplicate");
 						setFocus("main");
