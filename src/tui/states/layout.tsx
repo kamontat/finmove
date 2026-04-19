@@ -15,9 +15,11 @@ interface LayoutContextValue {
 	onMenuSelect: ((value: string) => void) | null;
 	hints: HelpHint[];
 	borderColor: string | null;
+	titleSuffix: string | null;
 	setMenu: (options: SelectOption[], onSelect: (value: string) => void) => void;
 	setHints: (hints: HelpHint[]) => void;
 	setBorderColor: (color: string | null) => void;
+	setTitleSuffix: (suffix: string | null) => void;
 	resetLayout: () => void;
 }
 
@@ -31,6 +33,7 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 	const [menuOptions, setMenuOptions] = useState<SelectOption[]>([]);
 	const [hints, setHintsState] = useState<HelpHint[]>([]);
 	const [borderColor, setBorderColorState] = useState<string | null>(null);
+	const [titleSuffix, setTitleSuffixState] = useState<string | null>(null);
 	const [callbackTick, setCallbackTick] = useState(0);
 	const onMenuSelectRef = useRef<((value: string) => void) | null>(null);
 
@@ -51,10 +54,15 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 		setBorderColorState(color);
 	}, []);
 
+	const setTitleSuffix = useCallback((suffix: string | null) => {
+		setTitleSuffixState(suffix);
+	}, []);
+
 	const resetLayout = useCallback(() => {
 		setMenuOptions([]);
 		setHintsState([]);
 		setBorderColorState(null);
+		setTitleSuffixState(null);
 		onMenuSelectRef.current = null;
 		setCallbackTick((t) => t + 1);
 	}, []);
@@ -68,9 +76,11 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 			onMenuSelect: onMenuSelectSnapshot,
 			hints,
 			borderColor,
+			titleSuffix,
 			setMenu,
 			setHints,
 			setBorderColor,
+			setTitleSuffix,
 			resetLayout,
 		}),
 		[
@@ -78,9 +88,11 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 			onMenuSelectSnapshot,
 			hints,
 			borderColor,
+			titleSuffix,
 			setMenu,
 			setHints,
 			setBorderColor,
+			setTitleSuffix,
 			resetLayout,
 		],
 	);
