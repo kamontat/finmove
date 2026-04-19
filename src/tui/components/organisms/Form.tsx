@@ -45,11 +45,16 @@ export function Form({
 	const [editing, setEditing] = useState(false);
 
 	const canSubmit = useMemo(() => {
-		return fields.every((field) => {
+		const allRequiredFilled = fields.every((field) => {
 			if (!field.required) return true;
+			const val = values[field.key] ?? "";
+			return val !== "" || field.defaultValue !== undefined;
+		});
+		const hasAnyChange = fields.some((field) => {
 			const val = values[field.key] ?? "";
 			return val !== "";
 		});
+		return allRequiredFilled && hasAnyChange;
 	}, [fields, values]);
 
 	const totalItems = canSubmit ? fields.length + 1 : fields.length;
