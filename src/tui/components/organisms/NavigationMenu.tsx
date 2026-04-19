@@ -1,8 +1,8 @@
 import { Box } from "ink";
 import type { JSX } from "react";
-import type { SelectOption } from "../atoms/select-input";
-import { SelectInput } from "../atoms/select-input";
-import { TextLabel } from "../atoms/text-label";
+import type { SelectOption } from "../atoms/SelectInput";
+import { SelectInput } from "../atoms/SelectInput";
+import { TextLabel } from "../atoms/TextLabel";
 
 interface NavigationMenuProps {
 	title?: string;

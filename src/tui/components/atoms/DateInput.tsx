@@ -5,6 +5,7 @@ import { useState } from "react";
 interface DateInputProps {
 	defaultValue: string;
 	onSubmit: (value: string) => void;
+	onCancel?: () => void;
 }
 
 type Segment = "year" | "month" | "day";
@@ -68,6 +69,7 @@ function format(parts: { year: number; month: number; day: number }): string {
 export function DateInput({
 	defaultValue,
 	onSubmit,
+	onCancel,
 }: DateInputProps): JSX.Element {
 	const [parts, setParts] = useState(() => parseParts(defaultValue));
 	const [segment, setSegment] = useState<Segment>("day");
@@ -89,6 +91,8 @@ export function DateInput({
 			});
 		} else if (key.return) {
 			onSubmit(format(parts));
+		} else if (key.escape && onCancel) {
+			onCancel();
 		}
 	});
 

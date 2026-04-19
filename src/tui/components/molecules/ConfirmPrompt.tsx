@@ -1,7 +1,7 @@
 import { ConfirmInput } from "@inkjs/ui";
 import { Box } from "ink";
 import type { JSX } from "react";
-import { TextLabel } from "../atoms/text-label";
+import { TextLabel } from "../atoms/TextLabel";
 
 interface ConfirmPromptProps {
 	message: string;

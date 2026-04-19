@@ -1,13 +1,14 @@
 import { Box } from "ink";
 import type { JSX } from "react";
-import { TextInput } from "../atoms/text-input";
-import { TextLabel } from "../atoms/text-label";
+import { TextInput } from "../atoms/TextInput";
+import { TextLabel } from "../atoms/TextLabel";
 
 interface FormFieldProps {
 	label: string;
 	placeholder?: string;
 	defaultValue?: string;
 	onSubmit: (value: string) => void;
+	onCancel?: () => void;
 }
 
 export function FormField({
@@ -15,6 +16,7 @@ export function FormField({
 	placeholder,
 	defaultValue,
 	onSubmit,
+	onCancel,
 }: FormFieldProps): JSX.Element {
 	return (
 		<Box flexDirection="column">
@@ -23,6 +25,7 @@ export function FormField({
 				{...(placeholder !== undefined ? { placeholder } : {})}
 				{...(defaultValue !== undefined ? { defaultValue } : {})}
 				onSubmit={onSubmit}
+				{...(onCancel !== undefined ? { onCancel } : {})}
 			/>
 		</Box>
 	);

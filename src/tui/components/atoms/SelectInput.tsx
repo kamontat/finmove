@@ -1,5 +1,6 @@
 import { Box, Text, useInput } from "ink";
 import type { JSX } from "react";
+import { useState } from "react";
 
 export interface SelectOption {
 	label: string;
@@ -10,39 +11,60 @@ export interface SelectOption {
 interface SelectInputProps {
 	options: SelectOption[];
 	onChange: (value: string) => void;
+	isActive?: boolean;
 }
 
 export function SelectInput({
 	options,
 	onChange,
+	isActive = true,
 }: SelectInputProps): JSX.Element {
-	useInput((input) => {
-		if (!input) return;
+	const [cursor, setCursor] = useState(0);
+
+	// Arrow navigation and Enter only when focused
+	useInput(
+		(_input, key) => {
+			if (key.leftArrow) {
+				setCursor((c) => (c > 0 ? c - 1 : options.length - 1));
+			} else if (key.rightArrow) {
+				setCursor((c) => (c < options.length - 1 ? c + 1 : 0));
+			} else if (key.return) {
+				const opt = options[cursor];
+				if (opt) onChange(opt.value);
+			}
+		},
+		{ isActive },
+	);
+
+	// Shortcut keys always work (except reserved keys)
+	useInput((input, key) => {
+		if (!input || key.escape || input === "q" || input === "?") return;
 		const lower = input.toLowerCase();
 		const match = options.find((o) => o.key?.toLowerCase() === lower);
-		if (match) {
-			onChange(match.value);
-		}
+		if (match) onChange(match.value);
 	});
 
 	return (
 		<Box gap={2} flexWrap="wrap">
-			{options.map((o) => (
-				<Text key={o.value}>
-					{o.key ? (
-						<>
-							<Text dimColor>[</Text>
-							<Text color="cyan" bold>
-								{o.key}
-							</Text>
-							<Text dimColor>]</Text>
-							<Text> {o.label}</Text>
-						</>
-					) : (
-						<Text dimColor>{o.label}</Text>
-					)}
-				</Text>
-			))}
+			{options.map((o, i) => {
+				const selected = isActive && i === cursor;
+				return (
+					<Text key={o.value} inverse={selected}>
+						{o.key ? (
+							<>
+								<Text dimColor={!selected}>[</Text>
+								<Text {...(selected ? {} : { color: "cyan" })} bold>
+									{o.key}
+								</Text>
+								<Text dimColor={!selected}>]</Text>
+								<Text> {o.label}</Text>
+							</>
+						) : (
+							<Text>{o.label}</Text>
+						)}
+					</Text>
+				);
+			})}
 		</Box>
 	);
 }

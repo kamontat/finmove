@@ -12,7 +12,7 @@ interface HelpBarProps {
 }
 
 export function HelpBar({ hints }: HelpBarProps): JSX.Element {
-	const [visible, setVisible] = useState(true);
+	const [visible, setVisible] = useState(false);
 
 	useInput((input) => {
 		if (input === "?") {
@@ -21,7 +21,7 @@ export function HelpBar({ hints }: HelpBarProps): JSX.Element {
 	});
 
 	if (!visible) {
-		return <Text dimColor>[?] Show help</Text>;
+		return <Text dimColor>[?] Help</Text>;
 	}
 
 	return (
