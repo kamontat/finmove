@@ -94,6 +94,7 @@ export function AccountList(): JSX.Element {
 			return;
 		}
 
+		setTitleSuffix(null);
 		const hasAccounts = trip.accounts.length > 0;
 		setMenu(
 			[

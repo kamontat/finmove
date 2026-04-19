@@ -139,6 +139,7 @@ export function TripList(): JSX.Element {
 			return;
 		}
 
+		setTitleSuffix(null);
 		setMenu(
 			[
 				{ label: "Create", value: "create", key: "c" },

@@ -65,6 +65,7 @@ export function OwnerList(): JSX.Element {
 			return;
 		}
 
+		setTitleSuffix(null);
 		const hasOwners = trip.owners.length > 0;
 		setMenu(
 			[
