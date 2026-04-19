@@ -22,8 +22,10 @@ export function ExpenseForm(): JSX.Element {
 
 	useEffect(() => {
 		setHints([
-			{ key: "enter", label: "confirm" },
-			{ key: "esc", label: "back" },
+			{ key: "↑↓", label: "Navigate" },
+			{ key: "Enter", label: "Edit field" },
+			{ key: "q", label: "Back" },
+			{ key: "esc", label: "Exit" },
 		]);
 	}, [setHints]);
 
@@ -164,12 +166,5 @@ export function ExpenseForm(): JSX.Element {
 		goBack();
 	};
 
-	return (
-		<Form
-			fields={fields}
-			onSubmit={handleSubmit}
-			submitLabel="Save Expense"
-			submitKey="s"
-		/>
-	);
+	return <Form fields={fields} onSubmit={handleSubmit} />;
 }

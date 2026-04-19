@@ -38,6 +38,14 @@ export function OwnerList(): JSX.Element {
 	useEffect(() => {
 		if (!trip || mode !== "list") {
 			setMenu([], () => {});
+			if (mode === "add") {
+				setHints([
+					{ key: "↑↓", label: "Navigate" },
+					{ key: "Enter", label: "Edit field" },
+					{ key: "q", label: "Back" },
+					{ key: "esc", label: "Exit" },
+				]);
+			}
 			return;
 		}
 
@@ -59,7 +67,13 @@ export function OwnerList(): JSX.Element {
 				reloadTrip();
 			}
 		});
-		setHints([{ key: "?", label: "help" }]);
+		setHints([
+			{ key: "tab", label: "Switch focus" },
+			{ key: "←→", label: "Navigate menu" },
+			{ key: "Enter", label: "Confirm" },
+			{ key: "q", label: "Back" },
+			{ key: "esc", label: "Exit" },
+		]);
 	}, [trip, mode, setMenu, setHints, setFocus, reloadTrip]);
 
 	if (mode === "add") {
@@ -77,8 +91,6 @@ export function OwnerList(): JSX.Element {
 					setMode("list");
 					setFocus("menu");
 				}}
-				submitLabel="Add Owner"
-				submitKey="a"
 			/>
 		);
 	}

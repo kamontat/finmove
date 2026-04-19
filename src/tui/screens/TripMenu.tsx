@@ -33,7 +33,13 @@ export function TripMenu(): JSX.Element {
 				}
 			},
 		);
-		setHints([{ key: "?", label: "help" }]);
+		setHints([
+			{ key: "tab", label: "Switch focus" },
+			{ key: "←→", label: "Navigate menu" },
+			{ key: "Enter", label: "Confirm" },
+			{ key: "q", label: "Back" },
+			{ key: "esc", label: "Exit" },
+		]);
 	}, [trip, setMenu, setHints, goTo]);
 
 	if (!trip) {
