@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from "ink";
-import { type JSX, useCallback, useMemo, useState } from "react";
+import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
 import type { FormFieldConfig } from "../../models";
 import { useFocus } from "../../states/focus";
 import { DateInput } from "../atoms/DateInput";
@@ -12,6 +12,8 @@ const INLINE_SELECT_THRESHOLD = 3;
 interface FormProps {
 	fields: FormFieldConfig[];
 	onSubmit: (values: Record<string, string>) => void;
+	onCancel?: () => void;
+	onEscape?: () => void;
 	submitLabel?: string;
 	submitKey?: string;
 }
@@ -19,10 +21,17 @@ interface FormProps {
 export function Form({
 	fields,
 	onSubmit,
+	onCancel,
+	onEscape,
 	submitLabel = "Submit",
 	submitKey = "s",
 }: FormProps): JSX.Element {
 	const { setFocus } = useFocus();
+
+	// Form takes over input handling — disable global shortcuts
+	useEffect(() => {
+		setFocus("input");
+	}, [setFocus]);
 
 	const [values, setValues] = useState<Record<string, string>>(() => {
 		const initial: Record<string, string> = {};
@@ -92,6 +101,14 @@ export function Form({
 
 	useInput(
 		(input, key) => {
+			if (key.escape && onEscape) {
+				onEscape();
+				return;
+			}
+			if (input === "q" && onCancel) {
+				onCancel();
+				return;
+			}
 			if (key.upArrow) {
 				setCursor((c) => (c > 0 ? c - 1 : totalItems - 1));
 			} else if (key.downArrow) {
