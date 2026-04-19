@@ -5,9 +5,9 @@ import type { JSX } from "react";
 import { useState } from "react";
 import type { Trip } from "../../core/models";
 import { exportCSV } from "../../core/services/export";
-import { TextLabel } from "../components/atoms/text-label";
-import { ConfirmPrompt } from "../components/molecules/confirm-prompt";
-import { FormField } from "../components/molecules/form-field";
+import { TextLabel } from "../components/atoms/TextLabel";
+import { ConfirmPrompt } from "../components/molecules/ConfirmPrompt";
+import { FormField } from "../components/molecules/FormField";
 
 interface ExportScreenProps {
 	trip: Trip;

@@ -4,10 +4,10 @@ import { useState } from "react";
 import type { Expense, Trip } from "../../core/models";
 import { today } from "../../core/services/date";
 import { addExpense, updateExpense } from "../../core/services/expense";
-import { SelectInput } from "../components/atoms/select-input";
-import { TextLabel } from "../components/atoms/text-label";
-import { DateField } from "../components/molecules/date-field";
-import { FormField } from "../components/molecules/form-field";
+import { SelectInput } from "../components/atoms/SelectInput";
+import { TextLabel } from "../components/atoms/TextLabel";
+import { DateField } from "../components/molecules/DateField";
+import { FormField } from "../components/molecules/FormField";
 
 interface ExpenseFormProps {
 	trip: Trip;

@@ -1,17 +1,17 @@
-import { Box } from "ink";
+import { Text } from "ink";
 import type { JSX } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
 import { addOwner, removeOwner } from "../../core/services/owner";
-import { TextLabel } from "../components/atoms/text-label";
-import { ConfirmPrompt } from "../components/molecules/confirm-prompt";
-import { FormField } from "../components/molecules/form-field";
-import { DataTable } from "../components/organisms/data-table";
-import { NavigationMenu } from "../components/organisms/navigation-menu";
+import { ConfirmPrompt } from "../components/molecules/ConfirmPrompt";
+import { FormField } from "../components/molecules/FormField";
+import { DataTable } from "../components/organisms/DataTable";
 
 interface OwnerListProps {
 	trip: Trip;
 	onTripUpdated: () => void;
+	pendingAction: string | null;
+	onActionConsumed: () => void;
 }
 
 type Mode = "list" | "add-id" | "add-name" | "remove";
@@ -19,10 +19,23 @@ type Mode = "list" | "add-id" | "add-name" | "remove";
 export function OwnerList({
 	trip,
 	onTripUpdated,
+	pendingAction,
+	onActionConsumed,
 }: OwnerListProps): JSX.Element {
 	const [mode, setMode] = useState<Mode>("list");
 	const [newId, setNewId] = useState("");
 	const [removeId, setRemoveId] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (!pendingAction || mode !== "list") return;
+		if (pendingAction === "add") {
+			setMode("add-id");
+		} else if (pendingAction.startsWith("remove:")) {
+			setRemoveId(pendingAction.replace("remove:", ""));
+			setMode("remove");
+		}
+		onActionConsumed();
+	}, [pendingAction, mode, onActionConsumed]);
 
 	if (mode === "add-id") {
 		return (
@@ -67,32 +80,14 @@ export function OwnerList({
 		);
 	}
 
-	const rows = trip.owners.map((o) => [o.id, o.name]);
-
-	const menuOptions = [
-		{ label: "Add", value: "add", key: "a" },
-		...trip.owners.map((o, i) => ({
-			label: `Remove ${o.name}`,
-			value: `remove:${o.id}`,
-			key: String(i + 1),
-		})),
-	];
+	if (trip.owners.length === 0) {
+		return <Text dimColor>No owners yet.</Text>;
+	}
 
 	return (
-		<Box flexDirection="column" gap={1}>
-			<TextLabel text="Owners" bold color="cyan" />
-			{rows.length > 0 && <DataTable headers={["ID", "Name"]} rows={rows} />}
-			{rows.length === 0 && <TextLabel text="No owners yet." dimColor />}
-			<NavigationMenu
-				options={menuOptions}
-				onSelect={(value) => {
-					if (value === "add") return setMode("add-id");
-					if (value.startsWith("remove:")) {
-						setRemoveId(value.replace("remove:", ""));
-						setMode("remove");
-					}
-				}}
-			/>
-		</Box>
+		<DataTable
+			headers={["ID", "Name"]}
+			rows={trip.owners.map((o) => [o.id, o.name])}
+		/>
 	);
 }

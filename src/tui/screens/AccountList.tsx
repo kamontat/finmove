@@ -1,18 +1,19 @@
-import { Box } from "ink";
+import { Box, Text } from "ink";
 import type { JSX } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
 import { AccountType } from "../../core/models";
 import { addAccount, removeAccount } from "../../core/services/account";
-import { SelectInput } from "../components/atoms/select-input";
-import { TextLabel } from "../components/atoms/text-label";
-import { FormField } from "../components/molecules/form-field";
-import { DataTable } from "../components/organisms/data-table";
-import { NavigationMenu } from "../components/organisms/navigation-menu";
+import { SelectInput } from "../components/atoms/SelectInput";
+import { TextLabel } from "../components/atoms/TextLabel";
+import { FormField } from "../components/molecules/FormField";
+import { DataTable } from "../components/organisms/DataTable";
 
 interface AccountListProps {
 	trip: Trip;
 	onTripUpdated: () => void;
+	pendingAction: string | null;
+	onActionConsumed: () => void;
 }
 
 type Mode = "list" | "add-id" | "add-name" | "add-type" | "add-owners";
@@ -20,11 +21,24 @@ type Mode = "list" | "add-id" | "add-name" | "add-type" | "add-owners";
 export function AccountList({
 	trip,
 	onTripUpdated,
+	pendingAction,
+	onActionConsumed,
 }: AccountListProps): JSX.Element {
 	const [mode, setMode] = useState<Mode>("list");
 	const [newId, setNewId] = useState("");
 	const [newName, setNewName] = useState("");
 	const [newType, setNewType] = useState<AccountType>(AccountType.Credit);
+
+	useEffect(() => {
+		if (!pendingAction || mode !== "list") return;
+		if (pendingAction === "add") {
+			setMode("add-id");
+		} else if (pendingAction.startsWith("remove:")) {
+			removeAccount(trip, pendingAction.replace("remove:", ""));
+			onTripUpdated();
+		}
+		onActionConsumed();
+	}, [pendingAction, mode, onActionConsumed, trip, onTripUpdated]);
 
 	if (mode === "add-id") {
 		return (
@@ -77,7 +91,12 @@ export function AccountList({
 				placeholder="e.g. alice,bob"
 				onSubmit={(ownersStr) => {
 					const owners = ownersStr.split(",").map((s) => s.trim());
-					addAccount(trip, { id: newId, name: newName, type: newType, owners });
+					addAccount(trip, {
+						id: newId,
+						name: newName,
+						type: newType,
+						owners,
+					});
 					onTripUpdated();
 					setMode("list");
 				}}
@@ -85,39 +104,19 @@ export function AccountList({
 		);
 	}
 
-	const rows = trip.accounts.map((a) => [
-		a.id,
-		a.name,
-		a.type,
-		a.owners.join(", "),
-	]);
-
-	const menuOptions = [
-		{ label: "Add", value: "add", key: "a" },
-		...trip.accounts.map((a, i) => ({
-			label: `Remove ${a.name}`,
-			value: `remove:${a.id}`,
-			key: String(i + 1),
-		})),
-	];
+	if (trip.accounts.length === 0) {
+		return <Text dimColor>No accounts yet.</Text>;
+	}
 
 	return (
-		<Box flexDirection="column" gap={1}>
-			<TextLabel text="Accounts" bold color="cyan" />
-			{rows.length > 0 && (
-				<DataTable headers={["ID", "Name", "Type", "Owners"]} rows={rows} />
-			)}
-			{rows.length === 0 && <TextLabel text="No accounts yet." dimColor />}
-			<NavigationMenu
-				options={menuOptions}
-				onSelect={(value) => {
-					if (value === "add") return setMode("add-id");
-					if (value.startsWith("remove:")) {
-						removeAccount(trip, value.replace("remove:", ""));
-						onTripUpdated();
-					}
-				}}
-			/>
-		</Box>
+		<DataTable
+			headers={["ID", "Name", "Type", "Owners"]}
+			rows={trip.accounts.map((a) => [
+				a.id,
+				a.name,
+				a.type,
+				a.owners.join(", "),
+			])}
+		/>
 	);
 }
