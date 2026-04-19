@@ -154,45 +154,55 @@ One type per file, `index.ts` re-exports all:
 One function per file, `index.ts` re-exports per service group:
 
 #### `services/trip/`
-- `list-trips.ts` — `listTrips(dataDir): Trip[]`
-- `load-trip.ts` — `loadTrip(tripPath): Trip`
-- `create-trip.ts` — `createTrip(dataDir, name, settings): Trip`
+- `listTrips.ts` — `listTrips(dataDir): Trip[]`
+- `loadTrip.ts` — `loadTrip(tripPath): Trip`
+- `createTrip.ts` — `createTrip(dataDir, name, settings): Trip`
+- `deleteTrip.ts` — `deleteTrip(tripPath): void`
+- `duplicateTrip.ts` — `duplicateTrip(dataDir, sourcePath, newDirName, newName): Trip`
+- `toDirName.ts` — `toDirName(tripName, startDate): string` — generates slug directory name
+- `index.ts`
+
+#### `services/date/`
+- `today.ts` — `today(): string` — returns current date as YYYY-MM-DD
+- `addDays.ts` — `addDays(dateStr, days): string` — add/subtract days from a date
 - `index.ts`
 
 #### `services/owner/`
-- `get-owners.ts` — `getOwners(trip): Owner[]`
-- `add-owner.ts` — `addOwner(trip, owner): void`
-- `remove-owner.ts` — `removeOwner(trip, id): void`
+- `getOwners.ts` — `getOwners(trip): Owner[]`
+- `addOwner.ts` — `addOwner(trip, owner): void`
+- `removeOwner.ts` — `removeOwner(trip, id): void`
 - `index.ts`
 
 #### `services/account/`
-- `get-accounts.ts` — `getAccounts(trip): Account[]`
-- `add-account.ts` — `addAccount(trip, account): void`
-- `remove-account.ts` — `removeAccount(trip, id): void`
+- `getAccounts.ts` — `getAccounts(trip): Account[]`
+- `addAccount.ts` — `addAccount(trip, account): void`
+- `removeAccount.ts` — `removeAccount(trip, id): void`
 - `index.ts`
 
 #### `services/expense/`
-- `get-expenses.ts` — `getExpenses(trip): Expense[]`
-- `add-expense.ts` — `addExpense(trip, expense): void`
-- `remove-expense.ts` — `removeExpense(trip, id): void`
+- `getExpenses.ts` — `getExpenses(trip): Expense[]`
+- `addExpense.ts` — `addExpense(trip, expense): void`
+- `removeExpense.ts` — `removeExpense(trip, id): void`
+- `updateExpense.ts` — `updateExpense(trip, expense): void`
+- `calculateSplits.ts` — `calculateSplits(totalAmount, owners, allTripOwners): OwnerAmount[]`
 - `index.ts`
 
 #### `services/export/`
-- `export-csv.ts` — `exportCSV(trip, outputPath?): string`
+- `exportCsv.ts` — `exportCSV(trip): string`
 - `index.ts`
 
 #### `services/currency/`
-- `convert-to-thb.ts` — `convertToTHB(amount, currency, expenseRate?, tripRate?): number`
+- `convertToThb.ts` — `convertToTHB(amount, currency, expenseRate?, tripRate?): number`
 - `index.ts`
 
 ### Core Validators (`src/core/validators/`)
 
 One function per file, `index.ts` re-exports:
 
-- `validate-settings.ts` — validates settings.yaml structure
-- `validate-owners.ts` — validates owners.yaml
-- `validate-accounts.ts` — validates accounts, checks owner ID references
-- `validate-expenses.ts` — validates expenses, checks account ID and owner ID references, validates split totals
+- `validateSettings.ts` — validates settings.yaml structure
+- `validateOwners.ts` — validates owners.yaml
+- `validateAccounts.ts` — validates accounts, checks owner ID references
+- `validateExpenses.ts` — validates expenses, checks account ID and owner ID references, validates split totals
 - `index.ts`
 
 ### TUI (`src/tui/`)
@@ -202,34 +212,38 @@ No `index.ts` re-export pattern in the TUI directory. All imports use direct fil
 #### Components — Atomic Design (`src/tui/components/`)
 
 **Atoms** (`atoms/`):
-- `text-label.tsx` — styled text display
-- `text-input.tsx` — single line input
-- `select-input.tsx` — select/dropdown wrapper
-- `checkbox.tsx` — toggle checkbox
+- `TextLabel.tsx` — styled text display
+- `TextInput.tsx` — single line input with optional `onCancel` (esc)
+- `SelectInput.tsx` — horizontal `[key] label` menu with arrow key navigation + shortcut keys
+- `VerticalSelect.tsx` — vertical list with up/down navigation, `onHighlight`, `onCancel`, and `color` props
+- `DateInput.tsx` — segmented date picker (year/month/day), arrow keys to navigate and change values
+- `Checkbox.tsx` — toggle checkbox
 
 **Molecules** (`molecules/`):
-- `form-field.tsx` — label + input together
-- `confirm-prompt.tsx` — question + yes/no
-- `list-item.tsx` — icon + text + metadata row
+- `FormField.tsx` — label + text input with optional `onCancel`
+- `DateField.tsx` — label + date input with optional `onCancel`
+- `ConfirmPrompt.tsx` — question + yes/no
+- `HelpBar.tsx` — toggleable keyboard hints, hidden by default
+- `ListItem.tsx` — icon + text + metadata row
 
 **Organisms** (`organisms/`):
-- `data-table.tsx` — table with headers and rows
-- `form.tsx` — group of form fields with validation
-- `navigation-menu.tsx` — selectable menu with descriptions
+- `Page.tsx` — standard 3-area layout: title + main box + menu + help bar
+- `DataTable.tsx` — table with headers and rows
+- `NavigationMenu.tsx` — title + SelectInput wrapper
 
 #### Screens (`src/tui/screens/`)
 
-- `trip-list.tsx` — lists all trips. Options: select trip, create new trip.
-- `trip-menu.tsx` — main menu for selected trip. Shows trip info. Options: Owners, Accounts, Expenses, Export CSV, Back.
-- `owner-list.tsx` — list/add/remove owners.
-- `account-list.tsx` — list/add/remove accounts.
-- `expense-list.tsx` — list expenses. Options: add, edit, delete.
-- `expense-form.tsx` — form for adding/editing an expense.
-- `export.tsx` — shows export path (editable), preview, confirm export.
+- `TripList.tsx` — vertical trip list in main box; menu: create, duplicate, delete. Duplicate/delete trigger trip selection mode first.
+- `TripMenu.tsx` — shows trip date range and countries. Menu: owners, accounts, expenses, export.
+- `OwnerList.tsx` — data table of owners; menu actions trigger add/remove flows.
+- `AccountList.tsx` — data table of accounts; menu actions trigger add/remove flows.
+- `ExpenseList.tsx` — numbered expense table.
+- `ExpenseForm.tsx` — multi-step expense wizard (account, date, payee, category, amount, currency, rate, owners, description, tags).
+- `Export.tsx` — export path input, CSV preview, confirm.
 
-#### App (`src/tui/app.tsx`)
+#### App (`src/tui/App.tsx`)
 
-Root component. Handles screen routing via React state. Receives parsed CLI args as props.
+Root component. Manages screen state, navigation history stack, focus (main/menu), pending actions, and global keyboard shortcuts. Wraps all screens in the `Page` organism.
 
 ### CLI Entry Point (`src/main.ts`)
 
@@ -289,5 +303,5 @@ Default path from `settings.yaml` `exportPath` field (default: `./expenses.csv` 
 - **Language**: TypeScript
 - **TUI**: React + Ink + @inkjs/ui
 - **Data**: YAML (via `yaml` package)
-- **CSV**: `csv` package (csv-stringify)
+- **CSV**: Hand-rolled (RFC 4180 compliant double-quote escaping)
 - **Linting**: Biome
