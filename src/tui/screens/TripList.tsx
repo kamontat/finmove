@@ -1,4 +1,4 @@
-import { Box, Text } from "ink";
+import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Settings, Trip } from "../../core/models";
@@ -11,8 +11,8 @@ import {
 	toDirName,
 } from "../../core/services/trip";
 import { VerticalSelect } from "../components/atoms/VerticalSelect";
-import { DateField } from "../components/molecules/DateField";
-import { FormField } from "../components/molecules/FormField";
+import { Form } from "../components/organisms/Form";
+import type { FormFieldConfig } from "../models";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
@@ -21,10 +21,8 @@ type Mode =
 	| "list"
 	| "select-for-duplicate"
 	| "select-for-delete"
-	| "create-name"
-	| "create-start"
-	| "create-end"
-	| "duplicate-name";
+	| "create"
+	| "duplicate";
 
 const DEFAULT_SETTINGS: Omit<Settings, "name" | "startDate" | "endDate"> = {
 	countries: [],
@@ -42,6 +40,40 @@ const DEFAULT_SETTINGS: Omit<Settings, "name" | "startDate" | "endDate"> = {
 	exportPath: "./expenses.csv",
 };
 
+const CREATE_FIELDS: FormFieldConfig[] = [
+	{
+		key: "name",
+		label: "Trip Name",
+		type: "text",
+		required: true,
+		placeholder: "e.g. Japan Trip",
+	},
+	{
+		key: "startDate",
+		label: "Start Date",
+		type: "date",
+		required: true,
+		defaultValue: today(),
+	},
+	{
+		key: "endDate",
+		label: "End Date",
+		type: "date",
+		required: true,
+		defaultValue: addDays(today(), 1),
+	},
+];
+
+const DUPLICATE_FIELDS: FormFieldConfig[] = [
+	{
+		key: "newName",
+		label: "New Trip Name",
+		type: "text",
+		required: true,
+		placeholder: "e.g. Japan Trip v2",
+	},
+];
+
 export function TripList(): JSX.Element {
 	const { goTo, currentRoute } = useNavigation();
 	const { focus, setFocus } = useFocus();
@@ -51,8 +83,6 @@ export function TripList(): JSX.Element {
 		(currentRoute.props["dataDir"] as string | undefined) ?? "./data";
 
 	const [mode, setMode] = useState<Mode>("list");
-	const [tripName, setTripName] = useState("");
-	const [startDate, setStartDate] = useState("");
 	const [targetTrip, setTargetTrip] = useState<Trip | null>(null);
 	const [trips, setTrips] = useState<Trip[]>(() => listTrips(dataDir));
 
@@ -76,8 +106,8 @@ export function TripList(): JSX.Element {
 			],
 			(value) => {
 				if (value === "create") {
-					setMode("create-name");
-					setFocus("input");
+					setMode("create");
+					setFocus("main");
 				} else if (value === "duplicate" && trips.length > 0) {
 					setMode("select-for-duplicate");
 					setFocus("main");
@@ -92,65 +122,30 @@ export function TripList(): JSX.Element {
 	}, [mode, trips.length, setMenu, setHints, setFocus, setBorderColor]);
 
 	// --- Create flow ---
-	if (mode === "create-name") {
+	if (mode === "create") {
 		return (
-			<FormField
-				label="Trip name:"
-				placeholder="e.g. Japan Trip"
-				onSubmit={(name) => {
-					setTripName(name);
-					setMode("create-start");
+			<Form
+				fields={CREATE_FIELDS}
+				onSubmit={(values) => {
+					const name = values["name"] ?? "";
+					const startDate = values["startDate"] ?? today();
+					const endDate = values["endDate"] ?? addDays(today(), 1);
+					const dirName = toDirName(name, startDate);
+					const settings: Settings = {
+						...DEFAULT_SETTINGS,
+						name,
+						startDate,
+						endDate,
+					};
+					const newTrip = createTrip(dataDir, dirName, settings);
+					resetLayout();
+					goTo("/trips/menu", {
+						props: { tripDirPath: newTrip.dirPath, tripName: name, dataDir },
+					});
 				}}
-				onCancel={() => {
-					setMode("list");
-					setFocus("menu");
-				}}
+				submitLabel="Create Trip"
+				submitKey="c"
 			/>
-		);
-	}
-
-	if (mode === "create-start") {
-		return (
-			<Box flexDirection="column">
-				<Text dimColor>Name: {tripName}</Text>
-				<DateField
-					label="Start date:"
-					defaultValue={today()}
-					onSubmit={(date) => {
-						setStartDate(date);
-						setMode("create-end");
-					}}
-					onCancel={() => setMode("create-name")}
-				/>
-			</Box>
-		);
-	}
-
-	if (mode === "create-end") {
-		return (
-			<Box flexDirection="column">
-				<Text dimColor>Name: {tripName}</Text>
-				<Text dimColor>Start: {startDate}</Text>
-				<DateField
-					label="End date:"
-					defaultValue={addDays(startDate, 1)}
-					onSubmit={(endDate) => {
-						const dirName = toDirName(tripName, startDate);
-						const settings = {
-							...DEFAULT_SETTINGS,
-							name: tripName,
-							startDate,
-							endDate,
-						};
-						const newTrip = createTrip(dataDir, dirName, settings);
-						resetLayout();
-						goTo("/trips/menu", {
-							props: { tripDirPath: newTrip.dirPath, tripName, dataDir },
-						});
-					}}
-					onCancel={() => setMode("create-start")}
-				/>
-			</Box>
 		);
 	}
 
@@ -175,8 +170,8 @@ export function TripList(): JSX.Element {
 						setBorderColor(null);
 						setFocus("menu");
 					} else {
-						setMode("duplicate-name");
-						setFocus("input");
+						setMode("duplicate");
+						setFocus("main");
 					}
 				}}
 				onCancel={() => {
@@ -191,12 +186,12 @@ export function TripList(): JSX.Element {
 	}
 
 	// --- Duplicate: ask for name ---
-	if (mode === "duplicate-name" && targetTrip) {
+	if (mode === "duplicate" && targetTrip) {
 		return (
-			<FormField
-				label={`Duplicate "${targetTrip.settings.name}" — new name:`}
-				placeholder="e.g. Japan Trip v2"
-				onSubmit={(name) => {
+			<Form
+				fields={DUPLICATE_FIELDS}
+				onSubmit={(values) => {
+					const name = values["newName"] ?? "";
 					const dirName = toDirName(name, targetTrip.settings.startDate);
 					duplicateTrip(dataDir, targetTrip.dirPath, dirName, name);
 					refreshTrips();
@@ -204,11 +199,8 @@ export function TripList(): JSX.Element {
 					setMode("list");
 					setFocus("menu");
 				}}
-				onCancel={() => {
-					setTargetTrip(null);
-					setMode("select-for-duplicate");
-					setFocus("main");
-				}}
+				submitLabel="Duplicate Trip"
+				submitKey="d"
 			/>
 		);
 	}
