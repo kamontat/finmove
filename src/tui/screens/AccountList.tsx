@@ -1,44 +1,55 @@
 import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import type { Trip } from "../../core/models";
 import { AccountType } from "../../core/models";
 import { addAccount, removeAccount } from "../../core/services/account";
 import { SelectInput } from "../components/atoms/SelectInput";
 import { TextLabel } from "../components/atoms/TextLabel";
 import { FormField } from "../components/molecules/FormField";
 import { DataTable } from "../components/organisms/DataTable";
-
-interface AccountListProps {
-	trip: Trip;
-	onTripUpdated: () => void;
-	pendingAction: string | null;
-	onActionConsumed: () => void;
-}
+import { useData } from "../states/data";
+import { useFocus } from "../states/focus";
+import { useLayout } from "../states/layout";
 
 type Mode = "list" | "add-id" | "add-name" | "add-type" | "add-owners";
 
-export function AccountList({
-	trip,
-	onTripUpdated,
-	pendingAction,
-	onActionConsumed,
-}: AccountListProps): JSX.Element {
+export function AccountList(): JSX.Element {
+	const { trip, reloadTrip } = useData();
+	const { setFocus, setMenuAvailable } = useFocus();
+	const { setMenu, setHints } = useLayout();
+
 	const [mode, setMode] = useState<Mode>("list");
 	const [newId, setNewId] = useState("");
 	const [newName, setNewName] = useState("");
 	const [newType, setNewType] = useState<AccountType>(AccountType.Credit);
 
 	useEffect(() => {
-		if (!pendingAction || mode !== "list") return;
-		if (pendingAction === "add") {
-			setMode("add-id");
-		} else if (pendingAction.startsWith("remove:")) {
-			removeAccount(trip, pendingAction.replace("remove:", ""));
-			onTripUpdated();
+		if (!trip || mode !== "list") {
+			setMenu([], () => {});
+			return;
 		}
-		onActionConsumed();
-	}, [pendingAction, mode, onActionConsumed, trip, onTripUpdated]);
+
+		const menuOptions = [
+			{ label: "Add", value: "add", key: "a" },
+			...trip.accounts.map((a) => ({
+				label: `Remove: ${a.name}`,
+				value: `remove:${a.id}`,
+			})),
+		];
+
+		setMenu(menuOptions, (value) => {
+			if (value === "add") {
+				setMode("add-id");
+				setFocus("input");
+			} else if (value.startsWith("remove:")) {
+				const id = value.replace("remove:", "");
+				removeAccount(trip, id);
+				reloadTrip();
+			}
+		});
+		setHints([{ key: "?", label: "help" }]);
+		setMenuAvailable(true);
+	}, [trip, mode, setMenu, setHints, setFocus, setMenuAvailable, reloadTrip]);
 
 	if (mode === "add-id") {
 		return (
@@ -91,17 +102,24 @@ export function AccountList({
 				placeholder="e.g. alice,bob"
 				onSubmit={(ownersStr) => {
 					const owners = ownersStr.split(",").map((s) => s.trim());
-					addAccount(trip, {
-						id: newId,
-						name: newName,
-						type: newType,
-						owners,
-					});
-					onTripUpdated();
+					if (trip) {
+						addAccount(trip, {
+							id: newId,
+							name: newName,
+							type: newType,
+							owners,
+						});
+						reloadTrip();
+					}
 					setMode("list");
+					setFocus("menu");
 				}}
 			/>
 		);
+	}
+
+	if (!trip) {
+		return <Text dimColor>Loading...</Text>;
 	}
 
 	if (trip.accounts.length === 0) {
