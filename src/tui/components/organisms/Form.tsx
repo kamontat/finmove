@@ -2,6 +2,7 @@ import { Box, Text, useInput } from "ink";
 import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
 import type { FormFieldConfig } from "../../models";
 import { useFocus } from "../../states/focus";
+import { useHelp } from "../../states/help";
 import { DateInput } from "../atoms/DateInput";
 import { DropdownSelect } from "../atoms/DropdownSelect";
 import { InlineSelect } from "../atoms/InlineSelect";
@@ -24,7 +25,8 @@ export function Form({
 	submitLabel = "Submit",
 	submitKey = "s",
 }: FormProps): JSX.Element {
-	const { setFocus } = useFocus();
+	const { setFocus, toggleFocus } = useFocus();
+	const { toggleHelp } = useHelp();
 
 	// Form takes over input handling — disable global shortcuts
 	useEffect(() => {
@@ -124,6 +126,10 @@ export function Form({
 				}
 			} else if (input === submitKey && canSubmit) {
 				handleSubmit();
+			} else if (input === "?") {
+				toggleHelp();
+			} else if (key.tab) {
+				toggleFocus();
 			}
 		},
 		{ isActive: !editing },
