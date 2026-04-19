@@ -1,12 +1,9 @@
 import { Box, Text, useInput } from "ink";
 import type { JSX } from "react";
 import { useState } from "react";
+import type { VerticalOption } from "../../models";
 
-export interface VerticalOption {
-	label: string;
-	value: string;
-	detail?: string;
-}
+export type { VerticalOption } from "../../models";
 
 interface VerticalSelectProps {
 	options: VerticalOption[];

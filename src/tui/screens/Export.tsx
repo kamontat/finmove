@@ -2,23 +2,41 @@ import { writeFileSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
 import { Box, Text } from "ink";
 import type { JSX } from "react";
-import { useState } from "react";
-import type { Trip } from "../../core/models";
+import { useEffect, useState } from "react";
 import { exportCSV } from "../../core/services/export";
 import { TextLabel } from "../components/atoms/TextLabel";
 import { ConfirmPrompt } from "../components/molecules/ConfirmPrompt";
 import { FormField } from "../components/molecules/FormField";
-
-interface ExportScreenProps {
-	trip: Trip;
-	onBack: () => void;
-}
+import { useData } from "../states/data";
+import { useFocus } from "../states/focus";
+import { useLayout } from "../states/layout";
+import { useNavigation } from "../states/navigation";
 
 type Mode = "path" | "preview" | "done";
 
-export function ExportScreen({ trip, onBack }: ExportScreenProps): JSX.Element {
+export function ExportScreen(): JSX.Element {
+	const { trip } = useData();
+	const { goBack } = useNavigation();
+	const { setFocus } = useFocus();
+	const { setHints } = useLayout();
+
 	const [mode, setMode] = useState<Mode>("path");
-	const [exportPath, setExportPath] = useState(trip.settings.exportPath);
+	const [exportPath, setExportPath] = useState(
+		trip?.settings.exportPath ?? "./expenses.csv",
+	);
+
+	// Enter input mode on mount
+	useEffect(() => {
+		setFocus("input");
+		setHints([
+			{ key: "enter", label: "confirm" },
+			{ key: "esc", label: "back" },
+		]);
+	}, [setFocus, setHints]);
+
+	if (!trip) {
+		return <Box />;
+	}
 
 	if (mode === "path") {
 		return (
@@ -59,7 +77,7 @@ export function ExportScreen({ trip, onBack }: ExportScreenProps): JSX.Element {
 							writeFileSync(fullPath, csv);
 							setMode("done");
 						} else {
-							onBack();
+							goBack();
 						}
 					}}
 				/>
@@ -72,7 +90,7 @@ export function ExportScreen({ trip, onBack }: ExportScreenProps): JSX.Element {
 		<Box flexDirection="column" gap={1}>
 			<TextLabel text="CSV exported successfully!" bold color="green" />
 			<TextLabel text={`Path: ${exportPath}`} dimColor />
-			<ConfirmPrompt message="Go back?" onConfirm={() => onBack()} />
+			<ConfirmPrompt message="Go back?" onConfirm={() => goBack()} />
 		</Box>
 	);
 }

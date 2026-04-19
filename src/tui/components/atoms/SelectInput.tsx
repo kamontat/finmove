@@ -1,12 +1,9 @@
 import { Box, Text, useInput } from "ink";
 import type { JSX } from "react";
 import { useState } from "react";
+import type { SelectOption } from "../../models";
 
-export interface SelectOption {
-	label: string;
-	value: string;
-	key?: string;
-}
+export type { SelectOption } from "../../models";
 
 interface SelectInputProps {
 	options: SelectOption[];

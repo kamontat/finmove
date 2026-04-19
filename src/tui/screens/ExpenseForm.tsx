@@ -1,221 +1,175 @@
 import { Box } from "ink";
 import type { JSX } from "react";
-import { useState } from "react";
-import type { Expense, Trip } from "../../core/models";
+import { useEffect, useMemo } from "react";
+import type { Expense } from "../../core/models";
 import { today } from "../../core/services/date";
 import { addExpense, updateExpense } from "../../core/services/expense";
-import { SelectInput } from "../components/atoms/SelectInput";
-import { TextLabel } from "../components/atoms/TextLabel";
-import { DateField } from "../components/molecules/DateField";
-import { FormField } from "../components/molecules/FormField";
+import { Form } from "../components/organisms/Form";
+import type { FormFieldConfig } from "../models";
+import { useData } from "../states/data";
+import { useFocus } from "../states/focus";
+import { useLayout } from "../states/layout";
+import { useNavigation } from "../states/navigation";
 
-interface ExpenseFormProps {
-	trip: Trip;
-	existingExpense?: Expense;
-	onDone: () => void;
-}
+export function ExpenseForm(): JSX.Element {
+	const { trip, reloadTrip } = useData();
+	const { goBack, currentRoute } = useNavigation();
+	const { setFocus } = useFocus();
+	const { setHints } = useLayout();
 
-type FormStep =
-	| "account"
-	| "date"
-	| "payee"
-	| "category"
-	| "amount"
-	| "currency"
-	| "exchangeRate"
-	| "owners"
-	| "description"
-	| "tags";
+	const expenseId = currentRoute.props["expenseId"] as string | undefined;
+	const existingExpense = trip?.expenses.find((e) => e.id === expenseId);
 
-export function ExpenseForm({
-	trip,
-	existingExpense,
-	onDone,
-}: ExpenseFormProps): JSX.Element {
-	const [step, setStep] = useState<FormStep>("account");
-	const [accountId, setAccountId] = useState(existingExpense?.accountId ?? "");
-	const [date, setDate] = useState(existingExpense?.date ?? "");
-	const [payee, setPayee] = useState(existingExpense?.payee ?? "");
-	const [category, setCategory] = useState(existingExpense?.category ?? "");
-	const [amount, setAmount] = useState(
-		existingExpense?.amount?.toString() ?? "",
-	);
-	const [currency, setCurrency] = useState(existingExpense?.currency ?? "THB");
-	const [exchangeRate, setExchangeRate] = useState(
-		existingExpense?.exchangeRate?.toString() ?? "",
-	);
-	const [owners, setOwners] = useState("");
-	const [description, setDescription] = useState(
-		existingExpense?.description ?? "",
-	);
+	useEffect(() => {
+		setHints([
+			{ key: "enter", label: "confirm" },
+			{ key: "esc", label: "back" },
+		]);
+	}, [setHints]);
 
-	const allCurrencies = ["THB", ...Object.keys(trip.settings.currencies)];
+	const fields = useMemo((): FormFieldConfig[] => {
+		if (!trip) return [];
 
-	switch (step) {
-		case "account":
-			return (
-				<Box flexDirection="column">
-					<TextLabel text="Select account:" bold />
-					<SelectInput
-						options={trip.accounts.map((a, i) => ({
-							label: `${a.name} (${a.type})`,
-							value: a.id,
-							key: String(i + 1),
-						}))}
-						onChange={(value) => {
-							setAccountId(value);
-							setStep("date");
-						}}
-					/>
-				</Box>
-			);
+		const allCurrencies = ["THB", ...Object.keys(trip.settings.currencies)];
+		const allOwnerIds = trip.owners.map((o) => o.id).join(",");
 
-		case "date":
-			return (
-				<DateField
-					label="Date:"
-					defaultValue={date || today()}
-					onSubmit={(v) => {
-						setDate(v);
-						setStep("payee");
-					}}
-				/>
-			);
+		return [
+			{
+				key: "account",
+				label: "Account",
+				type: "select",
+				required: true,
+				options: trip.accounts.map((a) => ({
+					label: `${a.name} (${a.type})`,
+					value: a.id,
+				})),
+				...(existingExpense ? { defaultValue: existingExpense.accountId } : {}),
+			},
+			{
+				key: "date",
+				label: "Date",
+				type: "date",
+				required: true,
+				defaultValue: existingExpense?.date ?? today(),
+			},
+			{
+				key: "payee",
+				label: "Payee",
+				type: "text",
+				required: true,
+				...(existingExpense ? { defaultValue: existingExpense.payee } : {}),
+			},
+			{
+				key: "category",
+				label: "Category",
+				type: "select",
+				required: true,
+				options: trip.settings.categories.map((c) => ({
+					label: c,
+					value: c,
+				})),
+				...(existingExpense ? { defaultValue: existingExpense.category } : {}),
+			},
+			{
+				key: "amount",
+				label: "Amount",
+				type: "text",
+				required: true,
+				...(existingExpense
+					? { defaultValue: existingExpense.amount.toString() }
+					: {}),
+			},
+			{
+				key: "currency",
+				label: "Currency",
+				type: "select",
+				required: true,
+				options: allCurrencies.map((c) => ({ label: c, value: c })),
+				defaultValue: existingExpense?.currency ?? "THB",
+			},
+			{
+				key: "exchangeRate",
+				label: "Exchange Rate (1 currency = ? THB)",
+				type: "text",
+				...(existingExpense?.exchangeRate !== undefined
+					? { defaultValue: existingExpense.exchangeRate.toString() }
+					: {}),
+			},
+			{
+				key: "owners",
+				label: "Owner IDs (comma-separated, empty for all)",
+				type: "text",
+				placeholder: allOwnerIds,
+			},
+			{
+				key: "description",
+				label: "Description",
+				type: "text",
+				...(existingExpense
+					? { defaultValue: existingExpense.description }
+					: {}),
+			},
+			{
+				key: "tags",
+				label: "Tags",
+				type: "text",
+				placeholder: "comma-separated",
+			},
+		];
+	}, [trip, existingExpense]);
 
-		case "payee":
-			return (
-				<FormField
-					label="Payee:"
-					defaultValue={payee}
-					onSubmit={(v) => {
-						setPayee(v);
-						setStep("category");
-					}}
-				/>
-			);
+	if (!trip) {
+		return <Box />;
+	}
 
-		case "category":
-			return (
-				<Box flexDirection="column">
-					<TextLabel text="Category:" bold />
-					<SelectInput
-						options={trip.settings.categories.map((c, i) => ({
-							label: c,
-							value: c,
-							key: String(i + 1),
-						}))}
-						onChange={(value) => {
-							setCategory(value);
-							setStep("amount");
-						}}
-					/>
-				</Box>
-			);
+	const handleSubmit = (values: Record<string, string>) => {
+		const tagsStr = values["tags"] ?? "";
+		const tags = tagsStr ? tagsStr.split(",").map((s) => s.trim()) : [];
 
-		case "amount":
-			return (
-				<FormField
-					label="Amount:"
-					defaultValue={amount}
-					onSubmit={(v) => {
-						setAmount(v);
-						setStep("currency");
-					}}
-				/>
-			);
+		const ownersStr = values["owners"] ?? "";
+		const ownerList =
+			ownersStr.trim() === ""
+				? undefined
+				: ownersStr.split(",").map((s) => s.trim());
 
-		case "currency":
-			return (
-				<Box flexDirection="column">
-					<TextLabel text="Currency:" bold />
-					<SelectInput
-						options={allCurrencies.map((c, i) => ({
-							label: c,
-							value: c,
-							key: String(i + 1),
-						}))}
-						onChange={(value) => {
-							setCurrency(value);
-							setStep(value === "THB" ? "owners" : "exchangeRate");
-						}}
-					/>
-				</Box>
-			);
+		const currency = values["currency"] ?? "THB";
+		const exchangeRateStr = values["exchangeRate"] ?? "";
 
-		case "exchangeRate": {
-			const tripRate = trip.settings.currencies[currency]?.exchangeRate;
-			return (
-				<FormField
-					label={`Exchange rate (1 ${currency} = ? THB)${tripRate !== undefined ? ` [default: ${tripRate}]` : ""}:`}
-					onSubmit={(v) => {
-						setExchangeRate(v);
-						setStep("owners");
-					}}
-				/>
-			);
+		const id = existingExpense?.id ?? `exp-${Date.now()}`;
+
+		const expense: Expense = {
+			id,
+			accountId: values["account"] ?? "",
+			date: values["date"] ?? "",
+			payee: values["payee"] ?? "",
+			category: values["category"] ?? "",
+			amount: Number.parseFloat(values["amount"] ?? "0"),
+			currency,
+			...(exchangeRateStr && currency !== "THB"
+				? { exchangeRate: Number.parseFloat(exchangeRateStr) }
+				: {}),
+			...(ownerList ? { owners: ownerList } : {}),
+			description: values["description"] ?? "",
+			tags,
+		};
+
+		if (existingExpense) {
+			updateExpense(trip, expense);
+		} else {
+			addExpense(trip, expense);
 		}
 
-		case "owners":
-			return (
-				<FormField
-					label="Expense owner IDs (comma-separated, empty for all):"
-					placeholder={trip.owners.map((o) => o.id).join(",")}
-					onSubmit={(v) => {
-						setOwners(v);
-						setStep("description");
-					}}
-				/>
-			);
+		reloadTrip();
+		setFocus("menu");
+		goBack();
+	};
 
-		case "description":
-			return (
-				<FormField
-					label="Description:"
-					defaultValue={description}
-					onSubmit={(v) => {
-						setDescription(v);
-						setStep("tags");
-					}}
-				/>
-			);
-
-		case "tags":
-			return (
-				<FormField
-					label="Tags (comma-separated):"
-					onSubmit={(tagsStr) => {
-						const tags = tagsStr ? tagsStr.split(",").map((s) => s.trim()) : [];
-						const ownerList =
-							owners.trim() === ""
-								? undefined
-								: owners.split(",").map((s) => s.trim());
-
-						const id = existingExpense?.id ?? `exp-${Date.now()}`;
-
-						const expense: Expense = {
-							id,
-							accountId,
-							date,
-							payee,
-							category,
-							amount: Number.parseFloat(amount),
-							currency,
-							...(exchangeRate
-								? { exchangeRate: Number.parseFloat(exchangeRate) }
-								: {}),
-							...(ownerList ? { owners: ownerList } : {}),
-							description,
-							tags,
-						};
-
-						if (existingExpense) {
-							updateExpense(trip, expense);
-						} else {
-							addExpense(trip, expense);
-						}
-						onDone();
-					}}
-				/>
-			);
-	}
+	return (
+		<Form
+			fields={fields}
+			onSubmit={handleSubmit}
+			submitLabel="Save Expense"
+			submitKey="s"
+		/>
+	);
 }
