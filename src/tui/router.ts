@@ -52,7 +52,7 @@ export const routes: Record<RoutePath, RouteConfig> = {
 	"/trips/settings": {
 		component: TripSettings as unknown as ComponentType,
 		title: (props) => (props["tripName"] as string) ?? "Settings",
-		defaultFocus: "menu",
+		defaultFocus: "main",
 	},
 	"/trips/settings/countries": {
 		component: TripSettingsCountries as unknown as ComponentType,
