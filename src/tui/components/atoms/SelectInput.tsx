@@ -2,6 +2,7 @@ import { Box, Text, useInput } from "ink";
 import type { JSX } from "react";
 import { useState } from "react";
 import type { SelectOption } from "../../models";
+import { useFocus } from "../../states/focus";
 
 export type { SelectOption } from "../../models";
 
@@ -17,6 +18,7 @@ export function SelectInput({
 	isActive = true,
 }: SelectInputProps): JSX.Element {
 	const [cursor, setCursor] = useState(0);
+	const { focus } = useFocus();
 
 	// Arrow navigation and Enter only when focused
 	useInput(
@@ -33,8 +35,9 @@ export function SelectInput({
 		{ isActive },
 	);
 
-	// Shortcut keys always work (except reserved keys)
+	// Shortcut keys work except during input mode (editing form fields)
 	useInput((input, key) => {
+		if (focus === "input") return;
 		if (!input || key.escape || input === "q" || input === "?") return;
 		const lower = input.toLowerCase();
 		const match = options.find((o) => o.key?.toLowerCase() === lower);
