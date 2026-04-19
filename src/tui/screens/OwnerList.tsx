@@ -9,6 +9,7 @@ import type { FormFieldConfig } from "../models";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
+import { useNavigation } from "../states/navigation";
 
 type Mode = "list" | "add" | "edit" | "select-for-remove";
 
@@ -31,6 +32,7 @@ const ADD_FIELDS: FormFieldConfig[] = [
 
 export function OwnerList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
+	const { goExit } = useNavigation();
 	const { setFocus } = useFocus();
 	const { setMenu, setHints, setBorderColor } = useLayout();
 
@@ -53,7 +55,8 @@ export function OwnerList(): JSX.Element {
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
 					{ key: "Enter", label: "Remove selected" },
-					{ key: "esc", label: "Back to list" },
+					{ key: "q", label: "Back to list" },
+					{ key: "esc", label: "Exit" },
 				]);
 			} else {
 				setBorderColor(null);
@@ -165,6 +168,7 @@ export function OwnerList(): JSX.Element {
 					setBorderColor(null);
 					setFocus("menu");
 				}}
+				onEscape={goExit}
 				color="red"
 				isActive
 			/>

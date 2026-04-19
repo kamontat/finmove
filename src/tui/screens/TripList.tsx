@@ -77,7 +77,7 @@ const DUPLICATE_FIELDS: FormFieldConfig[] = [
 ];
 
 export function TripList(): JSX.Element {
-	const { goTo, currentRoute } = useNavigation();
+	const { goTo, goExit, currentRoute } = useNavigation();
 	const { focus, setFocus } = useFocus();
 	const { setMenu, setHints, setBorderColor, resetLayout } = useLayout();
 
@@ -111,7 +111,15 @@ export function TripList(): JSX.Element {
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
 					{ key: "Enter", label: "Delete selected" },
-					{ key: "esc", label: "Back to list" },
+					{ key: "q", label: "Back to list" },
+					{ key: "esc", label: "Exit" },
+				]);
+			} else if (mode === "select-for-duplicate") {
+				setHints([
+					{ key: "↑↓", label: "Navigate" },
+					{ key: "Enter", label: "Select trip" },
+					{ key: "q", label: "Back to list" },
+					{ key: "esc", label: "Exit" },
 				]);
 			} else {
 				setBorderColor(null);
@@ -220,6 +228,7 @@ export function TripList(): JSX.Element {
 					setBorderColor(null);
 					setFocus("menu");
 				}}
+				onEscape={goExit}
 				{...(isDelete ? { color: "red" } : {})}
 				isActive
 			/>
