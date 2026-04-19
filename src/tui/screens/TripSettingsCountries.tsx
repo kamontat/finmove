@@ -100,10 +100,6 @@ export function TripSettingsCountries(): JSX.Element {
 					setMode("list");
 					setFocus("menu");
 				}}
-				onCancel={() => {
-					setMode("list");
-					setFocus("menu");
-				}}
 			/>
 		);
 	}

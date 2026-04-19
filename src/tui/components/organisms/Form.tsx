@@ -2,8 +2,6 @@ import { Box, Text, useInput } from "ink";
 import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
 import type { FormFieldConfig } from "../../models";
 import { useFocus } from "../../states/focus";
-import { useHelp } from "../../states/help";
-import { useNavigation } from "../../states/navigation";
 import { DateInput } from "../atoms/DateInput";
 import { DropdownSelect } from "../atoms/DropdownSelect";
 import { InlineSelect } from "../atoms/InlineSelect";
@@ -14,7 +12,6 @@ const INLINE_SELECT_THRESHOLD = 3;
 interface FormProps {
 	fields: FormFieldConfig[];
 	onSubmit: (values: Record<string, string>) => void;
-	onCancel?: () => void;
 	submitLabel?: string;
 	submitKey?: string;
 }
@@ -22,19 +19,13 @@ interface FormProps {
 export function Form({
 	fields,
 	onSubmit,
-	onCancel,
 	submitLabel = "Submit",
 	submitKey = "s",
 }: FormProps): JSX.Element {
-	const { setFocus, toggleFocus } = useFocus();
-	const { toggleHelp } = useHelp();
-	const { goBack, goExit } = useNavigation();
+	const { setFocus } = useFocus();
 
-	// Block useGlobalKeys (which checks focus === "input") so [q]/[esc]
-	// are handled here with onCancel instead of double-firing goBack().
-	// We forward [?], [tab], and [e] manually below.
 	useEffect(() => {
-		setFocus("input");
+		setFocus("main");
 	}, [setFocus]);
 
 	const [values, setValues] = useState<Record<string, string>>(() => {
@@ -108,16 +99,10 @@ export function Form({
 		exitEdit();
 	}, [exitEdit]);
 
+	// Only handle form-specific keys (navigation, editing, submit).
+	// Global shortcuts ([q], [esc], [e], [?], [tab]) are handled by useGlobalKeys.
 	useInput(
-		(input, key) => {
-			if (key.escape) {
-				(onCancel ?? goBack)();
-				return;
-			}
-			if (input === "q") {
-				(onCancel ?? goBack)();
-				return;
-			}
+		(_input, key) => {
 			if (key.upArrow) {
 				setCursor((c) => (c > 0 ? c - 1 : totalItems - 1));
 			} else if (key.downArrow) {
@@ -128,14 +113,8 @@ export function Form({
 				} else {
 					enterEdit();
 				}
-			} else if (input === submitKey && canSubmit) {
+			} else if (_input === submitKey && canSubmit) {
 				handleSubmit();
-			} else if (input === "?") {
-				toggleHelp();
-			} else if (key.tab) {
-				toggleFocus();
-			} else if (input === "e") {
-				goExit();
 			}
 		},
 		{ isActive: !editing },

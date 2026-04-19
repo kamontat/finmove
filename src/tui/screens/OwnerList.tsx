@@ -103,10 +103,6 @@ export function OwnerList(): JSX.Element {
 					setMode("list");
 					setFocus("menu");
 				}}
-				onCancel={() => {
-					setMode("list");
-					setFocus("menu");
-				}}
 			/>
 		);
 	}
@@ -133,11 +129,6 @@ export function OwnerList(): JSX.Element {
 							updateOwner(trip, editTarget.id, name);
 							reloadTrip();
 						}
-						setEditTarget(null);
-						setMode("list");
-						setFocus("menu");
-					}}
-					onCancel={() => {
 						setEditTarget(null);
 						setMode("list");
 						setFocus("menu");

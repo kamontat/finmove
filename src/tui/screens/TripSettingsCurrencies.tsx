@@ -122,10 +122,6 @@ export function TripSettingsCurrencies(): JSX.Element {
 					setMode("list");
 					setFocus("menu");
 				}}
-				onCancel={() => {
-					setMode("list");
-					setFocus("menu");
-				}}
 			/>
 		);
 	}
@@ -163,11 +159,6 @@ export function TripSettingsCurrencies(): JSX.Element {
 							});
 							reloadTrip();
 						}
-						setEditTarget(null);
-						setMode("list");
-						setFocus("menu");
-					}}
-					onCancel={() => {
 						setEditTarget(null);
 						setMode("list");
 						setFocus("menu");

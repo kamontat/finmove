@@ -100,10 +100,6 @@ export function TripSettingsTags(): JSX.Element {
 					setMode("list");
 					setFocus("menu");
 				}}
-				onCancel={() => {
-					setMode("list");
-					setFocus("menu");
-				}}
 			/>
 		);
 	}

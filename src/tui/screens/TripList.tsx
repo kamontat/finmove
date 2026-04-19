@@ -211,10 +211,6 @@ export function TripList(): JSX.Element {
 							props: { tripDirPath: newTrip.dirPath, tripName: name, dataDir },
 						});
 					}}
-					onCancel={() => {
-						setMode("list");
-						setFocus("menu");
-					}}
 				/>
 			</Box>
 		);
@@ -288,11 +284,6 @@ export function TripList(): JSX.Element {
 						setError(null);
 						duplicateTrip(dataDir, targetTrip.dirPath, dirName, name);
 						refreshTrips();
-						setTargetTrip(null);
-						setMode("list");
-						setFocus("menu");
-					}}
-					onCancel={() => {
 						setTargetTrip(null);
 						setMode("list");
 						setFocus("menu");
