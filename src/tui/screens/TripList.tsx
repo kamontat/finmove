@@ -1,24 +1,21 @@
 import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import type { Trip } from "../../core/models";
+import type { Settings, Trip } from "../../core/models";
 import { addDays, today } from "../../core/services/date";
-import { listTrips } from "../../core/services/trip";
+import {
+	createTrip,
+	deleteTrip,
+	duplicateTrip,
+	listTrips,
+	toDirName,
+} from "../../core/services/trip";
 import { VerticalSelect } from "../components/atoms/VerticalSelect";
 import { DateField } from "../components/molecules/DateField";
 import { FormField } from "../components/molecules/FormField";
-
-interface TripListProps {
-	dataDir: string;
-	onSelectTrip: (trip: Trip) => void;
-	onCreateTrip: (name: string, startDate: string, endDate: string) => void;
-	onDuplicateTrip: (sourcePath: string, newName: string) => void;
-	onDeleteTrip: (tripPath: string) => void;
-	pendingAction: string | null;
-	onActionConsumed: () => void;
-	onCancelAction: () => void;
-	focus: "main" | "menu";
-}
+import { useFocus } from "../states/focus";
+import { useLayout } from "../states/layout";
+import { useNavigation } from "../states/navigation";
 
 type Mode =
 	| "list"
@@ -29,34 +26,79 @@ type Mode =
 	| "create-end"
 	| "duplicate-name";
 
-export function TripList({
-	dataDir,
-	onSelectTrip,
-	onCreateTrip,
-	onDuplicateTrip,
-	onDeleteTrip,
-	pendingAction,
-	onActionConsumed,
-	onCancelAction,
-	focus,
-}: TripListProps): JSX.Element {
+const DEFAULT_SETTINGS: Omit<Settings, "name" | "startDate" | "endDate"> = {
+	countries: [],
+	baseCurrency: "THB",
+	currencies: {},
+	categories: [
+		"Flight",
+		"Hotels",
+		"Transportation",
+		"Shopping",
+		"Eating",
+		"Activities",
+	],
+	tags: [],
+	exportPath: "./expenses.csv",
+};
+
+export function TripList(): JSX.Element {
+	const { goTo, currentRoute } = useNavigation();
+	const { focus, setFocus, setMenuAvailable } = useFocus();
+	const { setMenu, setHints, setBorderColor, resetLayout } = useLayout();
+
+	const dataDir =
+		(currentRoute.props["dataDir"] as string | undefined) ?? "./data";
+
 	const [mode, setMode] = useState<Mode>("list");
 	const [tripName, setTripName] = useState("");
 	const [startDate, setStartDate] = useState("");
 	const [targetTrip, setTargetTrip] = useState<Trip | null>(null);
-	const trips = listTrips(dataDir);
+	const [trips, setTrips] = useState<Trip[]>(() => listTrips(dataDir));
 
+	const refreshTrips = () => {
+		setTrips(listTrips(dataDir));
+	};
+
+	// Register menu in list mode
 	useEffect(() => {
-		if (!pendingAction || mode !== "list") return;
-		if (pendingAction === "create") {
-			setMode("create-name");
-		} else if (pendingAction === "duplicate" && trips.length > 0) {
-			setMode("select-for-duplicate");
-		} else if (pendingAction === "delete" && trips.length > 0) {
-			setMode("select-for-delete");
+		if (mode !== "list") {
+			setMenu([], () => {});
+			setBorderColor("cyan");
+			return;
 		}
-		onActionConsumed();
-	}, [pendingAction, mode, onActionConsumed, trips.length]);
+
+		setMenu(
+			[
+				{ label: "Create", value: "create", key: "c" },
+				{ label: "Duplicate", value: "duplicate", key: "d" },
+				{ label: "Delete", value: "delete", key: "x" },
+			],
+			(value) => {
+				if (value === "create") {
+					setMode("create-name");
+					setFocus("input");
+				} else if (value === "duplicate" && trips.length > 0) {
+					setMode("select-for-duplicate");
+					setFocus("main");
+				} else if (value === "delete" && trips.length > 0) {
+					setMode("select-for-delete");
+					setBorderColor("red");
+					setFocus("main");
+				}
+			},
+		);
+		setHints([{ key: "?", label: "help" }]);
+		setMenuAvailable(true);
+	}, [
+		mode,
+		trips.length,
+		setMenu,
+		setHints,
+		setFocus,
+		setMenuAvailable,
+		setBorderColor,
+	]);
 
 	// --- Create flow ---
 	if (mode === "create-name") {
@@ -70,7 +112,7 @@ export function TripList({
 				}}
 				onCancel={() => {
 					setMode("list");
-					onCancelAction();
+					setFocus("menu");
 				}}
 			/>
 		);
@@ -102,8 +144,18 @@ export function TripList({
 					label="End date:"
 					defaultValue={addDays(startDate, 1)}
 					onSubmit={(endDate) => {
-						onCreateTrip(tripName, startDate, endDate);
-						setMode("list");
+						const dirName = toDirName(tripName, startDate);
+						const settings = {
+							...DEFAULT_SETTINGS,
+							name: tripName,
+							startDate,
+							endDate,
+						};
+						const newTrip = createTrip(dataDir, dirName, settings);
+						resetLayout();
+						goTo("/trips/menu", {
+							props: { tripDirPath: newTrip.dirPath, tripName, dataDir },
+						});
 					}}
 					onCancel={() => setMode("create-start")}
 				/>
@@ -126,16 +178,20 @@ export function TripList({
 					if (!trip) return;
 					setTargetTrip(trip);
 					if (isDelete) {
-						onDeleteTrip(value);
+						deleteTrip(value);
+						refreshTrips();
 						setMode("list");
-						onCancelAction();
+						setBorderColor("cyan");
+						setFocus("menu");
 					} else {
 						setMode("duplicate-name");
+						setFocus("input");
 					}
 				}}
 				onCancel={() => {
 					setMode("list");
-					onCancelAction();
+					setBorderColor("cyan");
+					setFocus("menu");
 				}}
 				{...(isDelete ? { color: "red" } : {})}
 				isActive
@@ -150,13 +206,17 @@ export function TripList({
 				label={`Duplicate "${targetTrip.settings.name}" — new name:`}
 				placeholder="e.g. Japan Trip v2"
 				onSubmit={(name) => {
-					onDuplicateTrip(targetTrip.dirPath, name);
+					const dirName = toDirName(name, targetTrip.settings.startDate);
+					duplicateTrip(dataDir, targetTrip.dirPath, dirName, name);
+					refreshTrips();
 					setTargetTrip(null);
 					setMode("list");
+					setFocus("menu");
 				}}
 				onCancel={() => {
 					setTargetTrip(null);
 					setMode("select-for-duplicate");
+					setFocus("main");
 				}}
 			/>
 		);
@@ -176,7 +236,15 @@ export function TripList({
 			}))}
 			onChange={(value) => {
 				const trip = trips.find((t) => t.dirPath === value);
-				if (trip) onSelectTrip(trip);
+				if (trip) {
+					goTo("/trips/menu", {
+						props: {
+							tripDirPath: trip.dirPath,
+							tripName: trip.settings.name,
+							dataDir,
+						},
+					});
+				}
 			}}
 			isActive={focus === "main"}
 		/>
