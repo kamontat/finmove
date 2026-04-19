@@ -1,3 +1,4 @@
+import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import { updateSettings } from "../../core/services/trip";
@@ -58,7 +59,7 @@ export function TripSettings(): JSX.Element {
 	}, [trip, setMenu, setHints, setTitleSuffix, goTo]);
 
 	if (!trip) {
-		return <></>;
+		return <Text dimColor>Loading...</Text>;
 	}
 
 	const { settings } = trip;
