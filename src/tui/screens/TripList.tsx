@@ -79,7 +79,8 @@ const DUPLICATE_FIELDS: FormFieldConfig[] = [
 export function TripList(): JSX.Element {
 	const { goTo, goExit, currentRoute } = useNavigation();
 	const { focus, setFocus } = useFocus();
-	const { setMenu, setHints, setBorderColor, resetLayout } = useLayout();
+	const { setMenu, setHints, setBorderColor, setTitleSuffix, resetLayout } =
+		useLayout();
 
 	const dataDir =
 		(currentRoute.props["dataDir"] as string | undefined) ?? "./data";
@@ -98,7 +99,8 @@ export function TripList(): JSX.Element {
 		setError(null);
 		if (mode !== "list") {
 			setMenu([], () => {});
-			if (mode === "create" || mode === "duplicate") {
+			if (mode === "create") {
+				setTitleSuffix("New");
 				setBorderColor(null);
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
@@ -115,10 +117,20 @@ export function TripList(): JSX.Element {
 					{ key: "esc", label: "Exit" },
 				]);
 			} else if (mode === "select-for-duplicate") {
+				setBorderColor(null);
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
 					{ key: "Enter", label: "Select trip" },
 					{ key: "q", label: "Back to list" },
+					{ key: "esc", label: "Exit" },
+				]);
+			} else if (mode === "duplicate") {
+				setTitleSuffix("Duplicate");
+				setBorderColor(null);
+				setHints([
+					{ key: "↑↓", label: "Navigate" },
+					{ key: "Enter", label: "Edit field" },
+					{ key: "q", label: "Back" },
 					{ key: "esc", label: "Exit" },
 				]);
 			} else {
@@ -154,7 +166,15 @@ export function TripList(): JSX.Element {
 			{ key: "q", label: "Quit" },
 			{ key: "esc", label: "Exit" },
 		]);
-	}, [mode, trips.length, setMenu, setHints, setFocus, setBorderColor]);
+	}, [
+		mode,
+		trips.length,
+		setMenu,
+		setHints,
+		setFocus,
+		setBorderColor,
+		setTitleSuffix,
+	]);
 
 	// --- Create flow ---
 	if (mode === "create") {

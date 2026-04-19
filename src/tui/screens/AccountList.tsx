@@ -63,7 +63,7 @@ export function AccountList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { goExit } = useNavigation();
 	const { setFocus } = useFocus();
-	const { setMenu, setHints, setBorderColor } = useLayout();
+	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
 
 	const [mode, setMode] = useState<Mode>("list");
 	const [editTarget, setEditTarget] = useState<EditTarget | null>(null);
@@ -72,6 +72,7 @@ export function AccountList(): JSX.Element {
 		if (!trip || mode !== "list") {
 			setMenu([], () => {});
 			if (mode === "add" || mode === "edit") {
+				if (mode === "add") setTitleSuffix("New");
 				setBorderColor(null);
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
@@ -119,7 +120,7 @@ export function AccountList(): JSX.Element {
 			{ key: "q", label: "Back" },
 			{ key: "esc", label: "Exit" },
 		]);
-	}, [trip, mode, setMenu, setHints, setFocus, setBorderColor]);
+	}, [trip, mode, setMenu, setHints, setFocus, setBorderColor, setTitleSuffix]);
 
 	if (mode === "add") {
 		return (
@@ -276,6 +277,7 @@ export function AccountList(): JSX.Element {
 						type: account.type,
 						owners: account.owners.join(", "),
 					});
+					setTitleSuffix(account.name);
 					setMode("edit");
 					setFocus("main");
 				}
