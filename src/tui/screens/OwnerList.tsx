@@ -1,41 +1,53 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import type { Trip } from "../../core/models";
 import { addOwner, removeOwner } from "../../core/services/owner";
 import { ConfirmPrompt } from "../components/molecules/ConfirmPrompt";
 import { FormField } from "../components/molecules/FormField";
 import { DataTable } from "../components/organisms/DataTable";
-
-interface OwnerListProps {
-	trip: Trip;
-	onTripUpdated: () => void;
-	pendingAction: string | null;
-	onActionConsumed: () => void;
-}
+import { useData } from "../states/data";
+import { useFocus } from "../states/focus";
+import { useLayout } from "../states/layout";
 
 type Mode = "list" | "add-id" | "add-name" | "remove";
 
-export function OwnerList({
-	trip,
-	onTripUpdated,
-	pendingAction,
-	onActionConsumed,
-}: OwnerListProps): JSX.Element {
+export function OwnerList(): JSX.Element {
+	const { trip, reloadTrip } = useData();
+	const { setFocus, setMenuAvailable } = useFocus();
+	const { setMenu, setHints } = useLayout();
+
 	const [mode, setMode] = useState<Mode>("list");
 	const [newId, setNewId] = useState("");
 	const [removeId, setRemoveId] = useState<string | null>(null);
 
 	useEffect(() => {
-		if (!pendingAction || mode !== "list") return;
-		if (pendingAction === "add") {
-			setMode("add-id");
-		} else if (pendingAction.startsWith("remove:")) {
-			setRemoveId(pendingAction.replace("remove:", ""));
-			setMode("remove");
+		if (!trip || mode !== "list") {
+			setMenu([], () => {});
+			return;
 		}
-		onActionConsumed();
-	}, [pendingAction, mode, onActionConsumed]);
+
+		const menuOptions = [
+			{ label: "Add", value: "add", key: "a" },
+			...trip.owners.map((o) => ({
+				label: `Remove: ${o.name}`,
+				value: `remove:${o.id}`,
+			})),
+		];
+
+		setMenu(menuOptions, (value) => {
+			if (value === "add") {
+				setMode("add-id");
+				setFocus("input");
+			} else if (value.startsWith("remove:")) {
+				const id = value.replace("remove:", "");
+				setRemoveId(id);
+				setMode("remove");
+				setFocus("input");
+			}
+		});
+		setHints([{ key: "?", label: "help" }]);
+		setMenuAvailable(true);
+	}, [trip, mode, setMenu, setHints, setFocus, setMenuAvailable]);
 
 	if (mode === "add-id") {
 		return (
@@ -56,9 +68,12 @@ export function OwnerList({
 				label="Owner display name:"
 				placeholder="e.g. Alice"
 				onSubmit={(name) => {
-					addOwner(trip, { id: newId, name });
-					onTripUpdated();
+					if (trip) {
+						addOwner(trip, { id: newId, name });
+						reloadTrip();
+					}
 					setMode("list");
+					setFocus("menu");
 				}}
 			/>
 		);
@@ -69,15 +84,20 @@ export function OwnerList({
 			<ConfirmPrompt
 				message={`Remove owner "${removeId}"?`}
 				onConfirm={(yes) => {
-					if (yes) {
+					if (yes && trip) {
 						removeOwner(trip, removeId);
-						onTripUpdated();
+						reloadTrip();
 					}
 					setRemoveId(null);
 					setMode("list");
+					setFocus("menu");
 				}}
 			/>
 		);
+	}
+
+	if (!trip) {
+		return <Text dimColor>Loading...</Text>;
 	}
 
 	if (trip.owners.length === 0) {
