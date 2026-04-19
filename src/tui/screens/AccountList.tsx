@@ -15,7 +15,7 @@ type Mode = "list" | "add-id" | "add-name" | "add-type" | "add-owners";
 
 export function AccountList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { setFocus, setMenuAvailable } = useFocus();
+	const { setFocus } = useFocus();
 	const { setMenu, setHints } = useLayout();
 
 	const [mode, setMode] = useState<Mode>("list");
@@ -48,8 +48,7 @@ export function AccountList(): JSX.Element {
 			}
 		});
 		setHints([{ key: "?", label: "help" }]);
-		setMenuAvailable(true);
-	}, [trip, mode, setMenu, setHints, setFocus, setMenuAvailable, reloadTrip]);
+	}, [trip, mode, setMenu, setHints, setFocus, reloadTrip]);
 
 	if (mode === "add-id") {
 		return (

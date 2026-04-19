@@ -13,7 +13,7 @@ type Mode = "list" | "add-id" | "add-name" | "remove";
 
 export function OwnerList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { setFocus, setMenuAvailable } = useFocus();
+	const { setFocus } = useFocus();
 	const { setMenu, setHints } = useLayout();
 
 	const [mode, setMode] = useState<Mode>("list");
@@ -46,8 +46,7 @@ export function OwnerList(): JSX.Element {
 			}
 		});
 		setHints([{ key: "?", label: "help" }]);
-		setMenuAvailable(true);
-	}, [trip, mode, setMenu, setHints, setFocus, setMenuAvailable]);
+	}, [trip, mode, setMenu, setHints, setFocus]);
 
 	if (mode === "add-id") {
 		return (

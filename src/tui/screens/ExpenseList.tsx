@@ -3,7 +3,6 @@ import type { JSX } from "react";
 import { useEffect } from "react";
 import { DataTable } from "../components/organisms/DataTable";
 import { useData } from "../states/data";
-import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
 
@@ -11,8 +10,6 @@ export function ExpenseList(): JSX.Element {
 	const { trip } = useData();
 	const { goTo } = useNavigation();
 	const { setMenu, setHints } = useLayout();
-	const { setMenuAvailable } = useFocus();
-
 	useEffect(() => {
 		if (!trip) return;
 
@@ -35,8 +32,7 @@ export function ExpenseList(): JSX.Element {
 			}
 		});
 		setHints([{ key: "?", label: "help" }]);
-		setMenuAvailable(true);
-	}, [trip, setMenu, setHints, setMenuAvailable, goTo]);
+	}, [trip, setMenu, setHints, goTo]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

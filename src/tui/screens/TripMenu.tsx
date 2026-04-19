@@ -2,7 +2,6 @@ import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import { useData } from "../states/data";
-import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
 
@@ -10,8 +9,6 @@ export function TripMenu(): JSX.Element {
 	const { trip } = useData();
 	const { goTo } = useNavigation();
 	const { setMenu, setHints } = useLayout();
-	const { setMenuAvailable } = useFocus();
-
 	useEffect(() => {
 		if (!trip) return;
 
@@ -37,8 +34,7 @@ export function TripMenu(): JSX.Element {
 			},
 		);
 		setHints([{ key: "?", label: "help" }]);
-		setMenuAvailable(true);
-	}, [trip, setMenu, setHints, setMenuAvailable, goTo]);
+	}, [trip, setMenu, setHints, goTo]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

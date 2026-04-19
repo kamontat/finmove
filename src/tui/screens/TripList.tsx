@@ -44,7 +44,7 @@ const DEFAULT_SETTINGS: Omit<Settings, "name" | "startDate" | "endDate"> = {
 
 export function TripList(): JSX.Element {
 	const { goTo, currentRoute } = useNavigation();
-	const { focus, setFocus, setMenuAvailable } = useFocus();
+	const { focus, setFocus } = useFocus();
 	const { setMenu, setHints, setBorderColor, resetLayout } = useLayout();
 
 	const dataDir =
@@ -64,7 +64,7 @@ export function TripList(): JSX.Element {
 	useEffect(() => {
 		if (mode !== "list") {
 			setMenu([], () => {});
-			setBorderColor("cyan");
+			setBorderColor(null);
 			return;
 		}
 
@@ -89,16 +89,7 @@ export function TripList(): JSX.Element {
 			},
 		);
 		setHints([{ key: "?", label: "help" }]);
-		setMenuAvailable(true);
-	}, [
-		mode,
-		trips.length,
-		setMenu,
-		setHints,
-		setFocus,
-		setMenuAvailable,
-		setBorderColor,
-	]);
+	}, [mode, trips.length, setMenu, setHints, setFocus, setBorderColor]);
 
 	// --- Create flow ---
 	if (mode === "create-name") {
@@ -181,7 +172,7 @@ export function TripList(): JSX.Element {
 						deleteTrip(value);
 						refreshTrips();
 						setMode("list");
-						setBorderColor("cyan");
+						setBorderColor(null);
 						setFocus("menu");
 					} else {
 						setMode("duplicate-name");
@@ -190,7 +181,7 @@ export function TripList(): JSX.Element {
 				}}
 				onCancel={() => {
 					setMode("list");
-					setBorderColor("cyan");
+					setBorderColor(null);
 					setFocus("menu");
 				}}
 				{...(isDelete ? { color: "red" } : {})}

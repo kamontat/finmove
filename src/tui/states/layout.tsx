@@ -17,7 +17,7 @@ interface LayoutContextValue {
 	borderColor: string | null;
 	setMenu: (options: SelectOption[], onSelect: (value: string) => void) => void;
 	setHints: (hints: HelpHint[]) => void;
-	setBorderColor: (color: string) => void;
+	setBorderColor: (color: string | null) => void;
 	resetLayout: () => void;
 }
 
@@ -47,7 +47,7 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 		setHintsState(newHints);
 	}, []);
 
-	const setBorderColor = useCallback((color: string) => {
+	const setBorderColor = useCallback((color: string | null) => {
 		setBorderColorState(color);
 	}, []);
 
