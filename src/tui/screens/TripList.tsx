@@ -139,7 +139,7 @@ export function TripList(): JSX.Element {
 					setFocus("main");
 				} else if (value === "duplicate" && trips.length > 0) {
 					setMode("select-for-duplicate");
-					setFocus("main");
+					setFocus("input");
 				} else if (value === "delete" && trips.length > 0) {
 					setMode("select-for-delete");
 					setBorderColor("red");
