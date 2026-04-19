@@ -1,19 +1,17 @@
 import { Box } from "ink";
 import type { JSX } from "react";
-import { useState } from "react";
-import type { Expense, Trip } from "../../core/models";
+import { useEffect, useState } from "react";
+import type { Expense } from "../../core/models";
 import { today } from "../../core/services/date";
 import { addExpense, updateExpense } from "../../core/services/expense";
 import { SelectInput } from "../components/atoms/SelectInput";
 import { TextLabel } from "../components/atoms/TextLabel";
 import { DateField } from "../components/molecules/DateField";
 import { FormField } from "../components/molecules/FormField";
-
-interface ExpenseFormProps {
-	trip: Trip;
-	existingExpense?: Expense;
-	onDone: () => void;
-}
+import { useData } from "../states/data";
+import { useFocus } from "../states/focus";
+import { useLayout } from "../states/layout";
+import { useNavigation } from "../states/navigation";
 
 type FormStep =
 	| "account"
@@ -27,11 +25,15 @@ type FormStep =
 	| "description"
 	| "tags";
 
-export function ExpenseForm({
-	trip,
-	existingExpense,
-	onDone,
-}: ExpenseFormProps): JSX.Element {
+export function ExpenseForm(): JSX.Element {
+	const { trip, reloadTrip } = useData();
+	const { goBack, currentRoute } = useNavigation();
+	const { setFocus } = useFocus();
+	const { setHints } = useLayout();
+
+	const expenseId = currentRoute.props["expenseId"] as string | undefined;
+	const existingExpense = trip?.expenses.find((e) => e.id === expenseId);
+
 	const [step, setStep] = useState<FormStep>("account");
 	const [accountId, setAccountId] = useState(existingExpense?.accountId ?? "");
 	const [date, setDate] = useState(existingExpense?.date ?? "");
@@ -49,7 +51,26 @@ export function ExpenseForm({
 		existingExpense?.description ?? "",
 	);
 
+	// Enter input mode on mount
+	useEffect(() => {
+		setFocus("input");
+		setHints([
+			{ key: "enter", label: "confirm" },
+			{ key: "esc", label: "back" },
+		]);
+	}, [setFocus, setHints]);
+
+	if (!trip) {
+		return <Box />;
+	}
+
 	const allCurrencies = ["THB", ...Object.keys(trip.settings.currencies)];
+
+	const handleDone = () => {
+		reloadTrip();
+		setFocus("menu");
+		goBack();
+	};
 
 	switch (step) {
 		case "account":
@@ -213,7 +234,7 @@ export function ExpenseForm({
 						} else {
 							addExpense(trip, expense);
 						}
-						onDone();
+						handleDone();
 					}}
 				/>
 			);
