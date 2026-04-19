@@ -1,4 +1,6 @@
-import { Text } from "ink";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
+import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Settings, Trip } from "../../core/models";
@@ -85,6 +87,7 @@ export function TripList(): JSX.Element {
 	const [mode, setMode] = useState<Mode>("list");
 	const [targetTrip, setTargetTrip] = useState<Trip | null>(null);
 	const [trips, setTrips] = useState<Trip[]>(() => listTrips(dataDir));
+	const [error, setError] = useState<string | null>(null);
 
 	const refreshTrips = () => {
 		setTrips(listTrips(dataDir));
@@ -92,9 +95,18 @@ export function TripList(): JSX.Element {
 
 	// Register menu in list mode
 	useEffect(() => {
+		setError(null);
 		if (mode !== "list") {
 			setMenu([], () => {});
 			setBorderColor(null);
+			if (mode === "create" || mode === "duplicate") {
+				setHints([
+					{ key: "↑↓", label: "Navigate" },
+					{ key: "Enter", label: "Edit field" },
+					{ key: "q", label: "Back" },
+					{ key: "esc", label: "Exit" },
+				]);
+			}
 			return;
 		}
 
@@ -118,34 +130,51 @@ export function TripList(): JSX.Element {
 				}
 			},
 		);
-		setHints([{ key: "?", label: "help" }]);
+		setHints([
+			{ key: "tab", label: "Switch focus" },
+			{ key: "←→", label: "Navigate menu" },
+			{ key: "Enter", label: "Confirm" },
+			{ key: "q", label: "Quit" },
+			{ key: "esc", label: "Exit" },
+		]);
 	}, [mode, trips.length, setMenu, setHints, setFocus, setBorderColor]);
 
 	// --- Create flow ---
 	if (mode === "create") {
 		return (
-			<Form
-				fields={CREATE_FIELDS}
-				onSubmit={(values) => {
-					const name = values["name"] ?? "";
-					const startDate = values["startDate"] ?? today();
-					const endDate = values["endDate"] ?? addDays(today(), 1);
-					const dirName = toDirName(name, startDate);
-					const settings: Settings = {
-						...DEFAULT_SETTINGS,
-						name,
-						startDate,
-						endDate,
-					};
-					const newTrip = createTrip(dataDir, dirName, settings);
-					resetLayout();
-					goTo("/trips/menu", {
-						props: { tripDirPath: newTrip.dirPath, tripName: name, dataDir },
-					});
-				}}
-				submitLabel="Create Trip"
-				submitKey="c"
-			/>
+			<Box flexDirection="column">
+				{error && (
+					<Text color="red" bold>
+						{error}
+					</Text>
+				)}
+				<Form
+					fields={CREATE_FIELDS}
+					onSubmit={(values) => {
+						const name = values["name"] ?? "";
+						const startDate = values["startDate"] ?? today();
+						const endDate = values["endDate"] ?? addDays(today(), 1);
+						const dirName = toDirName(name, startDate);
+						const tripPath = join(dataDir, dirName);
+						if (existsSync(tripPath)) {
+							setError(`Trip "${name}" already exists (${dirName})`);
+							return;
+						}
+						setError(null);
+						const settings: Settings = {
+							...DEFAULT_SETTINGS,
+							name,
+							startDate,
+							endDate,
+						};
+						const newTrip = createTrip(dataDir, dirName, settings);
+						resetLayout();
+						goTo("/trips/menu", {
+							props: { tripDirPath: newTrip.dirPath, tripName: name, dataDir },
+						});
+					}}
+				/>
+			</Box>
 		);
 	}
 
@@ -188,20 +217,31 @@ export function TripList(): JSX.Element {
 	// --- Duplicate: ask for name ---
 	if (mode === "duplicate" && targetTrip) {
 		return (
-			<Form
-				fields={DUPLICATE_FIELDS}
-				onSubmit={(values) => {
-					const name = values["newName"] ?? "";
-					const dirName = toDirName(name, targetTrip.settings.startDate);
-					duplicateTrip(dataDir, targetTrip.dirPath, dirName, name);
-					refreshTrips();
-					setTargetTrip(null);
-					setMode("list");
-					setFocus("menu");
-				}}
-				submitLabel="Duplicate Trip"
-				submitKey="d"
-			/>
+			<Box flexDirection="column">
+				{error && (
+					<Text color="red" bold>
+						{error}
+					</Text>
+				)}
+				<Form
+					fields={DUPLICATE_FIELDS}
+					onSubmit={(values) => {
+						const name = values["newName"] ?? "";
+						const dirName = toDirName(name, targetTrip.settings.startDate);
+						const tripPath = join(dataDir, dirName);
+						if (existsSync(tripPath)) {
+							setError(`Trip "${name}" already exists (${dirName})`);
+							return;
+						}
+						setError(null);
+						duplicateTrip(dataDir, targetTrip.dirPath, dirName, name);
+						refreshTrips();
+						setTargetTrip(null);
+						setMode("list");
+						setFocus("menu");
+					}}
+				/>
+			</Box>
 		);
 	}
 
