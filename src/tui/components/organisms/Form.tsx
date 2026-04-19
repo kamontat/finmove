@@ -13,7 +13,6 @@ interface FormProps {
 	fields: FormFieldConfig[];
 	onSubmit: (values: Record<string, string>) => void;
 	onCancel?: () => void;
-	onEscape?: () => void;
 	submitLabel?: string;
 	submitKey?: string;
 }
@@ -22,7 +21,6 @@ export function Form({
 	fields,
 	onSubmit,
 	onCancel,
-	onEscape,
 	submitLabel = "Submit",
 	submitKey = "s",
 }: FormProps): JSX.Element {
@@ -106,8 +104,8 @@ export function Form({
 
 	useInput(
 		(input, key) => {
-			if (key.escape && onEscape) {
-				onEscape();
+			if (key.escape && onCancel) {
+				onCancel();
 				return;
 			}
 			if (input === "q" && onCancel) {

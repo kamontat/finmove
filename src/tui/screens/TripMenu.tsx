@@ -41,8 +41,8 @@ export function TripMenu(): JSX.Element {
 			{ key: "tab", label: "Switch focus" },
 			{ key: "←→", label: "Navigate menu" },
 			{ key: "Enter", label: "Confirm" },
-			{ key: "q", label: "Back" },
-			{ key: "esc", label: "Exit" },
+			{ key: "q/esc", label: "Back" },
+			{ key: "e", label: "Exit" },
 		]);
 	}, [trip, setMenu, setHints, goTo]);
 

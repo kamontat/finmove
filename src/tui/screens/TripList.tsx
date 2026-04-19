@@ -77,7 +77,7 @@ const DUPLICATE_FIELDS: FormFieldConfig[] = [
 ];
 
 export function TripList(): JSX.Element {
-	const { goTo, goExit, currentRoute } = useNavigation();
+	const { goTo, currentRoute } = useNavigation();
 	const { focus, setFocus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix, resetLayout } =
 		useLayout();
@@ -105,24 +105,24 @@ export function TripList(): JSX.Element {
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
 					{ key: "Enter", label: "Edit field" },
-					{ key: "q", label: "Back" },
-					{ key: "esc", label: "Exit" },
+					{ key: "q/esc", label: "Back" },
+					{ key: "e", label: "Exit" },
 				]);
 			} else if (mode === "select-for-delete") {
 				setBorderColor("red");
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
 					{ key: "Enter", label: "Delete selected" },
-					{ key: "q", label: "Back to list" },
-					{ key: "esc", label: "Exit" },
+					{ key: "q/esc", label: "Back to list" },
+					{ key: "e", label: "Exit" },
 				]);
 			} else if (mode === "select-for-duplicate") {
 				setBorderColor(null);
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
 					{ key: "Enter", label: "Select trip" },
-					{ key: "q", label: "Back to list" },
-					{ key: "esc", label: "Exit" },
+					{ key: "q/esc", label: "Back to list" },
+					{ key: "e", label: "Exit" },
 				]);
 			} else if (mode === "duplicate") {
 				setTitleSuffix("Duplicate");
@@ -130,8 +130,8 @@ export function TripList(): JSX.Element {
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
 					{ key: "Enter", label: "Edit field" },
-					{ key: "q", label: "Back" },
-					{ key: "esc", label: "Exit" },
+					{ key: "q/esc", label: "Back" },
+					{ key: "e", label: "Exit" },
 				]);
 			} else {
 				setBorderColor(null);
@@ -164,8 +164,8 @@ export function TripList(): JSX.Element {
 			{ key: "tab", label: "Switch focus" },
 			{ key: "←→", label: "Navigate menu" },
 			{ key: "Enter", label: "Confirm" },
-			{ key: "q", label: "Quit" },
-			{ key: "esc", label: "Exit" },
+			{ key: "q/esc", label: "Quit" },
+			{ key: "e", label: "Exit" },
 		]);
 	}, [
 		mode,
@@ -215,7 +215,6 @@ export function TripList(): JSX.Element {
 						setMode("list");
 						setFocus("menu");
 					}}
-					onEscape={goExit}
 				/>
 			</Box>
 		);
@@ -260,7 +259,6 @@ export function TripList(): JSX.Element {
 						setBorderColor(null);
 						setFocus("menu");
 					}}
-					onEscape={goExit}
 					{...(isDelete ? { color: "red" } : {})}
 					isActive
 				/>
@@ -299,7 +297,6 @@ export function TripList(): JSX.Element {
 						setMode("list");
 						setFocus("menu");
 					}}
-					onEscape={goExit}
 				/>
 			</Box>
 		);

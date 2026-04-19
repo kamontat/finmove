@@ -13,7 +13,7 @@ import { useNavigation } from "../states/navigation";
 
 export function ExpenseForm(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { goBack, goExit, currentRoute } = useNavigation();
+	const { goBack, currentRoute } = useNavigation();
 	const { setFocus } = useFocus();
 	const { setHints } = useLayout();
 
@@ -24,8 +24,8 @@ export function ExpenseForm(): JSX.Element {
 		setHints([
 			{ key: "↑↓", label: "Navigate" },
 			{ key: "Enter", label: "Edit field" },
-			{ key: "q", label: "Back" },
-			{ key: "esc", label: "Exit" },
+			{ key: "q/esc", label: "Back" },
+			{ key: "e", label: "Exit" },
 		]);
 	}, [setHints]);
 
@@ -166,12 +166,5 @@ export function ExpenseForm(): JSX.Element {
 		goBack();
 	};
 
-	return (
-		<Form
-			fields={fields}
-			onSubmit={handleSubmit}
-			onCancel={goBack}
-			onEscape={goExit}
-		/>
-	);
+	return <Form fields={fields} onSubmit={handleSubmit} onCancel={goBack} />;
 }

@@ -9,7 +9,6 @@ import type { FormFieldConfig } from "../models";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
-import { useNavigation } from "../states/navigation";
 
 type Mode = "list" | "add" | "edit" | "select-for-remove";
 
@@ -32,7 +31,6 @@ const ADD_FIELDS: FormFieldConfig[] = [
 
 export function OwnerList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { goExit } = useNavigation();
 	const { setFocus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
 
@@ -48,16 +46,16 @@ export function OwnerList(): JSX.Element {
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
 					{ key: "Enter", label: "Edit field" },
-					{ key: "q", label: "Back" },
-					{ key: "esc", label: "Exit" },
+					{ key: "q/esc", label: "Back" },
+					{ key: "e", label: "Exit" },
 				]);
 			} else if (mode === "select-for-remove") {
 				setBorderColor("red");
 				setHints([
 					{ key: "↑↓", label: "Navigate" },
 					{ key: "Enter", label: "Remove selected" },
-					{ key: "q", label: "Back to list" },
-					{ key: "esc", label: "Exit" },
+					{ key: "q/esc", label: "Back to list" },
+					{ key: "e", label: "Exit" },
 				]);
 			} else {
 				setBorderColor(null);
@@ -87,8 +85,8 @@ export function OwnerList(): JSX.Element {
 			{ key: "tab", label: "Switch focus" },
 			{ key: "←→", label: "Navigate menu" },
 			{ key: "Enter", label: "Confirm" },
-			{ key: "q", label: "Back" },
-			{ key: "esc", label: "Exit" },
+			{ key: "q/esc", label: "Back" },
+			{ key: "e", label: "Exit" },
 		]);
 	}, [trip, mode, setMenu, setHints, setFocus, setBorderColor, setTitleSuffix]);
 
@@ -109,7 +107,6 @@ export function OwnerList(): JSX.Element {
 					setMode("list");
 					setFocus("menu");
 				}}
-				onEscape={goExit}
 			/>
 		);
 	}
@@ -145,7 +142,6 @@ export function OwnerList(): JSX.Element {
 						setMode("list");
 						setFocus("menu");
 					}}
-					onEscape={goExit}
 				/>
 			</Box>
 		);
@@ -182,7 +178,6 @@ export function OwnerList(): JSX.Element {
 						setBorderColor(null);
 						setFocus("menu");
 					}}
-					onEscape={goExit}
 					color="red"
 					isActive
 				/>

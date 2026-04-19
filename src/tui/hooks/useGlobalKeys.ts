@@ -12,12 +12,17 @@ export function useGlobalKeys(): void {
 		if (focus === "input") return;
 
 		if (key.escape) {
-			goExit();
+			goBack();
 			return;
 		}
 
 		if (input === "q") {
 			goBack();
+			return;
+		}
+
+		if (input === "e") {
+			goExit();
 			return;
 		}
 

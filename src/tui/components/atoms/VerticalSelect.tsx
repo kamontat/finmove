@@ -10,7 +10,6 @@ interface VerticalSelectProps {
 	onChange: (value: string) => void;
 	onHighlight?: (value: string) => void;
 	onCancel?: () => void;
-	onEscape?: () => void;
 	isActive?: boolean;
 	color?: string;
 }
@@ -20,7 +19,6 @@ export function VerticalSelect({
 	onChange,
 	onHighlight,
 	onCancel,
-	onEscape,
 	isActive = true,
 	color,
 }: VerticalSelectProps): JSX.Element {
@@ -45,8 +43,8 @@ export function VerticalSelect({
 			} else if (key.return) {
 				const opt = options[cursor];
 				if (opt) onChange(opt.value);
-			} else if (key.escape && onEscape) {
-				onEscape();
+			} else if (key.escape && onCancel) {
+				onCancel();
 			} else if (input === "q" && onCancel) {
 				onCancel();
 			}

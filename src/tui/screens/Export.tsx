@@ -30,7 +30,8 @@ export function ExportScreen(): JSX.Element {
 		setFocus("input");
 		setHints([
 			{ key: "enter", label: "confirm" },
-			{ key: "esc", label: "back" },
+			{ key: "q/esc", label: "back" },
+			{ key: "e", label: "exit" },
 		]);
 	}, [setFocus, setHints]);
 

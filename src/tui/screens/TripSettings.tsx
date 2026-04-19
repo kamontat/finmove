@@ -9,7 +9,7 @@ import { useNavigation } from "../states/navigation";
 
 export function TripSettings(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { goTo, goExit, goBack } = useNavigation();
+	const { goTo, goBack } = useNavigation();
 	const { setMenu, setHints, setTitleSuffix } = useLayout();
 
 	useEffect(() => {
@@ -52,8 +52,8 @@ export function TripSettings(): JSX.Element {
 			{ key: "Enter", label: "Edit field" },
 			{ key: "s", label: "Submit" },
 			{ key: "tab", label: "Switch focus" },
-			{ key: "q", label: "Back" },
-			{ key: "esc", label: "Exit" },
+			{ key: "q/esc", label: "Back" },
+			{ key: "e", label: "Exit" },
 		]);
 	}, [trip, setMenu, setHints, setTitleSuffix, goTo]);
 
@@ -109,7 +109,6 @@ export function TripSettings(): JSX.Element {
 			onCancel={() => {
 				goBack();
 			}}
-			onEscape={goExit}
 		/>
 	);
 }

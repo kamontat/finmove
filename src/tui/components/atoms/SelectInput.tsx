@@ -38,7 +38,8 @@ export function SelectInput({
 	// Shortcut keys work except during input mode (editing form fields)
 	useInput((input, key) => {
 		if (focus === "input") return;
-		if (!input || key.escape || input === "q" || input === "?") return;
+		if (!input || key.escape || input === "q" || input === "e" || input === "?")
+			return;
 		const lower = input.toLowerCase();
 		const match = options.find((o) => o.key?.toLowerCase() === lower);
 		if (match) onChange(match.value);
