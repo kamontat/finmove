@@ -13,6 +13,14 @@ export function updateAccount(
 		throw new Error(`Account with id "${accountId}" not found`);
 	}
 
+	if (updates.owners !== undefined) {
+		for (const ownerId of updates.owners) {
+			if (!trip.owners.some((o) => o.id === ownerId)) {
+				throw new Error(`Owner "${ownerId}" not found`);
+			}
+		}
+	}
+
 	const filePath = join(trip.dirPath, "accounts.yaml");
 	const data = parse(readFileSync(filePath, "utf-8"));
 	// biome-ignore lint/style/noNonNullAssertion: index validated above

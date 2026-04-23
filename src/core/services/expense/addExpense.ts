@@ -13,6 +13,15 @@ export function addExpense(trip: Trip, expense: Expense): void {
 		throw new Error(`Account "${expense.accountId}" not found`);
 	}
 
+	if (expense.owners && expense.owners.length > 0) {
+		for (const ref of expense.owners) {
+			const ownerId = typeof ref === "string" ? ref : ref.id;
+			if (!trip.owners.some((o) => o.id === ownerId)) {
+				throw new Error(`Owner "${ownerId}" not found`);
+			}
+		}
+	}
+
 	const filePath = join(trip.dirPath, "expenses.yaml");
 	const data = parse(readFileSync(filePath, "utf-8")) ?? { expenses: [] };
 	data.expenses.push(expense);

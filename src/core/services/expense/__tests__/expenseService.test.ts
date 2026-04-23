@@ -96,6 +96,25 @@ describe("addExpense", () => {
 			'Expense with id "e1" already exists',
 		);
 	});
+
+	test("throws when expense.owners contains unknown string ID", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		expect(() =>
+			addExpense(trip, { ...sampleExpense, owners: ["alice", "ghost"] }),
+		).toThrow('Owner "ghost" not found');
+	});
+
+	test("throws when expense.owners contains unknown object ID", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		expect(() =>
+			addExpense(trip, {
+				...sampleExpense,
+				owners: [{ id: "ghost", split: "100%" }],
+			}),
+		).toThrow('Owner "ghost" not found');
+	});
 });
 
 describe("updateExpense", () => {
@@ -118,6 +137,15 @@ describe("updateExpense", () => {
 		expect(() => updateExpense(trip, sampleExpense)).toThrow(
 			'Expense with id "e1" not found',
 		);
+	});
+
+	test("throws when updated expense.owners contains unknown ID", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		addExpense(trip, sampleExpense);
+		expect(() =>
+			updateExpense(trip, { ...sampleExpense, owners: ["ghost"] }),
+		).toThrow('Owner "ghost" not found');
 	});
 });
 

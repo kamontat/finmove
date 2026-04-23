@@ -8,6 +8,7 @@ import { loadTrip } from "../../trip/loadTrip";
 import { addAccount } from "../addAccount";
 import { getAccounts } from "../getAccounts";
 import { removeAccount } from "../removeAccount";
+import { updateAccount } from "../updateAccount";
 
 const TEST_DIR = join(import.meta.dir, "__fixtures__");
 
@@ -99,6 +100,24 @@ describe("addAccount", () => {
 				owners: ["nobody"],
 			}),
 		).toThrow('Owner "nobody" not found');
+	});
+});
+
+describe("updateAccount", () => {
+	test("throws when updated owners include unknown ID", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		expect(() =>
+			updateAccount(trip, "a1", { owners: ["alice", "nobody"] }),
+		).toThrow('Owner "nobody" not found');
+	});
+
+	test("allows update when all owner IDs are known", () => {
+		const tripDir = setupTrip();
+		let trip = loadTrip(tripDir);
+		updateAccount(trip, "a1", { name: "Renamed", owners: ["alice"] });
+		trip = loadTrip(tripDir);
+		expect(trip.accounts[0].name).toBe("Renamed");
 	});
 });
 
