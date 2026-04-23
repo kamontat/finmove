@@ -38,6 +38,7 @@ export function Form({
 
 	const [cursor, setCursor] = useState(0);
 	const [editing, setEditing] = useState(false);
+	const [error, setError] = useState<string | null>(null);
 
 	const canSubmit = useMemo(() => {
 		const allRequiredFilled = fields.every((field) => {
@@ -74,10 +75,16 @@ export function Form({
 				result[field.key] = "";
 			}
 		}
-		onSubmit(result);
+		try {
+			onSubmit(result);
+			setError(null);
+		} catch (e) {
+			setError(e instanceof Error ? e.message : String(e));
+		}
 	}, [canSubmit, fields, values, onSubmit]);
 
 	const enterEdit = useCallback(() => {
+		setError(null);
 		setEditing(true);
 		setFocus("input");
 	}, [setFocus]);
@@ -255,6 +262,13 @@ export function Form({
 					</Text>
 				)}
 			</Box>
+
+			{/* Error from onSubmit (e.g. validation throw) */}
+			{error && (
+				<Box marginTop={1}>
+					<Text color="red">⚠ {error}</Text>
+				</Box>
+			)}
 		</Box>
 	);
 }
