@@ -1,6 +1,8 @@
 export { createTrip } from "./createTrip";
 export { deleteTrip } from "./deleteTrip";
 export { duplicateTrip } from "./duplicateTrip";
+export type { TripStatus } from "./getTripStatus";
+export { getTripStatus } from "./getTripStatus";
 export { listTrips } from "./listTrips";
 export { loadTrip } from "./loadTrip";
 export { toDirName } from "./toDirName";
