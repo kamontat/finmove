@@ -64,21 +64,33 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 	}
 	const remainingDays = totalDays - elapsedDays;
 
-	// --- Spend ---
+	// --- Spend + Categories + Tags ---
 	let totalSpendThb = 0;
 	let missingRateCount = 0;
 	const currencyTotals = new Map<string, number>();
+	const categoryTotals = new Map<string, number>();
+	const usedCategories = new Set<string>();
+	const usedTags = new Set<string>();
 
 	for (const expense of trip.expenses) {
 		currencyTotals.set(
 			expense.currency,
 			(currencyTotals.get(expense.currency) ?? 0) + expense.amount,
 		);
+		usedCategories.add(expense.category);
+		for (const tag of expense.tags) {
+			usedTags.add(tag);
+		}
+
 		const thb = tryConvertToTHB(expense, settings);
 		if (thb === null) {
 			missingRateCount += 1;
 		} else {
 			totalSpendThb += thb;
+			categoryTotals.set(
+				expense.category,
+				(categoryTotals.get(expense.category) ?? 0) + thb,
+			);
 		}
 	}
 	totalSpendThb = round2(totalSpendThb);
@@ -89,6 +101,28 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 	const byCurrency = [...currencyTotals.entries()]
 		.map(([currency, amount]) => ({ currency, amount: round2(amount) }))
 		.sort((a, b) => b.amount - a.amount);
+
+	const sortedCategories = [...categoryTotals.entries()]
+		.map(([category, amountThb]) => ({
+			category,
+			amountThb: round2(amountThb),
+		}))
+		.sort((a, b) => b.amountThb - a.amountThb);
+
+	const topCategories =
+		sortedCategories.length <= 5
+			? sortedCategories
+			: [
+					...sortedCategories.slice(0, 5),
+					{
+						category: "Other",
+						amountThb: round2(
+							sortedCategories
+								.slice(5)
+								.reduce((sum, c) => sum + c.amountThb, 0),
+						),
+					},
+				];
 
 	if (missingRateCount > 0) {
 		warnings.push(
@@ -108,9 +142,12 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 		avgPerDayThb,
 		expenseCount: trip.expenses.length,
 		byCurrency,
-		topCategories: [],
-		categoryCount: { used: 0, total: settings.categories.length },
-		tagCount: { used: 0, total: settings.tags.length },
+		topCategories,
+		categoryCount: {
+			used: usedCategories.size,
+			total: settings.categories.length,
+		},
+		tagCount: { used: usedTags.size, total: settings.tags.length },
 		ownerBalances: [],
 		accountCount: trip.accounts.length,
 		warnings,

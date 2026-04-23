@@ -363,3 +363,192 @@ describe("getTripStatus — spend", () => {
 		expect(s.byCurrency).toEqual([{ currency: "JPY", amount: 1000 }]);
 	});
 });
+
+describe("getTripStatus — categories and tags", () => {
+	test("top categories sorted desc by THB amount", () => {
+		const trip = makeTrip({
+			settings: {
+				...makeTrip().settings,
+				categories: ["Food", "Transport", "Lodging"],
+			},
+			expenses: [
+				{
+					id: "1",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 500,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+				{
+					id: "2",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Transport",
+					amount: 800,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+				{
+					id: "3",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Lodging",
+					amount: 200,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.topCategories).toEqual([
+			{ category: "Transport", amountThb: 800 },
+			{ category: "Food", amountThb: 500 },
+			{ category: "Lodging", amountThb: 200 },
+		]);
+	});
+
+	test("collapses overflow into Other row", () => {
+		const expenses = ["A", "B", "C", "D", "E", "F", "G"].map((cat, i) => ({
+			id: `${i}`,
+			accountId: "a",
+			date: "2026-04-16",
+			payee: "",
+			category: cat,
+			amount: 100 - i, // A=100, B=99, ... G=94
+			currency: "THB" as const,
+			description: "",
+			tags: [] as string[],
+		}));
+		const s = getTripStatus(makeTrip({ expenses }), "2026-04-20");
+		expect(s.topCategories).toHaveLength(6); // top 5 + Other
+		expect(s.topCategories.at(-1)).toEqual({
+			category: "Other",
+			amountThb: 94 + 95, // F + G
+		});
+	});
+
+	test("no Other row when five or fewer categories", () => {
+		const expenses = ["A", "B", "C"].map((cat, i) => ({
+			id: `${i}`,
+			accountId: "a",
+			date: "2026-04-16",
+			payee: "",
+			category: cat,
+			amount: 100,
+			currency: "THB" as const,
+			description: "",
+			tags: [] as string[],
+		}));
+		const s = getTripStatus(makeTrip({ expenses }), "2026-04-20");
+		expect(s.topCategories.map((c) => c.category)).not.toContain("Other");
+	});
+
+	test("topCategories skips expenses with missing rate", () => {
+		const trip = makeTrip({
+			expenses: [
+				{
+					id: "1",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 500,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+				{
+					id: "2",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Mystery",
+					amount: 9999,
+					currency: "JPY",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.topCategories).toEqual([{ category: "Food", amountThb: 500 }]);
+	});
+
+	test("categoryCount tracks used vs total", () => {
+		const trip = makeTrip({
+			settings: {
+				...makeTrip().settings,
+				categories: ["Food", "Transport", "Lodging"],
+			},
+			expenses: [
+				{
+					id: "1",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 100,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+				{
+					id: "2",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 200,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.categoryCount).toEqual({ used: 1, total: 3 });
+	});
+
+	test("tagCount tracks distinct tags on expenses", () => {
+		const trip = makeTrip({
+			settings: {
+				...makeTrip().settings,
+				tags: ["biz", "fun", "family"],
+			},
+			expenses: [
+				{
+					id: "1",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 100,
+					currency: "THB",
+					description: "",
+					tags: ["biz", "fun"],
+				},
+				{
+					id: "2",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 200,
+					currency: "THB",
+					description: "",
+					tags: ["fun"],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.tagCount).toEqual({ used: 2, total: 3 });
+	});
+});
