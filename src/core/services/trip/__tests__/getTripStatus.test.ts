@@ -745,4 +745,65 @@ describe("getTripStatus — owner balances", () => {
 		// share still computed; paid is 0
 		expect(s.ownerBalances[0]?.balanceThb).toBe(-1000);
 	});
+
+	test("no accounts + owners emits no-accounts warning", () => {
+		const trip = makeTrip({
+			owners: [
+				{ id: "alice", name: "Alice" },
+				{ id: "bob", name: "Bob" },
+			],
+			accounts: [],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "x",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 500,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.warnings).toContain(
+			"No accounts configured — per-owner balances unavailable",
+		);
+	});
+
+	test("no accounts + no owners skips the no-accounts warning", () => {
+		const s = getTripStatus(
+			makeTrip({ accounts: [], owners: [] }),
+			"2026-04-20",
+		);
+		expect(s.warnings.some((w) => w.startsWith("No accounts configured"))).toBe(
+			false,
+		);
+	});
+
+	test("trip with expenses but no owners does not divide by zero", () => {
+		const trip = makeTrip({
+			owners: [],
+			accounts: [],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "x",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 1000,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.ownerBalances).toEqual([]);
+		expect(Number.isFinite(s.totalSpendThb)).toBe(true);
+		expect(s.totalSpendThb).toBe(1000);
+	});
 });

@@ -108,12 +108,14 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 				}
 			}
 
-			for (const { ownerId, amount } of calculateSplits(
-				thb,
-				expense.owners,
-				trip.owners,
-			)) {
-				share.set(ownerId, (share.get(ownerId) ?? 0) + amount);
+			if (trip.owners.length > 0) {
+				for (const { ownerId, amount } of calculateSplits(
+					thb,
+					expense.owners,
+					trip.owners,
+				)) {
+					share.set(ownerId, (share.get(ownerId) ?? 0) + amount);
+				}
 			}
 		}
 	}
@@ -162,6 +164,10 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 
 	for (const name of orphanAccounts) {
 		warnings.push(`Account '${name}' has no owners — expenses not attributed`);
+	}
+
+	if (trip.accounts.length === 0 && trip.owners.length > 0) {
+		warnings.push("No accounts configured — per-owner balances unavailable");
 	}
 
 	return {
