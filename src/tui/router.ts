@@ -44,11 +44,6 @@ export const routes: Record<RoutePath, RouteConfig> = {
 		title: "Expense",
 		defaultFocus: "main",
 	},
-	"/trips/export": {
-		component: ExportScreen as unknown as ComponentType,
-		title: "Export CSV",
-		defaultFocus: "main",
-	},
 	"/trips/settings": {
 		component: TripSettings as unknown as ComponentType,
 		title: (props) => (props["tripName"] as string) ?? "Settings",
@@ -72,6 +67,11 @@ export const routes: Record<RoutePath, RouteConfig> = {
 	"/trips/settings/currencies": {
 		component: TripSettingsCurrencies as unknown as ComponentType,
 		title: (props) => (props["tripName"] as string) ?? "Currencies",
+		defaultFocus: "menu",
+	},
+	"/trips/settings/export": {
+		component: ExportScreen as unknown as ComponentType,
+		title: (props) => (props["tripName"] as string) ?? "Export CSV",
 		defaultFocus: "menu",
 	},
 };

@@ -20,7 +20,6 @@ export function TripMenu(): JSX.Element {
 				{ label: "Owners", value: "owners", key: "o" },
 				{ label: "Accounts", value: "accounts", key: "a" },
 				{ label: "Expenses", value: "expenses", key: "e" },
-				{ label: "Export CSV", value: "export", key: "x" },
 				{ label: "Settings", value: "settings", key: "s" },
 			],
 			(value) => {
@@ -30,8 +29,6 @@ export function TripMenu(): JSX.Element {
 					goTo("/trips/accounts", { props: { tripDirPath } });
 				} else if (value === "expenses") {
 					goTo("/trips/expenses", { props: { tripDirPath } });
-				} else if (value === "export") {
-					goTo("/trips/export", { props: { tripDirPath } });
 				} else if (value === "settings") {
 					goTo("/trips/settings", { props: { tripDirPath, tripName } });
 				}

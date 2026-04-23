@@ -27,6 +27,7 @@ export function TripSettings(): JSX.Element {
 				{ label: "Categories", value: "categories", key: "g" },
 				{ label: "Tags", value: "tags", key: "t" },
 				{ label: "Currencies", value: "currencies", key: "r" },
+				{ label: "Export CSV", value: "export", key: "x" },
 			],
 			(value) => {
 				if (value === "countries") {
@@ -43,6 +44,10 @@ export function TripSettings(): JSX.Element {
 					});
 				} else if (value === "currencies") {
 					goTo("/trips/settings/currencies", {
+						props: { tripDirPath, tripName },
+					});
+				} else if (value === "export") {
+					goTo("/trips/settings/export", {
 						props: { tripDirPath, tripName },
 					});
 				}

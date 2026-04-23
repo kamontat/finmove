@@ -23,7 +23,7 @@ function resolveInitialRoute(args: AppArgs): {
 				owners: "/trips/owners",
 				accounts: "/trips/accounts",
 				expenses: "/trips/expenses",
-				export: "/trips/export",
+				export: "/trips/settings/export",
 			};
 			const path = pageMap[args.page];
 			if (path) return { path, props };
@@ -70,7 +70,6 @@ function Router(): JSX.Element {
 		else if (path === "/trips/expenses") breadcrumbs.push("Expenses");
 		else if (path === "/trips/expenses/form")
 			breadcrumbs.push("Expenses", expenseFormLabel(currentRoute.props));
-		else if (path === "/trips/export") breadcrumbs.push("Export");
 	}
 
 	if (titleSuffix) {

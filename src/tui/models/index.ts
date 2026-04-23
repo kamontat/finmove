@@ -9,12 +9,12 @@ export type RoutePath =
 	| "/trips/accounts"
 	| "/trips/expenses"
 	| "/trips/expenses/form"
-	| "/trips/export"
 	| "/trips/settings"
 	| "/trips/settings/countries"
 	| "/trips/settings/categories"
 	| "/trips/settings/tags"
-	| "/trips/settings/currencies";
+	| "/trips/settings/currencies"
+	| "/trips/settings/export";
 
 export interface RouteConfig {
 	component: ComponentType;
