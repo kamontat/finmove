@@ -19,6 +19,15 @@ function toSlug(name: string): string {
 		.replace(/^-|-$/g, "");
 }
 
+function uniqueSlug(name: string, takenIds: Iterable<string>): string {
+	const taken = new Set(takenIds);
+	const base = toSlug(name);
+	if (!taken.has(base)) return base;
+	let i = 2;
+	while (taken.has(`${base}-${i}`)) i++;
+	return `${base}-${i}`;
+}
+
 const ADD_FIELDS: FormFieldConfig[] = [
 	{
 		key: "name",
@@ -97,7 +106,13 @@ export function OwnerList(): JSX.Element {
 				onSubmit={(values) => {
 					const name = values["name"] ?? "";
 					if (trip) {
-						addOwner(trip, { id: toSlug(name), name });
+						addOwner(trip, {
+							id: uniqueSlug(
+								name,
+								trip.owners.map((o) => o.id),
+							),
+							name,
+						});
 						reloadTrip();
 					}
 					setMode("list");
