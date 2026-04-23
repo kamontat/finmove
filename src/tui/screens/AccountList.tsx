@@ -30,6 +30,15 @@ function toSlug(name: string): string {
 		.replace(/^-|-$/g, "");
 }
 
+function uniqueSlug(name: string, takenIds: Iterable<string>): string {
+	const taken = new Set(takenIds);
+	const base = toSlug(name);
+	if (!taken.has(base)) return base;
+	let i = 2;
+	while (taken.has(`${base}-${i}`)) i++;
+	return `${base}-${i}`;
+}
+
 const ADD_FIELDS: FormFieldConfig[] = [
 	{
 		key: "name",
@@ -131,7 +140,10 @@ export function AccountList(): JSX.Element {
 					const owners = ownersStr.split(",").map((s) => s.trim());
 					if (trip) {
 						addAccount(trip, {
-							id: toSlug(name),
+							id: uniqueSlug(
+								name,
+								trip.accounts.map((a) => a.id),
+							),
 							name,
 							type: (values["type"] ?? "Credit") as AccountType,
 							owners,
