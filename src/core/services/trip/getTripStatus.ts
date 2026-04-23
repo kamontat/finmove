@@ -74,7 +74,10 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 	const usedTags = new Set<string>();
 	const paid = new Map<string, number>();
 	const share = new Map<string, number>();
-	const orphanAccounts = new Set<string>();
+	// Key orphan accounts by id so two accounts sharing a name stay distinct.
+	const orphanAccounts = new Map<string, string>();
+	const knownOwnerIds = new Set(trip.owners.map((o) => o.id));
+	const unknownOwnerIds = new Set<string>();
 
 	for (const expense of trip.expenses) {
 		currencyTotals.set(
@@ -99,11 +102,15 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 			const account = trip.accounts.find((a) => a.id === expense.accountId);
 			if (account) {
 				if (account.owners.length === 0) {
-					orphanAccounts.add(account.name);
+					orphanAccounts.set(account.id, account.name);
 				} else {
 					const paidShare = thb / account.owners.length;
 					for (const ownerId of account.owners) {
-						paid.set(ownerId, (paid.get(ownerId) ?? 0) + paidShare);
+						if (knownOwnerIds.has(ownerId)) {
+							paid.set(ownerId, (paid.get(ownerId) ?? 0) + paidShare);
+						} else {
+							unknownOwnerIds.add(ownerId);
+						}
 					}
 				}
 			}
@@ -114,7 +121,11 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 					expense.owners,
 					trip.owners,
 				)) {
-					share.set(ownerId, (share.get(ownerId) ?? 0) + amount);
+					if (knownOwnerIds.has(ownerId)) {
+						share.set(ownerId, (share.get(ownerId) ?? 0) + amount);
+					} else {
+						unknownOwnerIds.add(ownerId);
+					}
 				}
 			}
 		}
@@ -162,12 +173,19 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 		balanceThb: round2((paid.get(o.id) ?? 0) - (share.get(o.id) ?? 0)),
 	}));
 
-	for (const name of orphanAccounts) {
+	for (const name of orphanAccounts.values()) {
 		warnings.push(`Account '${name}' has no owners — expenses not attributed`);
 	}
 
 	if (trip.accounts.length === 0 && trip.owners.length > 0) {
 		warnings.push("No accounts configured — per-owner balances unavailable");
+	}
+
+	if (unknownOwnerIds.size > 0) {
+		const ids = [...unknownOwnerIds].sort().join(", ");
+		warnings.push(
+			`Unknown owner id${unknownOwnerIds.size === 1 ? "" : "s"}: ${ids} — excluded from balance calculations`,
+		);
 	}
 
 	return {

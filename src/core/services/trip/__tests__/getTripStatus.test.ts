@@ -806,4 +806,165 @@ describe("getTripStatus — owner balances", () => {
 		expect(Number.isFinite(s.totalSpendThb)).toBe(true);
 		expect(s.totalSpendThb).toBe(1000);
 	});
+
+	test("unknown owner id in expense.owners emits warning and is dropped from share", () => {
+		const trip = makeTrip({
+			owners: [{ id: "alice", name: "Alice" }],
+			accounts: [
+				{
+					id: "acc1",
+					name: "Alice's card",
+					type: AccountType.Credit,
+					owners: ["alice"],
+				},
+			],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "acc1",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 1000,
+					currency: "THB",
+					description: "",
+					tags: [],
+					owners: ["alice", "ghost"],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.warnings).toContain(
+			"Unknown owner id: ghost — excluded from balance calculations",
+		);
+		// Alice's share = equal split across 2 listed owners = 500
+		// Alice's paid = 1000 (single-owner account)
+		// Balance = 1000 - 500 = 500
+		expect(s.ownerBalances[0]?.balanceThb).toBe(500);
+	});
+
+	test("unknown owner id in account.owners emits warning", () => {
+		const trip = makeTrip({
+			owners: [{ id: "alice", name: "Alice" }],
+			accounts: [
+				{
+					id: "acc1",
+					name: "Shared",
+					type: AccountType.Credit,
+					owners: ["alice", "ghost"],
+				},
+			],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "acc1",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 1000,
+					currency: "THB",
+					description: "",
+					tags: [],
+					owners: ["alice"],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.warnings).toContain(
+			"Unknown owner id: ghost — excluded from balance calculations",
+		);
+	});
+
+	test("collapses multiple unknown owner ids into one sorted warning", () => {
+		const trip = makeTrip({
+			owners: [{ id: "alice", name: "Alice" }],
+			accounts: [
+				{
+					id: "acc1",
+					name: "X",
+					type: AccountType.Credit,
+					owners: ["alice", "zombie"],
+				},
+			],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "acc1",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 1000,
+					currency: "THB",
+					description: "",
+					tags: [],
+					owners: ["alice", "ghost", "phantom"],
+				},
+				{
+					id: "e2",
+					accountId: "acc1",
+					date: "2026-04-17",
+					payee: "",
+					category: "Food",
+					amount: 500,
+					currency: "THB",
+					description: "",
+					tags: [],
+					owners: ["ghost"], // duplicate reference
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.warnings).toContain(
+			"Unknown owner ids: ghost, phantom, zombie — excluded from balance calculations",
+		);
+	});
+
+	test("two orphan accounts sharing a name emit two warnings", () => {
+		const trip = makeTrip({
+			owners: [{ id: "alice", name: "Alice" }],
+			accounts: [
+				{
+					id: "a1",
+					name: "Cash",
+					type: AccountType.Credit,
+					owners: [],
+				},
+				{
+					id: "a2",
+					name: "Cash",
+					type: AccountType.Debit,
+					owners: [],
+				},
+			],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "a1",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 100,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+				{
+					id: "e2",
+					accountId: "a2",
+					date: "2026-04-17",
+					payee: "",
+					category: "Food",
+					amount: 200,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		const orphanWarnings = s.warnings.filter((w) =>
+			w.startsWith("Account 'Cash'"),
+		);
+		expect(orphanWarnings).toHaveLength(2);
+	});
 });
