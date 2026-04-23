@@ -90,3 +90,276 @@ describe("getTripStatus — timeline", () => {
 		expect(s.countries).toEqual(["Japan", "Korea"]);
 	});
 });
+
+describe("getTripStatus — spend", () => {
+	test("sums THB expenses for total", () => {
+		const s = getTripStatus(
+			makeTrip({
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 500,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e2",
+						accountId: "a",
+						date: "2026-04-17",
+						payee: "Y",
+						category: "Food",
+						amount: 750,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.totalSpendThb).toBe(1250);
+		expect(s.expenseCount).toBe(2);
+	});
+
+	test("converts non-THB using expense exchangeRate", () => {
+		const s = getTripStatus(
+			makeTrip({
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 1000,
+						currency: "JPY",
+						exchangeRate: 0.23,
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.totalSpendThb).toBe(230);
+	});
+
+	test("falls back to trip-level exchange rate", () => {
+		const trip = makeTrip({
+			settings: {
+				...makeTrip().settings,
+				currencies: { JPY: { exchangeRate: 0.25 } },
+			},
+			expenses: [
+				{
+					id: "e1",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "X",
+					category: "Food",
+					amount: 1000,
+					currency: "JPY",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.totalSpendThb).toBe(250);
+	});
+
+	test("excludes expenses with missing rate and emits warning", () => {
+		const s = getTripStatus(
+			makeTrip({
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 500,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e2",
+						accountId: "a",
+						date: "2026-04-17",
+						payee: "Y",
+						category: "Food",
+						amount: 1000,
+						currency: "JPY",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.totalSpendThb).toBe(500);
+		expect(s.expenseCount).toBe(2);
+		expect(s.warnings).toContain(
+			"1 expense missing THB rate (excluded from totals)",
+		);
+	});
+
+	test("pluralizes missing-rate warning", () => {
+		const s = getTripStatus(
+			makeTrip({
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 100,
+						currency: "JPY",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e2",
+						accountId: "a",
+						date: "2026-04-17",
+						payee: "Y",
+						category: "Food",
+						amount: 200,
+						currency: "JPY",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.warnings).toContain(
+			"2 expenses missing THB rate (excluded from totals)",
+		);
+	});
+
+	test("computes avgPerDayThb on elapsed days, not total", () => {
+		const s = getTripStatus(
+			makeTrip({
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 900,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-23", // 9 elapsed days
+		);
+		expect(s.avgPerDayThb).toBe(100);
+	});
+
+	test("avgPerDayThb is 0 when upcoming", () => {
+		const s = getTripStatus(
+			makeTrip({
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 500,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-10",
+		);
+		expect(s.avgPerDayThb).toBe(0);
+	});
+
+	test("byCurrency aggregates original amounts, sorted desc", () => {
+		const trip = makeTrip({
+			settings: {
+				...makeTrip().settings,
+				currencies: {
+					JPY: { exchangeRate: 0.25 },
+					KRW: { exchangeRate: 0.027 },
+				},
+			},
+			expenses: [
+				{
+					id: "e1",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "X",
+					category: "Food",
+					amount: 1000,
+					currency: "JPY",
+					description: "",
+					tags: [],
+				},
+				{
+					id: "e2",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "Y",
+					category: "Food",
+					amount: 500,
+					currency: "JPY",
+					description: "",
+					tags: [],
+				},
+				{
+					id: "e3",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "Z",
+					category: "Food",
+					amount: 10000,
+					currency: "KRW",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.byCurrency).toEqual([
+			{ currency: "KRW", amount: 10000 },
+			{ currency: "JPY", amount: 1500 },
+		]);
+	});
+
+	test("byCurrency still includes expenses with missing rate", () => {
+		const s = getTripStatus(
+			makeTrip({
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 1000,
+						currency: "JPY",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.byCurrency).toEqual([{ currency: "JPY", amount: 1000 }]);
+	});
+});
