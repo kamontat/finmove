@@ -1,0 +1,239 @@
+import { Box, Text } from "ink";
+import type { JSX } from "react";
+import type { TripStatus } from "../../../core/services/trip";
+
+interface Props {
+	status: TripStatus;
+}
+
+const PHASE_COLOR: Record<TripStatus["phase"], string> = {
+	upcoming: "blue",
+	ongoing: "green",
+	ended: "gray",
+};
+
+const PHASE_LABEL: Record<TripStatus["phase"], string> = {
+	upcoming: "Upcoming",
+	ongoing: "Ongoing",
+	ended: "Ended",
+};
+
+function formatThb(amount: number): string {
+	return `฿${amount.toLocaleString("en-US", {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	})}`;
+}
+
+function formatOriginal(currency: string, amount: number): string {
+	return `${currency} ${amount.toLocaleString("en-US")}`;
+}
+
+function StatusHeader({ status }: Props): JSX.Element {
+	return (
+		<Box>
+			<Text bold color={PHASE_COLOR[status.phase]}>
+				[{PHASE_LABEL[status.phase]}]
+			</Text>
+			<Text>
+				{"  "}
+				{status.startDate} — {status.endDate}
+			</Text>
+			{status.countries.length > 0 && (
+				<Text dimColor>{`  |  ${status.countries.join(", ")}`}</Text>
+			)}
+		</Box>
+	);
+}
+
+function ProgressBar({ status }: Props): JSX.Element {
+	const width = 20;
+	const filled = Math.max(
+		0,
+		Math.min(
+			width,
+			Math.round((status.elapsedDays / Math.max(status.totalDays, 1)) * width),
+		),
+	);
+	const empty = width - filled;
+	return (
+		<Box>
+			<Text>[</Text>
+			<Text color="green">{"█".repeat(filled)}</Text>
+			<Text dimColor>{"░".repeat(empty)}</Text>
+			<Text>] </Text>
+			<Text>
+				{status.elapsedDays}/{status.totalDays} days ({status.remainingDays}{" "}
+				left)
+			</Text>
+		</Box>
+	);
+}
+
+function SectionHeader({ label }: { label: string }): JSX.Element {
+	return (
+		<Box flexDirection="column">
+			<Text bold color="cyan">
+				{label}
+			</Text>
+			<Text dimColor>{"─".repeat(label.length)}</Text>
+		</Box>
+	);
+}
+
+function SpendBlock({ status }: Props): JSX.Element {
+	return (
+		<Box flexDirection="column" width={38}>
+			<SectionHeader label="Spend" />
+			<Box>
+				<Text dimColor>Total</Text>
+				<Text>{"  "}</Text>
+				<Text bold>{formatThb(status.totalSpendThb)}</Text>
+			</Box>
+			<Box>
+				<Text dimColor>Avg/day</Text>
+				<Text>{"  "}</Text>
+				<Text bold>{formatThb(status.avgPerDayThb)}</Text>
+			</Box>
+			<Box>
+				<Text dimColor>Expenses</Text>
+				<Text>{"  "}</Text>
+				<Text bold>{status.expenseCount}</Text>
+			</Box>
+			{status.byCurrency.length > 0 && (
+				<Box flexDirection="column">
+					<Box>
+						<Text dimColor>By currency</Text>
+						<Text>{"  "}</Text>
+						{status.byCurrency[0] && (
+							<Text>
+								{formatOriginal(
+									status.byCurrency[0].currency,
+									status.byCurrency[0].amount,
+								)}
+							</Text>
+						)}
+					</Box>
+					{status.byCurrency.slice(1).map((c) => (
+						<Box key={c.currency}>
+							<Text>{"             "}</Text>
+							<Text>{formatOriginal(c.currency, c.amount)}</Text>
+						</Box>
+					))}
+				</Box>
+			)}
+		</Box>
+	);
+}
+
+function CategoriesBlock({ status }: Props): JSX.Element {
+	const max = Math.max(1, ...status.topCategories.map((c) => c.amountThb));
+	const barWidth = 8;
+	return (
+		<Box flexDirection="column">
+			<SectionHeader label="Top categories" />
+			{status.topCategories.length === 0 ? (
+				<Text dimColor>—</Text>
+			) : (
+				status.topCategories.map((c) => {
+					const cells = Math.max(1, Math.round((c.amountThb / max) * barWidth));
+					return (
+						<Box key={c.category}>
+							<Text>{c.category.padEnd(12)}</Text>
+							<Text bold>{formatThb(c.amountThb).padStart(10)}</Text>
+							<Text>{"  "}</Text>
+							<Text color="cyan">{"█".repeat(cells)}</Text>
+						</Box>
+					);
+				})
+			)}
+		</Box>
+	);
+}
+
+function formatSigned(amount: number): string {
+	if (amount === 0) return formatThb(0);
+	const sign = amount > 0 ? "+" : "−";
+	return `${sign}${formatThb(Math.abs(amount))}`;
+}
+
+function OwnersBlock({ status }: Props): JSX.Element {
+	return (
+		<Box flexDirection="column" width={38}>
+			<SectionHeader label="Owners" />
+			{status.ownerBalances.map((o) => {
+				const color =
+					o.balanceThb > 0 ? "green" : o.balanceThb < 0 ? "red" : undefined;
+				return (
+					<Box key={o.ownerId}>
+						<Text>{o.name.padEnd(14)}</Text>
+						<Text bold {...(color ? { color } : { dimColor: true })}>
+							{formatSigned(o.balanceThb)}
+						</Text>
+					</Box>
+				);
+			})}
+		</Box>
+	);
+}
+
+function CountsBlock({ status }: Props): JSX.Element {
+	return (
+		<Box flexDirection="column">
+			<SectionHeader label="Counts" />
+			<Box>
+				<Text dimColor>Accounts</Text>
+				<Text>{"    "}</Text>
+				<Text bold>{status.accountCount}</Text>
+			</Box>
+			<Box>
+				<Text dimColor>Categories</Text>
+				<Text>{"  "}</Text>
+				<Text bold>
+					{status.categoryCount.used} used / {status.categoryCount.total} total
+				</Text>
+			</Box>
+			<Box>
+				<Text dimColor>Tags</Text>
+				<Text>{"        "}</Text>
+				<Text bold>
+					{status.tagCount.used} used / {status.tagCount.total} total
+				</Text>
+			</Box>
+		</Box>
+	);
+}
+
+function WarningList({ status }: Props): JSX.Element {
+	return (
+		<Box flexDirection="column">
+			{status.warnings.map((w) => (
+				<Text key={w} color="yellow">
+					⚠ {w}
+				</Text>
+			))}
+		</Box>
+	);
+}
+
+export function TripDashboard({ status }: Props): JSX.Element {
+	const hasOwners = status.ownerBalances.length > 0;
+	return (
+		<Box flexDirection="column" gap={1}>
+			<StatusHeader status={status} />
+			<ProgressBar status={status} />
+
+			<Box flexDirection="row" gap={2}>
+				<SpendBlock status={status} />
+				<CategoriesBlock status={status} />
+			</Box>
+
+			<Box flexDirection="row" gap={2}>
+				{hasOwners && <OwnersBlock status={status} />}
+				<CountsBlock status={status} />
+			</Box>
+
+			{status.warnings.length > 0 && <WarningList status={status} />}
+		</Box>
+	);
+}
