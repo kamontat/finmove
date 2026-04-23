@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { Trip } from "../../../models";
+import { AccountType } from "../../../models";
 import { getTripStatus } from "../getTripStatus";
 
 function makeTrip(overrides: Partial<Trip> = {}): Trip {
@@ -550,5 +551,198 @@ describe("getTripStatus — categories and tags", () => {
 		});
 		const s = getTripStatus(trip, "2026-04-20");
 		expect(s.tagCount).toEqual({ used: 2, total: 3 });
+	});
+});
+
+describe("getTripStatus — owner balances", () => {
+	test("single owner account + equal split", () => {
+		const trip = makeTrip({
+			owners: [
+				{ id: "alice", name: "Alice" },
+				{ id: "bob", name: "Bob" },
+			],
+			accounts: [
+				{
+					id: "acc1",
+					name: "Alice's card",
+					type: AccountType.Credit,
+					owners: ["alice"],
+				},
+			],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "acc1",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 1000,
+					currency: "THB",
+					description: "",
+					tags: [],
+					// no owners → equal split among all
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		const alice = s.ownerBalances.find((o) => o.ownerId === "alice");
+		const bob = s.ownerBalances.find((o) => o.ownerId === "bob");
+		expect(alice?.balanceThb).toBe(500); // paid 1000, share 500
+		expect(bob?.balanceThb).toBe(-500); // paid 0, share 500
+	});
+
+	test("multi-owner account splits paid equally", () => {
+		const trip = makeTrip({
+			owners: [
+				{ id: "alice", name: "Alice" },
+				{ id: "bob", name: "Bob" },
+			],
+			accounts: [
+				{
+					id: "acc1",
+					name: "Shared",
+					type: AccountType.Credit,
+					owners: ["alice", "bob"],
+				},
+			],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "acc1",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 1000,
+					currency: "THB",
+					description: "",
+					tags: [],
+					owners: ["alice"], // full share to alice
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		const alice = s.ownerBalances.find((o) => o.ownerId === "alice");
+		const bob = s.ownerBalances.find((o) => o.ownerId === "bob");
+		expect(alice?.balanceThb).toBe(-500); // paid 500, share 1000
+		expect(bob?.balanceThb).toBe(500); // paid 500, share 0
+	});
+
+	test("balances preserved in owners list order", () => {
+		const trip = makeTrip({
+			owners: [
+				{ id: "carol", name: "Carol" },
+				{ id: "alice", name: "Alice" },
+				{ id: "bob", name: "Bob" },
+			],
+			accounts: [
+				{
+					id: "acc1",
+					name: "X",
+					type: AccountType.Credit,
+					owners: ["carol"],
+				},
+			],
+			expenses: [],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.ownerBalances.map((o) => o.ownerId)).toEqual([
+			"carol",
+			"alice",
+			"bob",
+		]);
+	});
+
+	test("zero-owner account emits warning and excludes expense from paid", () => {
+		const trip = makeTrip({
+			owners: [
+				{ id: "alice", name: "Alice" },
+				{ id: "bob", name: "Bob" },
+			],
+			accounts: [
+				{
+					id: "bad",
+					name: "Orphan",
+					type: AccountType.Credit,
+					owners: [],
+				},
+			],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "bad",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 1000,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.warnings).toContain(
+			"Account 'Orphan' has no owners — expenses not attributed",
+		);
+		// paid = 0 for both; share = 500 each
+		const alice = s.ownerBalances.find((o) => o.ownerId === "alice");
+		expect(alice?.balanceThb).toBe(-500);
+	});
+
+	test("expenses with missing rate are excluded from balance", () => {
+		const trip = makeTrip({
+			owners: [{ id: "alice", name: "Alice" }],
+			accounts: [
+				{
+					id: "acc1",
+					name: "X",
+					type: AccountType.Credit,
+					owners: ["alice"],
+				},
+			],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "acc1",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 1000,
+					currency: "JPY",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.ownerBalances[0]?.balanceThb).toBe(0);
+	});
+
+	test("empty owners list produces no balances", () => {
+		const s = getTripStatus(makeTrip(), "2026-04-20");
+		expect(s.ownerBalances).toEqual([]);
+	});
+
+	test("missing account reference is ignored for paid", () => {
+		const trip = makeTrip({
+			owners: [{ id: "alice", name: "Alice" }],
+			accounts: [],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "ghost",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 1000,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		// share still computed; paid is 0
+		expect(s.ownerBalances[0]?.balanceThb).toBe(-1000);
 	});
 });

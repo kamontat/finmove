@@ -1,6 +1,7 @@
 import type { Expense, Settings, Trip } from "../../models";
 import { convertToTHB } from "../currency";
 import { daysBetween } from "../date";
+import { calculateSplits } from "../expense";
 
 export interface TripStatus {
 	phase: "upcoming" | "ongoing" | "ended";
@@ -71,6 +72,9 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 	const categoryTotals = new Map<string, number>();
 	const usedCategories = new Set<string>();
 	const usedTags = new Set<string>();
+	const paid = new Map<string, number>();
+	const share = new Map<string, number>();
+	const orphanAccounts = new Set<string>();
 
 	for (const expense of trip.expenses) {
 		currencyTotals.set(
@@ -91,6 +95,26 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 				expense.category,
 				(categoryTotals.get(expense.category) ?? 0) + thb,
 			);
+
+			const account = trip.accounts.find((a) => a.id === expense.accountId);
+			if (account) {
+				if (account.owners.length === 0) {
+					orphanAccounts.add(account.name);
+				} else {
+					const paidShare = thb / account.owners.length;
+					for (const ownerId of account.owners) {
+						paid.set(ownerId, (paid.get(ownerId) ?? 0) + paidShare);
+					}
+				}
+			}
+
+			for (const { ownerId, amount } of calculateSplits(
+				thb,
+				expense.owners,
+				trip.owners,
+			)) {
+				share.set(ownerId, (share.get(ownerId) ?? 0) + amount);
+			}
 		}
 	}
 	totalSpendThb = round2(totalSpendThb);
@@ -130,6 +154,16 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 		);
 	}
 
+	const ownerBalances = trip.owners.map((o) => ({
+		ownerId: o.id,
+		name: o.name,
+		balanceThb: round2((paid.get(o.id) ?? 0) - (share.get(o.id) ?? 0)),
+	}));
+
+	for (const name of orphanAccounts) {
+		warnings.push(`Account '${name}' has no owners — expenses not attributed`);
+	}
+
 	return {
 		phase,
 		startDate: settings.startDate,
@@ -148,7 +182,7 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 			total: settings.categories.length,
 		},
 		tagCount: { used: usedTags.size, total: settings.tags.length },
-		ownerBalances: [],
+		ownerBalances,
 		accountCount: trip.accounts.length,
 		warnings,
 	};
