@@ -1,6 +1,9 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
+import { today } from "../../core/services/date";
+import { getTripStatus } from "../../core/services/trip";
+import { TripDashboard } from "../components/organisms/TripDashboard";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
@@ -47,11 +50,5 @@ export function TripMenu(): JSX.Element {
 		return <Text dimColor>Loading...</Text>;
 	}
 
-	const { settings } = trip;
-	return (
-		<Text dimColor>
-			{settings.startDate} — {settings.endDate} |{" "}
-			{settings.countries.join(", ")}
-		</Text>
-	);
+	return <TripDashboard status={getTripStatus(trip, today())} />;
 }
