@@ -141,13 +141,25 @@ export function Form({
 					displayValue = found?.label ?? currentValue;
 				}
 
-				// Placeholder display
-				let placeholder: string | undefined;
-				if (field.type === "text") {
-					placeholder = field.placeholder;
-				}
 				const hasValue = currentValue !== "";
 				const optionalSuffix = !field.required ? " (optional)" : "";
+
+				// Preview shown when the user hasn't touched the field.
+				// Prefer defaultValue (existing data in edit mode) over placeholder
+				// (input hint) so edit forms are distinguishable from add forms.
+				let preview: string | undefined;
+				if (field.defaultValue !== undefined) {
+					if (field.type === "select") {
+						const found = field.options.find(
+							(o) => o.value === field.defaultValue,
+						);
+						preview = found?.label ?? field.defaultValue;
+					} else {
+						preview = field.defaultValue;
+					}
+				} else if (field.type === "text" && field.placeholder !== undefined) {
+					preview = field.placeholder;
+				}
 
 				return (
 					<Box key={field.key} flexDirection="column">
@@ -159,11 +171,9 @@ export function Form({
 									{optionalSuffix}:{" "}
 									{hasValue
 										? displayValue
-										: placeholder !== undefined
-											? `(${placeholder})`
-											: field.defaultValue !== undefined
-												? `(${field.defaultValue})`
-												: ""}
+										: preview !== undefined
+											? `(${preview})`
+											: ""}
 								</Text>
 							) : (
 								<Text dimColor>
@@ -172,11 +182,9 @@ export function Form({
 									{optionalSuffix}:{" "}
 									{hasValue
 										? displayValue
-										: placeholder !== undefined
-											? `(${placeholder})`
-											: field.defaultValue !== undefined
-												? `(${field.defaultValue})`
-												: ""}
+										: preview !== undefined
+											? `(${preview})`
+											: ""}
 								</Text>
 							)}
 						</Text>
@@ -186,7 +194,9 @@ export function Form({
 							<Box marginLeft={4}>
 								{field.type === "text" && (
 									<TextInput
-										{...(placeholder !== undefined ? { placeholder } : {})}
+										{...(field.placeholder !== undefined
+											? { placeholder: field.placeholder }
+											: {})}
 										{...(currentValue !== ""
 											? { defaultValue: currentValue }
 											: field.defaultValue !== undefined
