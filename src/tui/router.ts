@@ -13,6 +13,8 @@ import { CurrencyList } from "./screens/CurrencyList";
 import { ExpenseForm } from "./screens/ExpenseForm";
 import { ExpenseList } from "./screens/ExpenseList";
 import { ExportScreen } from "./screens/Export";
+import { OwnerCreate } from "./screens/OwnerCreate";
+import { OwnerEdit } from "./screens/OwnerEdit";
 import { OwnerList } from "./screens/OwnerList";
 import { TagCreate } from "./screens/TagCreate";
 import { TagEdit } from "./screens/TagEdit";
@@ -36,6 +38,16 @@ export const routes: Record<RoutePath, RouteConfig> = {
 		component: OwnerList as unknown as ComponentType,
 		title: "Owners",
 		defaultFocus: "menu",
+	},
+	"/trips/owners/new": {
+		component: OwnerCreate as unknown as ComponentType,
+		title: "Owner",
+		defaultFocus: "main",
+	},
+	"/trips/owners/edit": {
+		component: OwnerEdit as unknown as ComponentType,
+		title: "Owner",
+		defaultFocus: "main",
 	},
 	"/trips/accounts": {
 		component: AccountList as unknown as ComponentType,

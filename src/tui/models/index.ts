@@ -6,6 +6,8 @@ export type RoutePath =
 	| "/trips"
 	| "/trips/overview"
 	| "/trips/owners"
+	| "/trips/owners/new"
+	| "/trips/owners/edit"
 	| "/trips/accounts"
 	| "/trips/expenses"
 	| "/trips/expenses/form"
