@@ -5,13 +5,15 @@ import { ExpenseForm } from "./screens/ExpenseForm";
 import { ExpenseList } from "./screens/ExpenseList";
 import { ExportScreen } from "./screens/Export";
 import { OwnerList } from "./screens/OwnerList";
+import { TagCreate } from "./screens/TagCreate";
+import { TagEdit } from "./screens/TagEdit";
+import { TagList } from "./screens/TagList";
 import { TripList } from "./screens/TripList";
 import { TripOverview } from "./screens/TripOverview";
 import { TripSettings } from "./screens/TripSettings";
 import { TripSettingsCategories } from "./screens/TripSettingsCategories";
 import { TripSettingsCountries } from "./screens/TripSettingsCountries";
 import { TripSettingsCurrencies } from "./screens/TripSettingsCurrencies";
-import { TripSettingsTags } from "./screens/TripSettingsTags";
 
 export const routes: Record<RoutePath, RouteConfig> = {
 	"/trips": {
@@ -60,9 +62,19 @@ export const routes: Record<RoutePath, RouteConfig> = {
 		defaultFocus: "menu",
 	},
 	"/trips/settings/tags": {
-		component: TripSettingsTags as unknown as ComponentType,
+		component: TagList as unknown as ComponentType,
 		title: (props) => (props["tripName"] as string) ?? "Tags",
 		defaultFocus: "menu",
+	},
+	"/trips/settings/tags/new": {
+		component: TagCreate as unknown as ComponentType,
+		title: (props) => (props["tripName"] as string) ?? "Tag",
+		defaultFocus: "main",
+	},
+	"/trips/settings/tags/edit": {
+		component: TagEdit as unknown as ComponentType,
+		title: (props) => (props["tripName"] as string) ?? "Tag",
+		defaultFocus: "main",
 	},
 	"/trips/settings/currencies": {
 		component: TripSettingsCurrencies as unknown as ComponentType,

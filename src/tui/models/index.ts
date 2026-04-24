@@ -13,6 +13,8 @@ export type RoutePath =
 	| "/trips/settings/countries"
 	| "/trips/settings/categories"
 	| "/trips/settings/tags"
+	| "/trips/settings/tags/new"
+	| "/trips/settings/tags/edit"
 	| "/trips/settings/currencies"
 	| "/trips/settings/export";
 
