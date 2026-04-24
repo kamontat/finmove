@@ -20,6 +20,8 @@ export type RoutePath =
 	| "/trips/settings/tags/new"
 	| "/trips/settings/tags/edit"
 	| "/trips/settings/currencies"
+	| "/trips/settings/currencies/new"
+	| "/trips/settings/currencies/edit"
 	| "/trips/settings/export";
 
 export interface RouteConfig {

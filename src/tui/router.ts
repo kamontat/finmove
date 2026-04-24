@@ -7,6 +7,9 @@ import { CategoryList } from "./screens/CategoryList";
 import { CountryCreate } from "./screens/CountryCreate";
 import { CountryEdit } from "./screens/CountryEdit";
 import { CountryList } from "./screens/CountryList";
+import { CurrencyCreate } from "./screens/CurrencyCreate";
+import { CurrencyEdit } from "./screens/CurrencyEdit";
+import { CurrencyList } from "./screens/CurrencyList";
 import { ExpenseForm } from "./screens/ExpenseForm";
 import { ExpenseList } from "./screens/ExpenseList";
 import { ExportScreen } from "./screens/Export";
@@ -17,7 +20,6 @@ import { TagList } from "./screens/TagList";
 import { TripList } from "./screens/TripList";
 import { TripOverview } from "./screens/TripOverview";
 import { TripSettings } from "./screens/TripSettings";
-import { TripSettingsCurrencies } from "./screens/TripSettingsCurrencies";
 
 export const routes: Record<RoutePath, RouteConfig> = {
 	"/trips": {
@@ -101,9 +103,19 @@ export const routes: Record<RoutePath, RouteConfig> = {
 		defaultFocus: "main",
 	},
 	"/trips/settings/currencies": {
-		component: TripSettingsCurrencies as unknown as ComponentType,
+		component: CurrencyList as unknown as ComponentType,
 		title: (props) => (props["tripName"] as string) ?? "Currencies",
 		defaultFocus: "menu",
+	},
+	"/trips/settings/currencies/new": {
+		component: CurrencyCreate as unknown as ComponentType,
+		title: (props) => (props["tripName"] as string) ?? "Currency",
+		defaultFocus: "main",
+	},
+	"/trips/settings/currencies/edit": {
+		component: CurrencyEdit as unknown as ComponentType,
+		title: (props) => (props["tripName"] as string) ?? "Currency",
+		defaultFocus: "main",
 	},
 	"/trips/settings/export": {
 		component: ExportScreen as unknown as ComponentType,
