@@ -6,7 +6,7 @@ import { ExpenseList } from "./screens/ExpenseList";
 import { ExportScreen } from "./screens/Export";
 import { OwnerList } from "./screens/OwnerList";
 import { TripList } from "./screens/TripList";
-import { TripMenu } from "./screens/TripMenu";
+import { TripOverview } from "./screens/TripOverview";
 import { TripSettings } from "./screens/TripSettings";
 import { TripSettingsCategories } from "./screens/TripSettingsCategories";
 import { TripSettingsCountries } from "./screens/TripSettingsCountries";
@@ -19,9 +19,9 @@ export const routes: Record<RoutePath, RouteConfig> = {
 		title: "Trips",
 		defaultFocus: "main",
 	},
-	"/trips/menu": {
-		component: TripMenu as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Trip Menu",
+	"/trips/overview": {
+		component: TripOverview as unknown as ComponentType,
+		title: (props) => (props["tripName"] as string) ?? "Trip Overview",
 		defaultFocus: "menu",
 	},
 	"/trips/owners": {

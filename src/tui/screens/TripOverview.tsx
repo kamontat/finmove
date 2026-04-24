@@ -8,7 +8,7 @@ import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
 
-export function TripMenu(): JSX.Element {
+export function TripOverview(): JSX.Element {
 	const { trip } = useData();
 	const { goTo } = useNavigation();
 	const { setMenu, setHints } = useLayout();

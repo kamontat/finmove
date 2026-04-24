@@ -4,7 +4,7 @@ export type FocusZone = "main" | "menu" | "input";
 
 export type RoutePath =
 	| "/trips"
-	| "/trips/menu"
+	| "/trips/overview"
 	| "/trips/owners"
 	| "/trips/accounts"
 	| "/trips/expenses"

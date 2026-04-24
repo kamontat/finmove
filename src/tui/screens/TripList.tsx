@@ -207,7 +207,7 @@ export function TripList(): JSX.Element {
 						};
 						const newTrip = createTrip(dataDir, dirName, settings);
 						resetLayout();
-						goTo("/trips/menu", {
+						goTo("/trips/overview", {
 							props: { tripDirPath: newTrip.dirPath, tripName: name, dataDir },
 						});
 					}}
@@ -308,7 +308,7 @@ export function TripList(): JSX.Element {
 			onChange={(value) => {
 				const trip = trips.find((t) => t.dirPath === value);
 				if (trip) {
-					goTo("/trips/menu", {
+					goTo("/trips/overview", {
 						props: {
 							tripDirPath: trip.dirPath,
 							tripName: trip.settings.name,

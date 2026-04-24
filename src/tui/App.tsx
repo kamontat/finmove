@@ -28,7 +28,7 @@ function resolveInitialRoute(args: AppArgs): {
 			const path = pageMap[args.page];
 			if (path) return { path, props };
 		}
-		return { path: "/trips/menu", props };
+		return { path: "/trips/overview", props };
 	}
 	return { path: "/trips", props: { dataDir: args.dataDir } };
 }
@@ -58,17 +58,26 @@ function Router(): JSX.Element {
 	const breadcrumbs: string[] = [];
 	const path = currentRoute.path;
 
-	if (path === "/trips") {
+	const p = path as string;
+	if (p === "/trips") {
 		breadcrumbs.push("Trips");
+	} else if (p === "/trips/new") {
+		breadcrumbs.push("Trips", "New");
+	} else if (p === "/trips/duplicate") {
+		breadcrumbs.push("Trips", "Duplicate");
 	} else {
 		breadcrumbs.push("Trips");
 		if (trip) {
 			breadcrumbs.push(trip.settings.name);
 		}
-		if (path === "/trips/owners") breadcrumbs.push("Owners");
-		else if (path === "/trips/accounts") breadcrumbs.push("Accounts");
-		else if (path === "/trips/expenses") breadcrumbs.push("Expenses");
-		else if (path === "/trips/expenses/form")
+		if (p === "/trips/owners") breadcrumbs.push("Owners");
+		else if (p === "/trips/owners/new") breadcrumbs.push("Owners", "New");
+		else if (p === "/trips/owners/edit") breadcrumbs.push("Owners", "Edit");
+		else if (p === "/trips/accounts") breadcrumbs.push("Accounts");
+		else if (p === "/trips/accounts/new") breadcrumbs.push("Accounts", "New");
+		else if (p === "/trips/accounts/edit") breadcrumbs.push("Accounts", "Edit");
+		else if (p === "/trips/expenses") breadcrumbs.push("Expenses");
+		else if (p === "/trips/expenses/form")
 			breadcrumbs.push("Expenses", expenseFormLabel(currentRoute.props));
 	}
 
