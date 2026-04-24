@@ -1,4 +1,4 @@
-import { Text } from "ink";
+import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
@@ -105,27 +105,32 @@ export function TripList(): JSX.Element {
 			return <Text dimColor>No trips.</Text>;
 		}
 		return (
-			<VerticalSelect
-				options={trips.map((t) => ({
-					label: t.settings.name,
-					value: t.dirPath,
-					detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
-				}))}
-				onChange={(dirPath) => {
-					const trip = trips.find((t) => t.dirPath === dirPath);
-					if (!trip) return;
-					goTo("/trips/duplicate", {
-						props: {
-							dataDir,
-							sourceDirPath: trip.dirPath,
-							sourceName: trip.settings.name,
-							sourceStartDate: trip.settings.startDate,
-						},
-					});
-				}}
-				onCancel={goBack}
-				isActive
-			/>
+			<Box flexDirection="column">
+				<Text bold color="cyan">
+					Select a trip to duplicate:
+				</Text>
+				<VerticalSelect
+					options={trips.map((t) => ({
+						label: t.settings.name,
+						value: t.dirPath,
+						detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
+					}))}
+					onChange={(dirPath) => {
+						const trip = trips.find((t) => t.dirPath === dirPath);
+						if (!trip) return;
+						goTo("/trips/duplicate", {
+							props: {
+								dataDir,
+								sourceDirPath: trip.dirPath,
+								sourceName: trip.settings.name,
+								sourceStartDate: trip.settings.startDate,
+							},
+						});
+					}}
+					onCancel={goBack}
+					isActive
+				/>
+			</Box>
 		);
 	}
 

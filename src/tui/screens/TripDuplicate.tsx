@@ -56,6 +56,9 @@ export function TripDuplicate(): JSX.Element {
 					}
 					setError(null);
 					duplicateTrip(dataDir, sourceDirPath, dirName, name);
+					// Pop the form AND the duplicate-selector entry so the user
+					// lands back on the normal trip list after a successful duplicate.
+					goBack();
 					goBack();
 				}}
 			/>
