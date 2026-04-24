@@ -1,5 +1,7 @@
 import type { ComponentType } from "react";
 import type { RouteConfig, RoutePath } from "./models";
+import { AccountCreate } from "./screens/AccountCreate";
+import { AccountEdit } from "./screens/AccountEdit";
 import { AccountList } from "./screens/AccountList";
 import { CategoryCreate } from "./screens/CategoryCreate";
 import { CategoryEdit } from "./screens/CategoryEdit";
@@ -53,6 +55,16 @@ export const routes: Record<RoutePath, RouteConfig> = {
 		component: AccountList as unknown as ComponentType,
 		title: "Accounts",
 		defaultFocus: "menu",
+	},
+	"/trips/accounts/new": {
+		component: AccountCreate as unknown as ComponentType,
+		title: "Account",
+		defaultFocus: "main",
+	},
+	"/trips/accounts/edit": {
+		component: AccountEdit as unknown as ComponentType,
+		title: "Account",
+		defaultFocus: "main",
 	},
 	"/trips/expenses": {
 		component: ExpenseList as unknown as ComponentType,
