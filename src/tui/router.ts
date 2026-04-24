@@ -1,6 +1,9 @@
 import type { ComponentType } from "react";
 import type { RouteConfig, RoutePath } from "./models";
 import { AccountList } from "./screens/AccountList";
+import { CategoryCreate } from "./screens/CategoryCreate";
+import { CategoryEdit } from "./screens/CategoryEdit";
+import { CategoryList } from "./screens/CategoryList";
 import { CountryCreate } from "./screens/CountryCreate";
 import { CountryEdit } from "./screens/CountryEdit";
 import { CountryList } from "./screens/CountryList";
@@ -14,7 +17,6 @@ import { TagList } from "./screens/TagList";
 import { TripList } from "./screens/TripList";
 import { TripOverview } from "./screens/TripOverview";
 import { TripSettings } from "./screens/TripSettings";
-import { TripSettingsCategories } from "./screens/TripSettingsCategories";
 import { TripSettingsCurrencies } from "./screens/TripSettingsCurrencies";
 
 export const routes: Record<RoutePath, RouteConfig> = {
@@ -69,9 +71,19 @@ export const routes: Record<RoutePath, RouteConfig> = {
 		defaultFocus: "main",
 	},
 	"/trips/settings/categories": {
-		component: TripSettingsCategories as unknown as ComponentType,
+		component: CategoryList as unknown as ComponentType,
 		title: (props) => (props["tripName"] as string) ?? "Categories",
 		defaultFocus: "menu",
+	},
+	"/trips/settings/categories/new": {
+		component: CategoryCreate as unknown as ComponentType,
+		title: (props) => (props["tripName"] as string) ?? "Category",
+		defaultFocus: "main",
+	},
+	"/trips/settings/categories/edit": {
+		component: CategoryEdit as unknown as ComponentType,
+		title: (props) => (props["tripName"] as string) ?? "Category",
+		defaultFocus: "main",
 	},
 	"/trips/settings/tags": {
 		component: TagList as unknown as ComponentType,

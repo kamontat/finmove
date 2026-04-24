@@ -14,6 +14,8 @@ export type RoutePath =
 	| "/trips/settings/countries/new"
 	| "/trips/settings/countries/edit"
 	| "/trips/settings/categories"
+	| "/trips/settings/categories/new"
+	| "/trips/settings/categories/edit"
 	| "/trips/settings/tags"
 	| "/trips/settings/tags/new"
 	| "/trips/settings/tags/edit"
