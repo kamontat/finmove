@@ -21,6 +21,8 @@ import { OwnerList } from "./screens/OwnerList";
 import { TagCreate } from "./screens/TagCreate";
 import { TagEdit } from "./screens/TagEdit";
 import { TagList } from "./screens/TagList";
+import { TripCreate } from "./screens/TripCreate";
+import { TripDuplicate } from "./screens/TripDuplicate";
 import { TripList } from "./screens/TripList";
 import { TripOverview } from "./screens/TripOverview";
 import { TripSettings } from "./screens/TripSettings";
@@ -29,6 +31,16 @@ export const routes: Record<RoutePath, RouteConfig> = {
 	"/trips": {
 		component: TripList as unknown as ComponentType,
 		title: "Trips",
+		defaultFocus: "main",
+	},
+	"/trips/new": {
+		component: TripCreate as unknown as ComponentType,
+		title: "New Trip",
+		defaultFocus: "main",
+	},
+	"/trips/duplicate": {
+		component: TripDuplicate as unknown as ComponentType,
+		title: "Duplicate Trip",
 		defaultFocus: "main",
 	},
 	"/trips/overview": {

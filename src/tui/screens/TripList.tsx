@@ -1,145 +1,50 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
-import { Box, Text } from "ink";
+import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import type { Settings, Trip } from "../../core/models";
-import { addDays, today } from "../../core/services/date";
-import {
-	createTrip,
-	deleteTrip,
-	duplicateTrip,
-	listTrips,
-	toDirName,
-} from "../../core/services/trip";
+import type { Trip } from "../../core/models";
+import { deleteTrip, listTrips } from "../../core/services/trip";
 import { VerticalSelect } from "../components/atoms/VerticalSelect";
-import { Form } from "../components/organisms/Form";
-import type { FormFieldConfig } from "../models";
+import { RemoveSelector } from "../components/molecules/RemoveSelector";
+import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
 
-type Mode =
-	| "list"
-	| "select-for-duplicate"
-	| "select-for-delete"
-	| "create"
-	| "duplicate";
-
-const DEFAULT_SETTINGS: Omit<Settings, "name" | "startDate" | "endDate"> = {
-	countries: [],
-	baseCurrency: "THB",
-	currencies: {},
-	categories: [
-		"Flight",
-		"Hotels",
-		"Transportation",
-		"Shopping",
-		"Eating",
-		"Activities",
-	],
-	tags: [],
-	exportPath: "./expenses.csv",
-};
-
-const CREATE_FIELDS: FormFieldConfig[] = [
-	{
-		key: "name",
-		label: "Trip Name",
-		type: "text",
-		required: true,
-		placeholder: "e.g. Japan Trip",
-	},
-	{
-		key: "startDate",
-		label: "Start Date",
-		type: "date",
-		required: true,
-		defaultValue: today(),
-	},
-	{
-		key: "endDate",
-		label: "End Date",
-		type: "date",
-		required: true,
-		defaultValue: addDays(today(), 1),
-	},
-];
-
-const DUPLICATE_FIELDS: FormFieldConfig[] = [
-	{
-		key: "newName",
-		label: "New Trip Name",
-		type: "text",
-		required: true,
-		placeholder: "e.g. Japan Trip v2",
-	},
-];
+type SelectMode = "delete" | "duplicate";
 
 export function TripList(): JSX.Element {
-	const { goTo, currentRoute } = useNavigation();
-	const { focus, setFocus } = useFocus();
-	const { setMenu, setHints, setBorderColor, setTitleSuffix, resetLayout } =
-		useLayout();
+	const { goTo, goBack, currentRoute } = useNavigation();
+	const { focus } = useFocus();
+	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
 
 	const dataDir =
 		(currentRoute.props["dataDir"] as string | undefined) ?? "./data";
+	const selectMode = currentRoute.props["selectMode"] as SelectMode | undefined;
 
-	const [mode, setMode] = useState<Mode>("list");
-	const [targetTrip, setTargetTrip] = useState<Trip | null>(null);
 	const [trips, setTrips] = useState<Trip[]>(() => listTrips(dataDir));
-	const [error, setError] = useState<string | null>(null);
 
-	const refreshTrips = () => {
-		setTrips(listTrips(dataDir));
-	};
-
-	// Register menu in list mode
 	useEffect(() => {
-		setError(null);
-		if (mode !== "list") {
+		setTitleSuffix(null);
+
+		if (selectMode === "delete") {
+			setBorderColor("red");
 			setMenu([], () => {});
-			if (mode === "create") {
-				setTitleSuffix("New");
-				setBorderColor(null);
-				setHints([
-					{ key: "↑↓", label: "Navigate" },
-					{ key: "Enter", label: "Edit field" },
-					{ key: "q/esc", label: "Back" },
-					{ key: "e", label: "Exit" },
-				]);
-			} else if (mode === "select-for-delete") {
-				setBorderColor("red");
-				setHints([
-					{ key: "↑↓", label: "Navigate" },
-					{ key: "Enter", label: "Delete selected" },
-					{ key: "q/esc", label: "Back to list" },
-					{ key: "e", label: "Exit" },
-				]);
-			} else if (mode === "select-for-duplicate") {
-				setBorderColor(null);
-				setHints([
-					{ key: "↑↓", label: "Navigate" },
-					{ key: "Enter", label: "Select trip" },
-					{ key: "q/esc", label: "Back to list" },
-					{ key: "e", label: "Exit" },
-				]);
-			} else if (mode === "duplicate") {
-				setTitleSuffix("Duplicate");
-				setBorderColor(null);
-				setHints([
-					{ key: "↑↓", label: "Navigate" },
-					{ key: "Enter", label: "Edit field" },
-					{ key: "q/esc", label: "Back" },
-					{ key: "e", label: "Exit" },
-				]);
-			} else {
-				setBorderColor(null);
-			}
+			setHints(SELECT_REMOVE_HINTS);
+			return;
+		}
+		if (selectMode === "duplicate") {
+			setBorderColor(null);
+			setMenu([], () => {});
+			setHints([
+				{ key: "↑↓", label: "Navigate" },
+				{ key: "Enter", label: "Select trip" },
+				{ key: "q/esc", label: "Back to list" },
+				{ key: "e", label: "Exit" },
+			]);
 			return;
 		}
 
-		setTitleSuffix(null);
+		setBorderColor(null);
 		setMenu(
 			[
 				{ label: "Create", value: "create", key: "c" },
@@ -148,152 +53,82 @@ export function TripList(): JSX.Element {
 			],
 			(value) => {
 				if (value === "create") {
-					setMode("create");
-					setFocus("main");
+					goTo("/trips/new", { props: { dataDir } });
 				} else if (value === "duplicate" && trips.length > 0) {
-					setMode("select-for-duplicate");
-					setFocus("input");
+					goTo("/trips", {
+						props: { dataDir, selectMode: "duplicate" },
+					});
 				} else if (value === "delete" && trips.length > 0) {
-					setMode("select-for-delete");
-					setBorderColor("red");
-					setFocus("input");
+					goTo("/trips", { props: { dataDir, selectMode: "delete" } });
 				}
 			},
 		);
-		setHints([
-			{ key: "tab", label: "Switch focus" },
-			{ key: "←→", label: "Navigate menu" },
-			{ key: "Enter", label: "Confirm" },
-			{ key: "q/esc", label: "Quit" },
-			{ key: "e", label: "Exit" },
-		]);
+		setHints(LIST_HINTS);
 	}, [
-		mode,
+		selectMode,
+		dataDir,
 		trips.length,
 		setMenu,
 		setHints,
-		setFocus,
 		setBorderColor,
 		setTitleSuffix,
+		goTo,
 	]);
 
-	// --- Create flow ---
-	if (mode === "create") {
+	if (selectMode === "delete") {
+		if (trips.length === 0) {
+			return <Text dimColor>No trips.</Text>;
+		}
 		return (
-			<Box flexDirection="column">
-				{error && (
-					<Text color="red" bold>
-						{error}
-					</Text>
-				)}
-				<Form
-					fields={CREATE_FIELDS}
-					onSubmit={(values) => {
-						const name = values["name"] ?? "";
-						const startDate = values["startDate"] ?? today();
-						const endDate = values["endDate"] ?? addDays(today(), 1);
-						const dirName = toDirName(name, startDate);
-						const tripPath = join(dataDir, dirName);
-						if (existsSync(tripPath)) {
-							setError(`Trip "${name}" already exists (${dirName})`);
-							return;
-						}
-						setError(null);
-						const settings: Settings = {
-							...DEFAULT_SETTINGS,
-							name,
-							startDate,
-							endDate,
-						};
-						const newTrip = createTrip(dataDir, dirName, settings);
-						resetLayout();
-						goTo("/trips/overview", {
-							props: { tripDirPath: newTrip.dirPath, tripName: name, dataDir },
-						});
-					}}
-				/>
-			</Box>
+			<RemoveSelector
+				header="Select a trip to delete:"
+				options={trips.map((t) => ({
+					label: t.settings.name,
+					value: t.dirPath,
+					detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
+				}))}
+				onConfirm={(dirPath) => {
+					deleteTrip(dirPath);
+					const next = listTrips(dataDir);
+					setTrips(next);
+					if (next.length === 0) {
+						goBack();
+					}
+				}}
+				onCancel={goBack}
+			/>
 		);
 	}
 
-	// --- Select trip for duplicate/delete ---
-	if (mode === "select-for-duplicate" || mode === "select-for-delete") {
-		const isDelete = mode === "select-for-delete";
+	if (selectMode === "duplicate") {
+		if (trips.length === 0) {
+			return <Text dimColor>No trips.</Text>;
+		}
 		return (
-			<Box flexDirection="column">
-				<Text bold color={isDelete ? "red" : "cyan"}>
-					{isDelete
-						? "Select a trip to delete:"
-						: "Select a trip to duplicate:"}
-				</Text>
-				<VerticalSelect
-					options={trips.map((t) => ({
-						label: t.settings.name,
-						value: t.dirPath,
-						detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
-					}))}
-					onChange={(value) => {
-						const trip = trips.find((t) => t.dirPath === value);
-						if (!trip) return;
-						setTargetTrip(trip);
-						if (isDelete) {
-							deleteTrip(value);
-							const updated = listTrips(dataDir);
-							setTrips(updated);
-							if (updated.length === 0) {
-								setMode("list");
-								setBorderColor(null);
-								setFocus("menu");
-							}
-						} else {
-							setMode("duplicate");
-							setFocus("main");
-						}
-					}}
-					onCancel={() => {
-						setMode("list");
-						setBorderColor(null);
-						setFocus("menu");
-					}}
-					{...(isDelete ? { color: "red" } : {})}
-					isActive
-				/>
-			</Box>
+			<VerticalSelect
+				options={trips.map((t) => ({
+					label: t.settings.name,
+					value: t.dirPath,
+					detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
+				}))}
+				onChange={(dirPath) => {
+					const trip = trips.find((t) => t.dirPath === dirPath);
+					if (!trip) return;
+					goTo("/trips/duplicate", {
+						props: {
+							dataDir,
+							sourceDirPath: trip.dirPath,
+							sourceName: trip.settings.name,
+							sourceStartDate: trip.settings.startDate,
+						},
+					});
+				}}
+				onCancel={goBack}
+				isActive
+			/>
 		);
 	}
 
-	// --- Duplicate: ask for name ---
-	if (mode === "duplicate" && targetTrip) {
-		return (
-			<Box flexDirection="column">
-				{error && (
-					<Text color="red" bold>
-						{error}
-					</Text>
-				)}
-				<Form
-					fields={DUPLICATE_FIELDS}
-					onSubmit={(values) => {
-						const name = values["newName"] ?? "";
-						const dirName = toDirName(name, targetTrip.settings.startDate);
-						const tripPath = join(dataDir, dirName);
-						if (existsSync(tripPath)) {
-							setError(`Trip "${name}" already exists (${dirName})`);
-							return;
-						}
-						setError(null);
-						duplicateTrip(dataDir, targetTrip.dirPath, dirName, name);
-						refreshTrips();
-						setTargetTrip(null);
-						setMode("list");
-						setFocus("menu");
-					}}
-				/>
-			</Box>
-		);
-	}
-
-	// --- Default: trip list ---
 	if (trips.length === 0) {
 		return <Text dimColor>No trips yet. Press [c] to create one.</Text>;
 	}
