@@ -7,7 +7,7 @@ interface RemoveSelectorProps {
 	header: string;
 	options: VerticalOption[];
 	onConfirm: (value: string) => void;
-	onCancel: () => void;
+	onCancel?: () => void;
 }
 
 export function RemoveSelector({
@@ -24,7 +24,7 @@ export function RemoveSelector({
 			<ListSelect
 				options={options}
 				onChange={onConfirm}
-				onCancel={onCancel}
+				{...(onCancel ? { onCancel } : {})}
 				color="red"
 				isActive
 			/>
