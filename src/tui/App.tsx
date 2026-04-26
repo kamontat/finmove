@@ -7,6 +7,7 @@ import type { RouteEntry } from "./models";
 import { routes } from "./router";
 import { DataProvider, useData } from "./states/data";
 import { FocusProvider, useFocus } from "./states/focus";
+import { FormBufferProvider } from "./states/formBuffer";
 import { HelpProvider } from "./states/help";
 import { LayoutProvider, useLayout } from "./states/layout";
 import { NavigationProvider, useNavigation } from "./states/navigation";
@@ -137,9 +138,11 @@ export function App({ args }: AppProps): JSX.Element {
 			<FocusProvider>
 				<HelpProvider>
 					<LayoutProvider>
-						<NavigationProvider initial={initial}>
-							<Router />
-						</NavigationProvider>
+						<FormBufferProvider>
+							<NavigationProvider initial={initial}>
+								<Router />
+							</NavigationProvider>
+						</FormBufferProvider>
 					</LayoutProvider>
 				</HelpProvider>
 			</FocusProvider>
