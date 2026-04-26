@@ -89,7 +89,6 @@ export function CurrencyList(): JSX.Element {
 						goBack();
 					}
 				}}
-				onCancel={goBack}
 			/>
 		);
 	}
