@@ -10,7 +10,7 @@ import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
 import type { FormFieldConfig } from "../models";
 import { useLayout } from "../states/layout";
-import { useNavigation } from "../states/navigation";
+import { useNavigation, useRouteProps } from "../states/navigation";
 
 const DEFAULT_SETTINGS: Omit<Settings, "name" | "startDate" | "endDate"> = {
 	countries: [],
@@ -53,11 +53,10 @@ const FIELDS: FormFieldConfig[] = [
 ];
 
 export function TripCreate(): JSX.Element {
-	const { goTo, currentRoute } = useNavigation();
+	const { goTo } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
 
-	const dataDir =
-		(currentRoute.props["dataDir"] as string | undefined) ?? "./data";
+	const { dataDir = "./data" } = useRouteProps("/trips/new");
 
 	const [error, setError] = useState<string | null>(null);
 

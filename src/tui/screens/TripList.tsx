@@ -8,18 +8,14 @@ import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
-import { useNavigation } from "../states/navigation";
-
-type SelectMode = "delete" | "duplicate";
+import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripList(): JSX.Element {
-	const { goTo, goBack, currentRoute } = useNavigation();
+	const { goTo, goBack } = useNavigation();
 	const { focus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
 
-	const dataDir =
-		(currentRoute.props["dataDir"] as string | undefined) ?? "./data";
-	const selectMode = currentRoute.props["selectMode"] as SelectMode | undefined;
+	const { dataDir = "./data", selectMode } = useRouteProps("/trips");
 
 	const [trips, setTrips] = useState<Trip[]>(() => listTrips(dataDir));
 

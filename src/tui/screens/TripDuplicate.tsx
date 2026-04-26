@@ -8,17 +8,18 @@ import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
 import type { FormFieldConfig } from "../models";
 import { useLayout } from "../states/layout";
-import { useNavigation } from "../states/navigation";
+import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripDuplicate(): JSX.Element {
-	const { goBack, currentRoute } = useNavigation();
+	const { goBack } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
 
-	const dataDir =
-		(currentRoute.props["dataDir"] as string | undefined) ?? "./data";
-	const sourceDirPath = currentRoute.props["sourceDirPath"] as string;
-	const sourceName = currentRoute.props["sourceName"] as string;
-	const sourceStartDate = currentRoute.props["sourceStartDate"] as string;
+	const {
+		dataDir = "./data",
+		sourceDirPath,
+		sourceName,
+		sourceStartDate,
+	} = useRouteProps("/trips/duplicate");
 
 	const [error, setError] = useState<string | null>(null);
 
