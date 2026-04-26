@@ -84,7 +84,6 @@ export function CountryList(): JSX.Element {
 						goBack();
 					}
 				}}
-				onCancel={goBack}
 			/>
 		);
 	}
