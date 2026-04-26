@@ -51,7 +51,7 @@ export const routes: Routes = {
 	"/trips/owners": {
 		component: OwnerList as unknown as ComponentType,
 		title: "Owners",
-		defaultFocus: "menu",
+		defaultFocus: "main",
 	},
 	"/trips/owners/new": {
 		component: OwnerCreate as unknown as ComponentType,
@@ -66,7 +66,7 @@ export const routes: Routes = {
 	"/trips/accounts": {
 		component: AccountList as unknown as ComponentType,
 		title: "Accounts",
-		defaultFocus: "menu",
+		defaultFocus: "main",
 	},
 	"/trips/accounts/new": {
 		component: AccountCreate as unknown as ComponentType,
@@ -81,7 +81,7 @@ export const routes: Routes = {
 	"/trips/expenses": {
 		component: ExpenseList as unknown as ComponentType,
 		title: "Expenses",
-		defaultFocus: "menu",
+		defaultFocus: "main",
 	},
 	"/trips/expenses/form": {
 		component: ExpenseForm as unknown as ComponentType,

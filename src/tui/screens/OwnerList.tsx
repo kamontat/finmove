@@ -12,11 +12,16 @@ import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function OwnerList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { focus } = useFocus();
+	const { focus, setFocus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
 	const { goTo, goBack } = useNavigation();
 
 	const { selectMode } = useRouteProps("/trips/owners");
+
+	useEffect(() => {
+		if (!trip || selectMode) return;
+		setFocus(trip.owners.length > 0 ? "main" : "menu");
+	}, [trip, selectMode, setFocus]);
 
 	useEffect(() => {
 		setTitleSuffix(null);

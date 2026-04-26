@@ -3,13 +3,21 @@ import type { JSX } from "react";
 import { useEffect } from "react";
 import { DataTable } from "../components/organisms/DataTable";
 import { useData } from "../states/data";
+import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
 
 export function ExpenseList(): JSX.Element {
 	const { trip } = useData();
+	const { setFocus } = useFocus();
 	const { goTo } = useNavigation();
 	const { setMenu, setHints } = useLayout();
+
+	useEffect(() => {
+		if (!trip) return;
+		setFocus(trip.expenses.length > 0 ? "main" : "menu");
+	}, [trip, setFocus]);
+
 	useEffect(() => {
 		if (!trip) return;
 
