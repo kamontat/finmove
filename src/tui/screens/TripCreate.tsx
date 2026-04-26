@@ -3,11 +3,16 @@ import { join } from "node:path";
 import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import { DEFAULT_TRIP_SETTINGS } from "../../core/constants";
+import { DEFAULT_TRIP_SETTINGS, ZVENT_ID_PATTERN } from "../../core/constants";
 import type { Settings } from "../../core/models";
 import { addDays, today } from "../../core/services/date";
 import { isValidSlug } from "../../core/services/slug";
-import { createTrip, toDirName } from "../../core/services/trip";
+import {
+	buildZventTag,
+	createTrip,
+	nextZventId,
+	toDirName,
+} from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
 import type { FormFieldConfig } from "../models";
@@ -68,6 +73,13 @@ export function TripCreate(): JSX.Element {
 			required: false,
 			placeholder: "e.g. Japan, Korea",
 		},
+		{
+			key: "zventId",
+			label: "Zvent ID (3 digits, blank for auto)",
+			type: "text",
+			required: false,
+			placeholder: () => nextZventId(dataDir),
+		},
 	];
 
 	return (
@@ -94,6 +106,17 @@ export function TripCreate(): JSX.Element {
 							? toDirName(name, startDate)
 							: explicitDirName;
 
+					const rawZventId = (values["zventId"] ?? "").trim();
+					let zventId: string;
+					if (rawZventId === "") {
+						zventId = nextZventId(dataDir);
+					} else if (ZVENT_ID_PATTERN.test(rawZventId)) {
+						zventId = rawZventId;
+					} else {
+						setError(`Zvent ID "${rawZventId}" must be exactly 3 digits.`);
+						return;
+					}
+
 					if (!isValidSlug(dirName)) {
 						setError(
 							`Directory name "${dirName}" is invalid. Use lowercase letters, digits, and hyphens.`,
@@ -107,12 +130,14 @@ export function TripCreate(): JSX.Element {
 						return;
 					}
 					setError(null);
+					const zventTag = buildZventTag(zventId, name, endDate);
 					const settings: Settings = {
 						...DEFAULT_TRIP_SETTINGS,
 						name,
 						startDate,
 						endDate,
 						countries,
+						tags: [zventTag],
 					};
 					const newTrip = createTrip(dataDir, dirName, settings);
 					goTo("/trips/overview", {
