@@ -89,7 +89,6 @@ export function ExpenseList(): JSX.Element {
 						goBack();
 					}
 				}}
-				onCancel={goBack}
 			/>
 		);
 	}
