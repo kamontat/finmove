@@ -91,7 +91,6 @@ export function TripList(): JSX.Element {
 						goBack();
 					}
 				}}
-				onCancel={goBack}
 			/>
 		);
 	}
@@ -123,7 +122,6 @@ export function TripList(): JSX.Element {
 							},
 						});
 					}}
-					onCancel={goBack}
 					isActive
 				/>
 			</Box>
