@@ -41,12 +41,14 @@ Travel expense management tool. Bun runtime, TypeScript, React+Ink TUI.
 
 Every screen follows a standard Title/Main/Menu/Hint structure via `layouts/Default.tsx`. The layout reads from context providers — screens register their content via `useLayout()` hook rather than receiving props.
 
-1. **Title** — displayed above the main box, sourced from route metadata
+1. **Title** — breadcrumb above the main box. `App.tsx` builds it from the route path hierarchy (e.g., `/trips/owners/edit` → `Trips > [tripName] > Owners > Edit`) and appends the optional `titleSuffix` from `useLayout()`. Screens must not set `titleSuffix` to a value the route hierarchy already produces (e.g., `"New"` or `"Edit"`); reserve it for dynamic context (selected record name, sub-section path).
 2. **Main box** — bordered, contains interactive content (lists, forms, tables). Border color is the route's `borderColor` default, overridable at runtime, and falls back to gray when unfocused.
 3. **Menu** — bordered, horizontal `[key] label` items with arrow key navigation + shortcut keys. Only rendered when the screen registers menu options.
 4. **Hint bar** — hidden by default, toggled with `[?]`
 
 Focus switches between main and menu via `[tab]`. Menu shortcuts always work regardless of focus.
+
+Components rendered in the main box that handle `[Enter]` (e.g., `VerticalSelect`) must gate their `isActive` prop on `focus === "main"`. Otherwise pressing Enter while focus is on the menu fires both the menu's handler and the main-area handler, stacking two navigations on the history.
 
 ### Form Component (organisms/Form.tsx)
 
