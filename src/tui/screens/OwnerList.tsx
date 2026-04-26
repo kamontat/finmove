@@ -2,7 +2,7 @@ import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import { removeOwner } from "../../core/services/owner";
-import { VerticalSelect } from "../components/atoms/VerticalSelect";
+import { ListSelect } from "../components/molecules/ListSelect";
 import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
@@ -97,7 +97,7 @@ export function OwnerList(): JSX.Element {
 	}
 
 	return (
-		<VerticalSelect
+		<ListSelect
 			options={trip.owners.map((o) => ({
 				label: o.name,
 				value: o.id,

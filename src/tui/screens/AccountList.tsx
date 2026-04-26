@@ -2,7 +2,7 @@ import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import { removeAccount } from "../../core/services/account";
-import { VerticalSelect } from "../components/atoms/VerticalSelect";
+import { ListSelect } from "../components/molecules/ListSelect";
 import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
@@ -99,7 +99,7 @@ export function AccountList(): JSX.Element {
 	}
 
 	return (
-		<VerticalSelect
+		<ListSelect
 			options={trip.accounts.map((a) => ({
 				label: a.name,
 				value: a.id,

@@ -1,7 +1,7 @@
 import { Box, Text } from "ink";
 import type { JSX } from "react";
 import type { VerticalOption } from "../../models";
-import { VerticalSelect } from "../atoms/VerticalSelect";
+import { ListSelect } from "./ListSelect";
 
 interface RemoveSelectorProps {
 	header: string;
@@ -21,7 +21,7 @@ export function RemoveSelector({
 			<Text bold color="red">
 				{header}
 			</Text>
-			<VerticalSelect
+			<ListSelect
 				options={options}
 				onChange={onConfirm}
 				onCancel={onCancel}

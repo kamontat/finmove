@@ -1,77 +1,63 @@
-import { Box, Text, useInput } from "ink";
-import type { JSX } from "react";
+import { Box, useInput } from "ink";
+import type { JSX, ReactNode } from "react";
 import { useState } from "react";
-import type { VerticalOption } from "../../models";
-
-export type { VerticalOption } from "../../models";
 
 interface VerticalSelectProps {
-	options: VerticalOption[];
-	onChange: (value: string) => void;
-	onHighlight?: (value: string) => void;
+	rowCount: number;
+	renderRow: (index: number, selected: boolean) => ReactNode;
+	onChange: (index: number) => void;
+	onHighlight?: (index: number) => void;
 	onCancel?: () => void;
 	isActive?: boolean;
-	color?: string;
 }
 
 export function VerticalSelect({
-	options,
+	rowCount,
+	renderRow,
 	onChange,
 	onHighlight,
 	onCancel,
 	isActive = true,
-	color,
 }: VerticalSelectProps): JSX.Element {
 	const [cursor, setCursor] = useState(0);
 
 	useInput(
 		(input, key) => {
+			if (rowCount === 0) {
+				if ((key.escape || input === "q") && onCancel) onCancel();
+				return;
+			}
+
 			if (key.upArrow) {
 				setCursor((c) => {
-					const next = c > 0 ? c - 1 : options.length - 1;
-					const opt = options[next];
-					if (opt && onHighlight) onHighlight(opt.value);
+					const next = c > 0 ? c - 1 : rowCount - 1;
+					if (onHighlight) onHighlight(next);
 					return next;
 				});
 			} else if (key.downArrow) {
 				setCursor((c) => {
-					const next = c < options.length - 1 ? c + 1 : 0;
-					const opt = options[next];
-					if (opt && onHighlight) onHighlight(opt.value);
+					const next = c < rowCount - 1 ? c + 1 : 0;
+					if (onHighlight) onHighlight(next);
 					return next;
 				});
 			} else if (key.return) {
-				const opt = options[cursor];
-				if (opt) onChange(opt.value);
-			} else if (key.escape && onCancel) {
-				onCancel();
-			} else if (input === "q" && onCancel) {
+				if (cursor < rowCount) onChange(cursor);
+			} else if ((key.escape || input === "q") && onCancel) {
 				onCancel();
 			}
 		},
 		{ isActive },
 	);
 
-	if (options.length === 0) {
-		return <Text dimColor>No items.</Text>;
-	}
+	// Clamp cursor if rowCount shrinks below current cursor (e.g., after delete).
+	const safeCursor = cursor >= rowCount ? Math.max(0, rowCount - 1) : cursor;
 
 	return (
 		<Box flexDirection="column">
-			{options.map((o, i) => {
-				const selected = isActive && i === cursor;
-				return (
-					<Text
-						key={o.value}
-						inverse={selected}
-						{...(color !== undefined ? { color } : {})}
-					>
-						{selected ? "> " : "  "}
-						{o.label}
-						{o.detail ? <Text dimColor={!selected}> {o.detail}</Text> : null}
-					</Text>
-				);
-			})}
+			{Array.from({ length: rowCount }, (_, i) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: index is the stable id here
+				<Box key={i}>{renderRow(i, isActive && i === safeCursor)}</Box>
+			))}
 		</Box>
 	);
 }

@@ -2,7 +2,7 @@ import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import { updateSettings } from "../../core/services/trip";
-import { VerticalSelect } from "../components/atoms/VerticalSelect";
+import { ListSelect } from "../components/molecules/ListSelect";
 import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
@@ -94,7 +94,7 @@ export function CategoryList(): JSX.Element {
 	}
 
 	return (
-		<VerticalSelect
+		<ListSelect
 			options={categories.map((c) => ({ label: c, value: c }))}
 			onChange={(value) => {
 				goTo("/trips/settings/categories/edit", {

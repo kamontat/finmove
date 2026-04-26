@@ -3,7 +3,7 @@ import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
 import { deleteTrip, listTrips } from "../../core/services/trip";
-import { VerticalSelect } from "../components/atoms/VerticalSelect";
+import { ListSelect } from "../components/molecules/ListSelect";
 import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
@@ -105,7 +105,7 @@ export function TripList(): JSX.Element {
 				<Text bold color="cyan">
 					Select a trip to duplicate:
 				</Text>
-				<VerticalSelect
+				<ListSelect
 					options={trips.map((t) => ({
 						label: t.settings.name,
 						value: t.dirPath,
@@ -135,7 +135,7 @@ export function TripList(): JSX.Element {
 	}
 
 	return (
-		<VerticalSelect
+		<ListSelect
 			options={trips.map((t) => ({
 				label: t.settings.name,
 				value: t.dirPath,
