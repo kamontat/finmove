@@ -39,6 +39,10 @@ export function ExpenseForm(): JSX.Element {
 		const allCurrencies = ["THB", ...Object.keys(trip.settings.currencies)];
 		const allOwnerIds = trip.owners.map((o) => o.id).join(",");
 
+		const defaults = trip.settings.tags;
+		const tagsLabel =
+			defaults.length > 0 ? `Tags (auto-adds: ${defaults.join(", ")})` : "Tags";
+
 		return [
 			{
 				key: "account",
@@ -117,7 +121,7 @@ export function ExpenseForm(): JSX.Element {
 			},
 			{
 				key: "tags",
-				label: "Tags",
+				label: tagsLabel,
 				type: "text",
 				placeholder: "comma-separated",
 			},
