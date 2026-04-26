@@ -93,6 +93,37 @@ export interface RouteParams {
 	};
 
 	"/trips/settings/export": { tripDirPath: string; tripName?: string };
+
+	"/trips/new/countries": {
+		dataDir?: string;
+		selectMode?: "remove";
+	};
+	"/trips/new/countries/new": {
+		dataDir?: string;
+	};
+
+	"/trips/accounts/new/owners": {
+		tripDirPath: string;
+		formId: string;
+		fieldKey: string;
+	};
+	"/trips/accounts/edit/owners": {
+		tripDirPath: string;
+		accountId: string;
+		formId: string;
+		fieldKey: string;
+	};
+
+	"/trips/expenses/form/owners": {
+		tripDirPath: string;
+		formId: string;
+		fieldKey: string;
+	};
+	"/trips/expenses/form/tags": {
+		tripDirPath: string;
+		formId: string;
+		fieldKey: string;
+	};
 }
 
 export type RoutePath = keyof RouteParams;

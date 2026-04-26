@@ -18,10 +18,14 @@ import { ExportScreen } from "./screens/Export";
 import { OwnerCreate } from "./screens/OwnerCreate";
 import { OwnerEdit } from "./screens/OwnerEdit";
 import { OwnerList } from "./screens/OwnerList";
+import { OwnerSelect } from "./screens/OwnerSelect";
 import { TagCreate } from "./screens/TagCreate";
 import { TagEdit } from "./screens/TagEdit";
 import { TagList } from "./screens/TagList";
+import { TagSelect } from "./screens/TagSelect";
 import { TripCreate } from "./screens/TripCreate";
+import { TripCreateCountryAdd } from "./screens/TripCreateCountryAdd";
+import { TripCreateCountryList } from "./screens/TripCreateCountryList";
 import { TripDuplicate } from "./screens/TripDuplicate";
 import { TripList } from "./screens/TripList";
 import { TripOverview } from "./screens/TripOverview";
@@ -36,6 +40,16 @@ export const routes: Routes = {
 	"/trips/new": {
 		component: TripCreate as unknown as ComponentType,
 		title: "New Trip",
+		defaultFocus: "main",
+	},
+	"/trips/new/countries": {
+		component: TripCreateCountryList as unknown as ComponentType,
+		title: "Countries",
+		defaultFocus: "menu",
+	},
+	"/trips/new/countries/new": {
+		component: TripCreateCountryAdd as unknown as ComponentType,
+		title: "New Country",
 		defaultFocus: "main",
 	},
 	"/trips/duplicate": {
@@ -78,6 +92,16 @@ export const routes: Routes = {
 		title: "Account",
 		defaultFocus: "main",
 	},
+	"/trips/accounts/new/owners": {
+		component: OwnerSelect as unknown as ComponentType,
+		title: "Select Owners",
+		defaultFocus: "main",
+	},
+	"/trips/accounts/edit/owners": {
+		component: OwnerSelect as unknown as ComponentType,
+		title: "Select Owners",
+		defaultFocus: "main",
+	},
 	"/trips/expenses": {
 		component: ExpenseList as unknown as ComponentType,
 		title: "Expenses",
@@ -86,6 +110,16 @@ export const routes: Routes = {
 	"/trips/expenses/form": {
 		component: ExpenseForm as unknown as ComponentType,
 		title: "Expense",
+		defaultFocus: "main",
+	},
+	"/trips/expenses/form/owners": {
+		component: OwnerSelect as unknown as ComponentType,
+		title: "Select Owners",
+		defaultFocus: "main",
+	},
+	"/trips/expenses/form/tags": {
+		component: TagSelect as unknown as ComponentType,
+		title: "Select Tags",
 		defaultFocus: "main",
 	},
 	"/trips/settings": {
