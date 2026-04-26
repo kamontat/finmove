@@ -89,7 +89,6 @@ export function AccountList(): JSX.Element {
 						goBack();
 					}
 				}}
-				onCancel={goBack}
 			/>
 		);
 	}
