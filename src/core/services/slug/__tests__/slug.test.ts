@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { toSlug, uniqueSlug } from "..";
+import { toSlug, uniqueSlug, isValidSlug } from "..";
 
 describe("toSlug", () => {
 	test("lowercases letters", () => {
@@ -42,5 +42,33 @@ describe("uniqueSlug", () => {
 	test("accepts any Iterable for takenIds", () => {
 		const set = new Set(["alice"]);
 		expect(uniqueSlug("Alice", set)).toBe("alice-2");
+	});
+});
+
+describe("isValidSlug", () => {
+	test("accepts lowercase letters, digits, and hyphens", () => {
+		expect(isValidSlug("alice")).toBe(true);
+		expect(isValidSlug("alice-2")).toBe(true);
+		expect(isValidSlug("japan-trip-2026")).toBe(true);
+		expect(isValidSlug("a1b2-c3")).toBe(true);
+	});
+
+	test("rejects uppercase letters", () => {
+		expect(isValidSlug("Alice")).toBe(false);
+	});
+
+	test("rejects spaces and other punctuation", () => {
+		expect(isValidSlug("alice 2")).toBe(false);
+		expect(isValidSlug("alice_2")).toBe(false);
+		expect(isValidSlug("alice/bob")).toBe(false);
+		expect(isValidSlug("alice.")).toBe(false);
+	});
+
+	test("rejects empty string", () => {
+		expect(isValidSlug("")).toBe(false);
+	});
+
+	test("rejects unicode", () => {
+		expect(isValidSlug("αlice")).toBe(false);
 	});
 });
