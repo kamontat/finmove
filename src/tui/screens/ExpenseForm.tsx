@@ -9,20 +9,24 @@ import {
 	updateExpense,
 } from "../../core/services/expense";
 import { Form } from "../components/organisms/Form";
-import { type FieldValue, type FormFieldConfig, getString } from "../models";
+import { type FormFieldConfig, getString, getStringArray } from "../models";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
+import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function ExpenseForm(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { goBack } = useNavigation();
+	const { goTo, goBack } = useNavigation();
 	const { setFocus } = useFocus();
 	const { setHints } = useLayout();
 
-	const { expenseId } = useRouteProps("/trips/expenses/form");
+	const { expenseId, tripDirPath } = useRouteProps("/trips/expenses/form");
 	const existingExpense = trip?.expenses.find((e) => e.id === expenseId);
+
+	const formId = expenseId ? `expense-edit-${expenseId}` : "expense-new";
+	const buffer = useFormBuffer(formId);
 
 	useEffect(() => {
 		setHints([
@@ -33,11 +37,24 @@ export function ExpenseForm(): JSX.Element {
 		]);
 	}, [setHints]);
 
+	// Seed buffer with existing expense's owners + tags on mount (edit mode only)
+	useEffect(() => {
+		if (!existingExpense) return;
+		if (buffer.values["owners"] === undefined) {
+			const ownerIds = Array.isArray(existingExpense.owners)
+				? existingExpense.owners.map((o) => (typeof o === "string" ? o : o.id))
+				: [];
+			buffer.setField("owners", ownerIds);
+		}
+		if (buffer.values["tags"] === undefined) {
+			buffer.setField("tags", existingExpense.tags);
+		}
+	}, [existingExpense, buffer]);
+
 	const fields = useMemo((): FormFieldConfig[] => {
 		if (!trip) return [];
 
 		const allCurrencies = ["THB", ...Object.keys(trip.settings.currencies)];
-		const allOwnerIds = trip.owners.map((o) => o.id).join(",");
 
 		return [
 			{
@@ -103,9 +120,13 @@ export function ExpenseForm(): JSX.Element {
 			},
 			{
 				key: "owners",
-				label: "Owner IDs (comma-separated, empty for all)",
-				type: "text",
-				placeholder: allOwnerIds,
+				label: "Owners",
+				type: "multiselect",
+				required: false,
+				onEdit: () =>
+					goTo("/trips/expenses/form/owners", {
+						props: { tripDirPath, formId, fieldKey: "owners" },
+					}),
 			},
 			{
 				key: "description",
@@ -118,25 +139,23 @@ export function ExpenseForm(): JSX.Element {
 			{
 				key: "tags",
 				label: "Tags",
-				type: "text",
-				placeholder: "comma-separated",
+				type: "multiselect",
+				required: false,
+				onEdit: () =>
+					goTo("/trips/expenses/form/tags", {
+						props: { tripDirPath, formId, fieldKey: "tags" },
+					}),
 			},
 		];
-	}, [trip, existingExpense]);
+	}, [trip, existingExpense, goTo, tripDirPath, formId]);
 
 	if (!trip) {
 		return <Box />;
 	}
 
-	const handleSubmit = (values: Record<string, FieldValue>) => {
-		const tagsStr = getString(values, "tags");
-		const tags = tagsStr ? tagsStr.split(",").map((s) => s.trim()) : [];
-
-		const ownersStr = getString(values, "owners");
-		const ownerList =
-			ownersStr.trim() === ""
-				? undefined
-				: ownersStr.split(",").map((s) => s.trim());
+	const handleSubmit = (values: Record<string, string | string[]>) => {
+		const tags = getStringArray(values, "tags");
+		const ownerList = getStringArray(values, "owners");
 
 		const currency = getString(values, "currency") || "THB";
 		const exchangeRateStr = getString(values, "exchangeRate");
@@ -156,7 +175,7 @@ export function ExpenseForm(): JSX.Element {
 			...(exchangeRateStr && currency !== "THB"
 				? { exchangeRate: Number.parseFloat(exchangeRateStr) }
 				: {}),
-			...(ownerList ? { owners: ownerList } : {}),
+			...(ownerList.length > 0 ? { owners: ownerList } : {}),
 			description: getString(values, "description"),
 			tags,
 		};
@@ -168,9 +187,10 @@ export function ExpenseForm(): JSX.Element {
 		}
 
 		reloadTrip();
+		buffer.clear();
 		setFocus("menu");
 		goBack();
 	};
 
-	return <Form fields={fields} onSubmit={handleSubmit} />;
+	return <Form formId={formId} fields={fields} onSubmit={handleSubmit} />;
 }
