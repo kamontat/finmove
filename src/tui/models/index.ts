@@ -99,9 +99,9 @@ export type RouteEntry = {
 	[P in RoutePath]: { path: P; props: RouteParams[P] };
 }[RoutePath];
 
-export interface RouteConfig<_P extends RoutePath = RoutePath> {
+export interface RouteConfig<P extends RoutePath = RoutePath> {
 	component: ComponentType;
-	title: string | ((props: Record<string, unknown>) => string);
+	title: string | ((props: RouteParams[P]) => string);
 	defaultFocus: FocusZone;
 	borderColor?: string;
 }

@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import type { RouteConfig, RoutePath } from "./models";
+import type { Routes } from "./models";
 import { AccountCreate } from "./screens/AccountCreate";
 import { AccountEdit } from "./screens/AccountEdit";
 import { AccountList } from "./screens/AccountList";
@@ -27,7 +27,7 @@ import { TripList } from "./screens/TripList";
 import { TripOverview } from "./screens/TripOverview";
 import { TripSettings } from "./screens/TripSettings";
 
-export const routes: Record<RoutePath, RouteConfig> = {
+export const routes: Routes = {
 	"/trips": {
 		component: TripList as unknown as ComponentType,
 		title: "Trips",
@@ -45,7 +45,7 @@ export const routes: Record<RoutePath, RouteConfig> = {
 	},
 	"/trips/overview": {
 		component: TripOverview as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Trip Overview",
+		title: (props) => props.tripName ?? "Trip Overview",
 		defaultFocus: "menu",
 	},
 	"/trips/owners": {
@@ -90,72 +90,72 @@ export const routes: Record<RoutePath, RouteConfig> = {
 	},
 	"/trips/settings": {
 		component: TripSettings as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Settings",
+		title: (props) => props.tripName ?? "Settings",
 		defaultFocus: "main",
 	},
 	"/trips/settings/countries": {
 		component: CountryList as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Countries",
+		title: (props) => props.tripName ?? "Countries",
 		defaultFocus: "menu",
 	},
 	"/trips/settings/countries/new": {
 		component: CountryCreate as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Country",
+		title: (props) => props.tripName ?? "Country",
 		defaultFocus: "main",
 	},
 	"/trips/settings/countries/edit": {
 		component: CountryEdit as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Country",
+		title: (props) => props.tripName ?? "Country",
 		defaultFocus: "main",
 	},
 	"/trips/settings/categories": {
 		component: CategoryList as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Categories",
+		title: (props) => props.tripName ?? "Categories",
 		defaultFocus: "menu",
 	},
 	"/trips/settings/categories/new": {
 		component: CategoryCreate as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Category",
+		title: (props) => props.tripName ?? "Category",
 		defaultFocus: "main",
 	},
 	"/trips/settings/categories/edit": {
 		component: CategoryEdit as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Category",
+		title: (props) => props.tripName ?? "Category",
 		defaultFocus: "main",
 	},
 	"/trips/settings/tags": {
 		component: TagList as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Tags",
+		title: (props) => props.tripName ?? "Tags",
 		defaultFocus: "menu",
 	},
 	"/trips/settings/tags/new": {
 		component: TagCreate as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Tag",
+		title: (props) => props.tripName ?? "Tag",
 		defaultFocus: "main",
 	},
 	"/trips/settings/tags/edit": {
 		component: TagEdit as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Tag",
+		title: (props) => props.tripName ?? "Tag",
 		defaultFocus: "main",
 	},
 	"/trips/settings/currencies": {
 		component: CurrencyList as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Currencies",
+		title: (props) => props.tripName ?? "Currencies",
 		defaultFocus: "menu",
 	},
 	"/trips/settings/currencies/new": {
 		component: CurrencyCreate as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Currency",
+		title: (props) => props.tripName ?? "Currency",
 		defaultFocus: "main",
 	},
 	"/trips/settings/currencies/edit": {
 		component: CurrencyEdit as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Currency",
+		title: (props) => props.tripName ?? "Currency",
 		defaultFocus: "main",
 	},
 	"/trips/settings/export": {
 		component: ExportScreen as unknown as ComponentType,
-		title: (props) => (props["tripName"] as string) ?? "Export CSV",
+		title: (props) => props.tripName ?? "Export CSV",
 		defaultFocus: "menu",
 	},
 };
