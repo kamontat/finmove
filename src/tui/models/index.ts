@@ -2,6 +2,8 @@ import type { ComponentType } from "react";
 
 export type FocusZone = "main" | "menu" | "input";
 
+export type FieldValue = string | string[];
+
 export interface RouteParams {
 	"/trips": { dataDir?: string; selectMode?: "delete" | "duplicate" };
 	"/trips/new": { dataDir?: string };
@@ -151,3 +153,19 @@ export type DateFormField = FormFieldBase & {
 };
 
 export type FormFieldConfig = TextFormField | SelectFormField | DateFormField;
+
+export function getString(
+	values: Record<string, FieldValue>,
+	key: string,
+): string {
+	const v = values[key];
+	return typeof v === "string" ? v : "";
+}
+
+export function getStringArray(
+	values: Record<string, FieldValue>,
+	key: string,
+): string[] {
+	const v = values[key];
+	return Array.isArray(v) ? v : [];
+}
