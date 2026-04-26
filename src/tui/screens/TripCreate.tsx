@@ -61,6 +61,13 @@ export function TripCreate(): JSX.Element {
 			required: true,
 			defaultValue: addDays(today(), 1),
 		},
+		{
+			key: "countries",
+			label: "Countries (comma-separated)",
+			type: "text",
+			required: false,
+			placeholder: "e.g. Japan, Korea",
+		},
 	];
 
 	return (
@@ -76,6 +83,11 @@ export function TripCreate(): JSX.Element {
 					const name = values["name"] ?? "";
 					const startDate = values["startDate"] ?? today();
 					const endDate = values["endDate"] ?? addDays(today(), 1);
+					const countriesStr = values["countries"] ?? "";
+					const countries = countriesStr
+						.split(",")
+						.map((s) => s.trim())
+						.filter((s) => s !== "");
 					const explicitDirName = (values["dirName"] ?? "").trim();
 					const dirName =
 						explicitDirName === ""
@@ -100,6 +112,7 @@ export function TripCreate(): JSX.Element {
 						name,
 						startDate,
 						endDate,
+						countries,
 					};
 					const newTrip = createTrip(dataDir, dirName, settings);
 					goTo("/trips/overview", {
