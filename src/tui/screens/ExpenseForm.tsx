@@ -9,7 +9,7 @@ import {
 	updateExpense,
 } from "../../core/services/expense";
 import { Form } from "../components/organisms/Form";
-import { type FormFieldConfig, getString } from "../models";
+import { type FieldValue, type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
@@ -128,7 +128,7 @@ export function ExpenseForm(): JSX.Element {
 		return <Box />;
 	}
 
-	const handleSubmit = (values: Record<string, string>) => {
+	const handleSubmit = (values: Record<string, FieldValue>) => {
 		const tagsStr = getString(values, "tags");
 		const tags = tagsStr ? tagsStr.split(",").map((s) => s.trim()) : [];
 

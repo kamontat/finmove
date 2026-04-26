@@ -1,7 +1,8 @@
 import { Box, Text, useInput } from "ink";
 import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
-import type { FormFieldConfig } from "../../models";
+import type { FieldValue, FormFieldConfig } from "../../models";
 import { useFocus } from "../../states/focus";
+import { useFormBuffer } from "../../states/formBuffer";
 import { DateInput } from "../atoms/DateInput";
 import { DropdownSelect } from "../atoms/DropdownSelect";
 import { InlineSelect } from "../atoms/InlineSelect";
@@ -11,9 +12,10 @@ const INLINE_SELECT_THRESHOLD = 3;
 
 interface FormProps {
 	fields: FormFieldConfig[];
-	onSubmit: (values: Record<string, string>) => void;
+	onSubmit: (values: Record<string, FieldValue>) => void;
 	submitLabel?: string;
 	submitKey?: string;
+	formId?: string;
 }
 
 export function Form({
@@ -21,6 +23,7 @@ export function Form({
 	onSubmit,
 	submitLabel = "Submit",
 	submitKey = "s",
+	formId,
 }: FormProps): JSX.Element {
 	const { setFocus } = useFocus();
 
@@ -28,45 +31,80 @@ export function Form({
 		setFocus("main");
 	}, [setFocus]);
 
-	const [values, setValues] = useState<Record<string, string>>(() => {
-		const initial: Record<string, string> = {};
-		for (const field of fields) {
-			initial[field.key] = "";
-		}
-		return initial;
-	});
+	const buffer = useFormBuffer(formId ?? "__unused__");
+	const usingBuffer = formId !== undefined;
+
+	const [localValues, setLocalValues] = useState<Record<string, FieldValue>>(
+		() => {
+			const initial: Record<string, FieldValue> = {};
+			for (const field of fields) {
+				initial[field.key] = field.type === "multiselect" ? [] : "";
+			}
+			return initial;
+		},
+	);
+
+	const values: Record<string, FieldValue> = usingBuffer
+		? { ...localValues, ...buffer.values }
+		: localValues;
+
+	const setValue = useCallback(
+		(key: string, value: FieldValue) => {
+			setLocalValues((prev) => ({ ...prev, [key]: value }));
+			if (usingBuffer) {
+				buffer.setField(key, value);
+			}
+		},
+		[usingBuffer, buffer],
+	);
 
 	const [cursor, setCursor] = useState(0);
 	const [editing, setEditing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
+	const isFilled = useCallback(
+		(field: FormFieldConfig): boolean => {
+			const v = values[field.key];
+			if (field.type === "multiselect") {
+				return Array.isArray(v) && v.length > 0;
+			}
+			if (typeof v === "string" && v !== "") return true;
+			return field.defaultValue !== undefined;
+		},
+		[values],
+	);
+
 	const canSubmit = useMemo(() => {
 		const allRequiredFilled = fields.every((field) => {
 			if (!field.required) return true;
-			const val = values[field.key] ?? "";
-			return val !== "" || field.defaultValue !== undefined;
+			return isFilled(field);
 		});
 		const hasAnyChange = fields.some((field) => {
-			const val = values[field.key] ?? "";
-			return val !== "";
+			const v = values[field.key];
+			if (field.type === "multiselect") {
+				return Array.isArray(v) && v.length > 0;
+			}
+			return typeof v === "string" && v !== "";
 		});
 		return allRequiredFilled && hasAnyChange;
-	}, [fields, values]);
+	}, [fields, values, isFilled]);
 
 	const totalItems = canSubmit ? fields.length + 1 : fields.length;
 
-	// Clamp cursor if submit row becomes unavailable
 	if (cursor >= totalItems) {
 		setCursor(totalItems - 1);
 	}
 
 	const handleSubmit = useCallback(() => {
 		if (!canSubmit) return;
-		const result: Record<string, string> = {};
+		const result: Record<string, FieldValue> = {};
 		for (const field of fields) {
-			const val = values[field.key] ?? "";
-			if (val !== "") {
-				result[field.key] = val;
+			const v = values[field.key];
+			if (field.type === "multiselect") {
+				const arr = Array.isArray(v) ? v : [];
+				result[field.key] = arr.length > 0 ? arr : (field.defaultValue ?? []);
+			} else if (typeof v === "string" && v !== "") {
+				result[field.key] = v;
 			} else if (field.defaultValue !== undefined) {
 				result[field.key] = field.defaultValue;
 			} else {
@@ -92,22 +130,20 @@ export function Form({
 		setFocus("main");
 	}, [setFocus]);
 
-	const setValue = useCallback(
+	const setStringValue = useCallback(
 		(key: string, value: string) => {
-			setValues((prev) => ({ ...prev, [key]: value }));
+			setValue(key, value);
 			exitEdit();
 		},
-		[exitEdit],
+		[setValue, exitEdit],
 	);
 
 	const cancelEdit = useCallback(() => {
 		exitEdit();
 	}, [exitEdit]);
 
-	// Only handle form-specific keys (navigation, editing, submit).
-	// Global shortcuts ([q], [esc], [e], [?], [tab]) are handled by useGlobalKeys.
 	useInput(
-		(_input, key) => {
+		(input, key) => {
 			if (key.upArrow) {
 				setCursor((c) => (c > 0 ? c - 1 : totalItems - 1));
 			} else if (key.downArrow) {
@@ -116,9 +152,15 @@ export function Form({
 				if (cursor === fields.length) {
 					handleSubmit();
 				} else {
-					enterEdit();
+					const field = fields[cursor];
+					if (!field) return;
+					if (field.type === "multiselect") {
+						field.onEdit();
+					} else {
+						enterEdit();
+					}
 				}
-			} else if (_input === submitKey && canSubmit) {
+			} else if (input === submitKey && canSubmit) {
 				handleSubmit();
 			}
 		},
@@ -129,69 +171,85 @@ export function Form({
 		<Box flexDirection="column">
 			{fields.map((field, index) => {
 				const isCursor = cursor === index;
-				const currentValue = values[field.key] ?? "";
+				const currentValue = values[field.key];
 				const isEditing = editing && isCursor;
 
-				// Determine display label for the value
-				let displayValue = currentValue;
-				if (field.type === "select" && currentValue !== "") {
+				let displayValue = "";
+				if (field.type === "multiselect") {
+					const arr = Array.isArray(currentValue)
+						? currentValue
+						: (field.defaultValue ?? []);
+					displayValue = field.display
+						? field.display(arr)
+						: arr.length === 0
+							? "(none)"
+							: arr.join(", ");
+				} else if (
+					field.type === "select" &&
+					typeof currentValue === "string" &&
+					currentValue !== ""
+				) {
 					const found = field.options.find((o) => o.value === currentValue);
 					displayValue = found?.label ?? currentValue;
+				} else if (typeof currentValue === "string") {
+					displayValue = currentValue;
 				}
 
-				const hasValue = currentValue !== "";
+				const hasValue =
+					field.type === "multiselect"
+						? Array.isArray(currentValue) && currentValue.length > 0
+						: typeof currentValue === "string" && currentValue !== "";
 				const optionalSuffix = !field.required ? " (optional)" : "";
 
-				// Preview shown when the user hasn't touched the field.
-				// Prefer defaultValue (existing data in edit mode) over placeholder
-				// (input hint) so edit forms are distinguishable from add forms.
 				let preview: string | undefined;
-				if (field.defaultValue !== undefined) {
+				if (field.type === "multiselect") {
+					preview = undefined;
+				} else if (field.defaultValue !== undefined) {
 					if (field.type === "select") {
 						const found = field.options.find(
 							(o) => o.value === field.defaultValue,
 						);
-						preview = found?.label ?? field.defaultValue;
+						preview = found?.label ?? (field.defaultValue as string);
 					} else {
-						preview = field.defaultValue;
+						preview = field.defaultValue as string;
 					}
 				} else if (field.type === "text" && field.placeholder !== undefined) {
 					preview =
 						typeof field.placeholder === "function"
-							? field.placeholder(values)
+							? field.placeholder(stringValuesOnly(values))
 							: field.placeholder;
 				}
 
+				const labelText = (
+					<>
+						{field.label}
+						{optionalSuffix}:{" "}
+						{field.type === "multiselect"
+							? displayValue
+							: hasValue
+								? displayValue
+								: preview !== undefined
+									? `(${preview})`
+									: ""}
+					</>
+				);
+
 				return (
 					<Box key={field.key} flexDirection="column">
-						{/* Label row */}
 						<Text>
 							{isCursor ? (
 								<Text color="cyan" bold>
-									{">"} {field.label}
-									{optionalSuffix}:{" "}
-									{hasValue
-										? displayValue
-										: preview !== undefined
-											? `(${preview})`
-											: ""}
+									{">"} {labelText}
 								</Text>
 							) : (
 								<Text dimColor>
 									{"  "}
-									{field.label}
-									{optionalSuffix}:{" "}
-									{hasValue
-										? displayValue
-										: preview !== undefined
-											? `(${preview})`
-											: ""}
+									{labelText}
 								</Text>
 							)}
 						</Text>
 
-						{/* Edit row — shown only when this field is being edited */}
-						{isEditing && (
+						{isEditing && field.type !== "multiselect" && (
 							<Box marginLeft={4}>
 								{field.type === "text" && (
 									<TextInput
@@ -199,27 +257,27 @@ export function Form({
 											? {
 													placeholder:
 														typeof field.placeholder === "function"
-															? field.placeholder(values)
+															? field.placeholder(stringValuesOnly(values))
 															: field.placeholder,
 												}
 											: {})}
-										{...(currentValue !== ""
+										{...(typeof currentValue === "string" && currentValue !== ""
 											? { defaultValue: currentValue }
 											: field.defaultValue !== undefined
 												? { defaultValue: field.defaultValue }
 												: {})}
-										onSubmit={(val) => setValue(field.key, val)}
+										onSubmit={(val) => setStringValue(field.key, val)}
 										onCancel={cancelEdit}
 									/>
 								)}
 								{field.type === "date" && (
 									<DateInput
 										defaultValue={
-											currentValue !== ""
+											typeof currentValue === "string" && currentValue !== ""
 												? currentValue
 												: (field.defaultValue ?? "2026-01-01")
 										}
-										onSubmit={(val) => setValue(field.key, val)}
+										onSubmit={(val) => setStringValue(field.key, val)}
 										onCancel={cancelEdit}
 									/>
 								)}
@@ -227,12 +285,13 @@ export function Form({
 									field.options.length <= INLINE_SELECT_THRESHOLD && (
 										<InlineSelect
 											options={field.options}
-											{...(currentValue !== ""
+											{...(typeof currentValue === "string" &&
+											currentValue !== ""
 												? { defaultValue: currentValue }
 												: field.defaultValue !== undefined
 													? { defaultValue: field.defaultValue }
 													: {})}
-											onSubmit={(val) => setValue(field.key, val)}
+											onSubmit={(val) => setStringValue(field.key, val)}
 											onCancel={cancelEdit}
 										/>
 									)}
@@ -240,12 +299,13 @@ export function Form({
 									field.options.length > INLINE_SELECT_THRESHOLD && (
 										<DropdownSelect
 											options={field.options}
-											{...(currentValue !== ""
+											{...(typeof currentValue === "string" &&
+											currentValue !== ""
 												? { defaultValue: currentValue }
 												: field.defaultValue !== undefined
 													? { defaultValue: field.defaultValue }
 													: {})}
-											onSubmit={(val) => setValue(field.key, val)}
+											onSubmit={(val) => setStringValue(field.key, val)}
 											onCancel={cancelEdit}
 										/>
 									)}
@@ -255,12 +315,10 @@ export function Form({
 				);
 			})}
 
-			{/* Separator */}
 			<Box marginTop={1}>
 				<Text dimColor>{"─".repeat(20)}</Text>
 			</Box>
 
-			{/* Submit button */}
 			<Box>
 				{cursor === fields.length ? (
 					<Text
@@ -279,7 +337,6 @@ export function Form({
 				)}
 			</Box>
 
-			{/* Error from onSubmit (e.g. validation throw) */}
 			{error && (
 				<Box marginTop={1}>
 					<Text color="red">⚠ {error}</Text>
@@ -287,4 +344,14 @@ export function Form({
 			)}
 		</Box>
 	);
+}
+
+function stringValuesOnly(
+	values: Record<string, FieldValue>,
+): Record<string, string> {
+	const out: Record<string, string> = {};
+	for (const [k, v] of Object.entries(values)) {
+		if (typeof v === "string") out[k] = v;
+	}
+	return out;
 }

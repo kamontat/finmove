@@ -152,7 +152,18 @@ export type DateFormField = FormFieldBase & {
 	defaultValue?: string;
 };
 
-export type FormFieldConfig = TextFormField | SelectFormField | DateFormField;
+export type MultiSelectFormField = FormFieldBase & {
+	type: "multiselect";
+	defaultValue?: string[];
+	onEdit: () => void;
+	display?: (selected: string[]) => string;
+};
+
+export type FormFieldConfig =
+	| TextFormField
+	| SelectFormField
+	| DateFormField
+	| MultiSelectFormField;
 
 export function getString(
 	values: Record<string, FieldValue>,
