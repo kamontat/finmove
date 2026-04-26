@@ -3,7 +3,7 @@ import type { JSX } from "react";
 import { useEffect, useMemo } from "react";
 import type { Expense } from "../../core/models";
 import { today } from "../../core/services/date";
-import { addExpense, updateExpense } from "../../core/services/expense";
+import { addExpense, nextExpenseId, updateExpense } from "../../core/services/expense";
 import { Form } from "../components/organisms/Form";
 import type { FormFieldConfig } from "../models";
 import { useData } from "../states/data";
@@ -137,7 +137,8 @@ export function ExpenseForm(): JSX.Element {
 		const currency = values["currency"] ?? "THB";
 		const exchangeRateStr = values["exchangeRate"] ?? "";
 
-		const id = existingExpense?.id ?? `exp-${Date.now()}`;
+		const id =
+			existingExpense?.id ?? nextExpenseId(trip, values["date"] ?? today());
 
 		const expense: Expense = {
 			id,
