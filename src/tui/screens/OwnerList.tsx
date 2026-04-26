@@ -87,7 +87,6 @@ export function OwnerList(): JSX.Element {
 						goBack();
 					}
 				}}
-				onCancel={goBack}
 			/>
 		);
 	}
