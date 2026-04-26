@@ -43,7 +43,11 @@ export class FormBufferStore {
 
 	private emit(): void {
 		for (const fn of this.listeners) {
-			fn();
+			try {
+				fn();
+			} catch (error) {
+				console.error("FormBufferStore listener error:", error);
+			}
 		}
 	}
 }
