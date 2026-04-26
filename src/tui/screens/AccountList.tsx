@@ -7,6 +7,7 @@ import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
+import { useFormBufferAdmin } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
@@ -17,6 +18,11 @@ export function AccountList(): JSX.Element {
 	const { goTo, goBack } = useNavigation();
 
 	const { selectMode } = useRouteProps("/trips/accounts");
+
+	const { clearByPrefix } = useFormBufferAdmin();
+	useEffect(() => {
+		clearByPrefix("account-");
+	}, [clearByPrefix]);
 
 	useEffect(() => {
 		if (!trip || selectMode) return;

@@ -7,6 +7,7 @@ import { ListSelect } from "../components/molecules/ListSelect";
 import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
+import { useFormBufferAdmin } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
@@ -16,6 +17,11 @@ export function TripList(): JSX.Element {
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
 
 	const { dataDir = "./data", selectMode } = useRouteProps("/trips");
+
+	const { clearByPrefix } = useFormBufferAdmin();
+	useEffect(() => {
+		clearByPrefix("trip-");
+	}, [clearByPrefix]);
 
 	const [trips, setTrips] = useState<Trip[]>(() => listTrips(dataDir));
 
