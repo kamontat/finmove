@@ -9,23 +9,21 @@ import {
 	useRef,
 	useState,
 } from "react";
-import type { RoutePath } from "../models";
+import type { RouteParams, RoutePath } from "../models";
 import { routes } from "../router";
 import { useData } from "./data";
 import { useFocus } from "./focus";
 import { useLayout } from "./layout";
 
-interface RouteEntry {
-	path: RoutePath;
-	props: Record<string, unknown>;
-}
+type GoToOptions<P extends RoutePath> = {
+	replace?: boolean;
+} & (Record<string, never> extends RouteParams[P]
+	? { props?: RouteParams[P] }
+	: { props: RouteParams[P] });
 
 interface NavigationContextValue {
-	currentRoute: RouteEntry;
-	goTo: (
-		path: RoutePath,
-		options?: { props?: Record<string, unknown>; replace?: boolean },
-	) => void;
+	currentRoute: { path: RoutePath; props: Record<string, unknown> };
+	goTo: <P extends RoutePath>(path: P, options?: GoToOptions<P>) => void;
 	goBack: () => void;
 	goExit: () => void;
 }
@@ -48,11 +46,13 @@ export function NavigationProvider({
 	const { resetLayout } = useLayout();
 	const { loadTripByPath, clearTrip } = useData();
 
-	const [currentRoute, setCurrentRoute] = useState<RouteEntry>({
-		path: initialPath,
-		props: initialProps,
-	});
-	const historyRef = useRef<RouteEntry[]>([]);
+	const [currentRoute, setCurrentRoute] = useState<{
+		path: RoutePath;
+		props: Record<string, unknown>;
+	}>({ path: initialPath, props: initialProps });
+	const historyRef = useRef<
+		{ path: RoutePath; props: Record<string, unknown> }[]
+	>([]);
 
 	const syncTripData = useCallback(
 		(path: RoutePath, props: Record<string, unknown>) => {
@@ -69,7 +69,7 @@ export function NavigationProvider({
 	);
 
 	const applyRoute = useCallback(
-		(entry: RouteEntry) => {
+		(entry: { path: RoutePath; props: Record<string, unknown> }) => {
 			const config = routes[entry.path];
 			resetLayout();
 			setFocus(config.defaultFocus);
@@ -81,11 +81,10 @@ export function NavigationProvider({
 	);
 
 	const goTo = useCallback(
-		(
-			path: RoutePath,
-			options?: { props?: Record<string, unknown>; replace?: boolean },
-		) => {
-			const props = options?.props ?? {};
+		<P extends RoutePath>(path: P, options?: GoToOptions<P>) => {
+			const props =
+				(options as { props?: Record<string, unknown> } | undefined)?.props ??
+				{};
 			const replace = options?.replace ?? false;
 
 			setCurrentRoute((prev) => {
@@ -131,4 +130,14 @@ export function useNavigation(): NavigationContextValue {
 		throw new Error("useNavigation must be used within a NavigationProvider");
 	}
 	return ctx;
+}
+
+export function useRouteProps<P extends RoutePath>(path: P): RouteParams[P] {
+	const { currentRoute } = useNavigation();
+	if (currentRoute.path !== path) {
+		throw new Error(
+			`useRouteProps("${path}") called on route ${currentRoute.path}`,
+		);
+	}
+	return currentRoute.props as RouteParams[P];
 }
