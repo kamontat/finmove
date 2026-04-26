@@ -84,7 +84,6 @@ export function CategoryList(): JSX.Element {
 						goBack();
 					}
 				}}
-				onCancel={goBack}
 			/>
 		);
 	}
