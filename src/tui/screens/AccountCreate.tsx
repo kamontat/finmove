@@ -5,15 +5,19 @@ import { addAccount } from "../../core/services/account";
 import { isValidSlug, uniqueSlug } from "../../core/services/slug";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import { type FormFieldConfig, getString } from "../models";
+import { type FormFieldConfig, getString, getStringArray } from "../models";
 import { useData } from "../states/data";
+import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
+
+const FORM_ID = "account-new";
 
 export function AccountCreate(): JSX.Element | null {
 	const { trip, reloadTrip } = useData();
 	const { setHints, setTitleSuffix } = useLayout();
-	const { goBack } = useNavigation();
+	const { goTo, goBack } = useNavigation();
+	const buffer = useFormBuffer(FORM_ID);
 
 	useEffect(() => {
 		setTitleSuffix(null);
@@ -22,6 +26,7 @@ export function AccountCreate(): JSX.Element | null {
 
 	if (!trip) return null;
 
+	const tripDirPath = trip.dirPath;
 	const takenIds = trip.accounts.map((a) => a.id);
 
 	const fields: FormFieldConfig[] = [
@@ -56,15 +61,19 @@ export function AccountCreate(): JSX.Element | null {
 		},
 		{
 			key: "owners",
-			label: "Owner IDs (comma-separated)",
-			type: "text",
+			label: "Owners",
+			type: "multiselect",
 			required: true,
-			placeholder: "e.g. alice,bob",
+			onEdit: () =>
+				goTo("/trips/accounts/new/owners", {
+					props: { tripDirPath, formId: FORM_ID, fieldKey: "owners" },
+				}),
 		},
 	];
 
 	return (
 		<Form
+			formId={FORM_ID}
 			fields={fields}
 			onSubmit={(values) => {
 				const name = getString(values, "name");
@@ -80,8 +89,7 @@ export function AccountCreate(): JSX.Element | null {
 					throw new Error(`Account ID "${id}" already exists.`);
 				}
 
-				const ownersStr = getString(values, "owners");
-				const owners = ownersStr.split(",").map((s) => s.trim());
+				const owners = getStringArray(values, "owners");
 
 				addAccount(trip, {
 					id,
@@ -90,6 +98,7 @@ export function AccountCreate(): JSX.Element | null {
 					owners,
 				});
 				reloadTrip();
+				buffer.clear();
 				goBack();
 			}}
 		/>
