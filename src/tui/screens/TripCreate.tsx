@@ -10,13 +10,17 @@ import { isValidSlug } from "../../core/services/slug";
 import { createTrip, toDirName } from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import { type FormFieldConfig, getString } from "../models";
+import { type FormFieldConfig, getString, getStringArray } from "../models";
+import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
+
+const FORM_ID = "trip-new";
 
 export function TripCreate(): JSX.Element {
 	const { goTo } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
+	const buffer = useFormBuffer(FORM_ID);
 
 	const { dataDir = "./data" } = useRouteProps("/trips/new");
 
@@ -63,10 +67,10 @@ export function TripCreate(): JSX.Element {
 		},
 		{
 			key: "countries",
-			label: "Countries (comma-separated)",
-			type: "text",
+			label: "Countries",
+			type: "multiselect",
 			required: false,
-			placeholder: "e.g. Japan, Korea",
+			onEdit: () => goTo("/trips/new/countries", { props: { dataDir } }),
 		},
 	];
 
@@ -78,6 +82,7 @@ export function TripCreate(): JSX.Element {
 				</Text>
 			)}
 			<Form
+				formId={FORM_ID}
 				fields={fields}
 				onSubmit={(values) => {
 					const name = getString(values, "name");
@@ -89,11 +94,7 @@ export function TripCreate(): JSX.Element {
 							? toDirName(name, startDate)
 							: explicitDirName;
 
-					const countriesStr = getString(values, "countries");
-					const countries = countriesStr
-						.split(",")
-						.map((s) => s.trim())
-						.filter((s) => s !== "");
+					const countries = getStringArray(values, "countries");
 
 					if (!isValidSlug(dirName)) {
 						setError(
@@ -116,6 +117,7 @@ export function TripCreate(): JSX.Element {
 						countries,
 					};
 					const newTrip = createTrip(dataDir, dirName, settings);
+					buffer.clear();
 					goTo("/trips/overview", {
 						replace: true,
 						props: {
