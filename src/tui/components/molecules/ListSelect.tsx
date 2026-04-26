@@ -27,10 +27,7 @@ export function ListSelect({
 				const o = options[i];
 				if (!o) return null;
 				return (
-					<Text
-						inverse={selected}
-						{...(color !== undefined ? { color } : {})}
-					>
+					<Text inverse={selected} {...(color !== undefined ? { color } : {})}>
 						{selected ? "> " : "  "}
 						{o.label}
 						{o.detail ? <Text dimColor={!selected}> {o.detail}</Text> : null}

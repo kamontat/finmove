@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { toSlug, uniqueSlug, isValidSlug } from "..";
+import { isValidSlug, toSlug, uniqueSlug } from "..";
 
 describe("toSlug", () => {
 	test("lowercases letters", () => {
