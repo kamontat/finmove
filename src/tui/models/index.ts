@@ -2,40 +2,111 @@ import type { ComponentType } from "react";
 
 export type FocusZone = "main" | "menu" | "input";
 
-export type RoutePath =
-	| "/trips"
-	| "/trips/new"
-	| "/trips/duplicate"
-	| "/trips/overview"
-	| "/trips/owners"
-	| "/trips/owners/new"
-	| "/trips/owners/edit"
-	| "/trips/accounts"
-	| "/trips/accounts/new"
-	| "/trips/accounts/edit"
-	| "/trips/expenses"
-	| "/trips/expenses/form"
-	| "/trips/settings"
-	| "/trips/settings/countries"
-	| "/trips/settings/countries/new"
-	| "/trips/settings/countries/edit"
-	| "/trips/settings/categories"
-	| "/trips/settings/categories/new"
-	| "/trips/settings/categories/edit"
-	| "/trips/settings/tags"
-	| "/trips/settings/tags/new"
-	| "/trips/settings/tags/edit"
-	| "/trips/settings/currencies"
-	| "/trips/settings/currencies/new"
-	| "/trips/settings/currencies/edit"
-	| "/trips/settings/export";
+export interface RouteParams {
+	"/trips": { dataDir?: string; selectMode?: "delete" | "duplicate" };
+	"/trips/new": { dataDir?: string };
+	"/trips/duplicate": {
+		dataDir?: string;
+		sourceDirPath: string;
+		sourceName: string;
+		sourceStartDate: string;
+	};
+	"/trips/overview": {
+		tripDirPath: string;
+		tripName?: string;
+		dataDir?: string;
+	};
 
-export interface RouteConfig {
+	"/trips/owners": { tripDirPath: string; selectMode?: "remove" };
+	"/trips/owners/new": { tripDirPath: string };
+	"/trips/owners/edit": { tripDirPath: string; ownerId: string };
+
+	"/trips/accounts": { tripDirPath: string; selectMode?: "remove" };
+	"/trips/accounts/new": { tripDirPath: string };
+	"/trips/accounts/edit": { tripDirPath: string; accountId: string };
+
+	"/trips/expenses": { tripDirPath: string };
+	"/trips/expenses/form": { tripDirPath: string; expenseId?: string };
+
+	"/trips/settings": { tripDirPath: string; tripName?: string };
+
+	"/trips/settings/countries": {
+		tripDirPath: string;
+		tripName?: string;
+		selectMode?: "remove";
+	};
+	"/trips/settings/countries/new": {
+		tripDirPath: string;
+		tripName?: string;
+	};
+	"/trips/settings/countries/edit": {
+		tripDirPath: string;
+		tripName?: string;
+		value: string;
+	};
+
+	"/trips/settings/categories": {
+		tripDirPath: string;
+		tripName?: string;
+		selectMode?: "remove";
+	};
+	"/trips/settings/categories/new": {
+		tripDirPath: string;
+		tripName?: string;
+	};
+	"/trips/settings/categories/edit": {
+		tripDirPath: string;
+		tripName?: string;
+		value: string;
+	};
+
+	"/trips/settings/tags": {
+		tripDirPath: string;
+		tripName?: string;
+		selectMode?: "remove";
+	};
+	"/trips/settings/tags/new": {
+		tripDirPath: string;
+		tripName?: string;
+	};
+	"/trips/settings/tags/edit": {
+		tripDirPath: string;
+		tripName?: string;
+		value: string;
+	};
+
+	"/trips/settings/currencies": {
+		tripDirPath: string;
+		tripName?: string;
+		selectMode?: "remove";
+	};
+	"/trips/settings/currencies/new": {
+		tripDirPath: string;
+		tripName?: string;
+	};
+	"/trips/settings/currencies/edit": {
+		tripDirPath: string;
+		tripName?: string;
+		currencyCode: string;
+	};
+
+	"/trips/settings/export": { tripDirPath: string; tripName?: string };
+}
+
+export type RoutePath = keyof RouteParams;
+
+export type RouteEntry = {
+	[P in RoutePath]: { path: P; props: RouteParams[P] };
+}[RoutePath];
+
+export interface RouteConfig<_P extends RoutePath = RoutePath> {
 	component: ComponentType;
 	title: string | ((props: Record<string, unknown>) => string);
 	defaultFocus: FocusZone;
 	borderColor?: string;
 }
+
+export type Routes = { [P in RoutePath]: RouteConfig<P> };
 
 export interface SelectOption {
 	label: string;
