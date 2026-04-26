@@ -6,6 +6,7 @@ import { VerticalSelect } from "../components/atoms/VerticalSelect";
 import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
+import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
 
@@ -13,6 +14,7 @@ type SelectMode = "remove";
 
 export function OwnerList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
+	const { focus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
 	const { goTo, goBack, currentRoute } = useNavigation();
 
@@ -103,7 +105,7 @@ export function OwnerList(): JSX.Element {
 					props: { tripDirPath: trip.dirPath, ownerId },
 				});
 			}}
-			isActive
+			isActive={focus === "main"}
 		/>
 	);
 }
