@@ -101,8 +101,7 @@ export function Form({
 		for (const field of fields) {
 			const v = values[field.key];
 			if (field.type === "multiselect") {
-				const arr = Array.isArray(v) ? v : [];
-				result[field.key] = arr.length > 0 ? arr : (field.defaultValue ?? []);
+				result[field.key] = Array.isArray(v) ? v : [];
 			} else if (typeof v === "string" && v !== "") {
 				result[field.key] = v;
 			} else if (field.defaultValue !== undefined) {
