@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
+import { DEFAULT_TRIP_SETTINGS } from "../../core/constants";
 import type { Settings } from "../../core/models";
 import { addDays, today } from "../../core/services/date";
 import { isValidSlug } from "../../core/services/slug";
@@ -12,22 +13,6 @@ import { FORM_HINTS } from "../constants/hints";
 import type { FormFieldConfig } from "../models";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
-
-const DEFAULT_SETTINGS: Omit<Settings, "name" | "startDate" | "endDate"> = {
-	countries: [],
-	baseCurrency: "THB",
-	currencies: {},
-	categories: [
-		"Flight",
-		"Hotels",
-		"Transportation",
-		"Shopping",
-		"Eating",
-		"Activities",
-	],
-	tags: [],
-	exportPath: "./expenses.csv",
-};
 
 export function TripCreate(): JSX.Element {
 	const { goTo } = useNavigation();
@@ -111,7 +96,7 @@ export function TripCreate(): JSX.Element {
 					}
 					setError(null);
 					const settings: Settings = {
-						...DEFAULT_SETTINGS,
+						...DEFAULT_TRIP_SETTINGS,
 						name,
 						startDate,
 						endDate,
