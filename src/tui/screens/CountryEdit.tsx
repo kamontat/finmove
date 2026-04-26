@@ -7,14 +7,16 @@ import { FORM_HINTS } from "../constants/hints";
 import type { FormFieldConfig } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
-import { useNavigation } from "../states/navigation";
+import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function CountryEdit(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { setHints, setTitleSuffix } = useLayout();
-	const { goBack, currentRoute } = useNavigation();
+	const { goBack } = useNavigation();
 
-	const originalValue = currentRoute.props["value"] as string;
+	const { value: originalValue } = useRouteProps(
+		"/trips/settings/countries/edit",
+	);
 
 	useEffect(() => {
 		setTitleSuffix(`Settings > Countries > ${originalValue}`);
