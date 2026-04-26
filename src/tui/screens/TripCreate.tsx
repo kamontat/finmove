@@ -62,7 +62,7 @@ export function TripCreate(): JSX.Element {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		setTitleSuffix("New");
+		setTitleSuffix(null);
 		setHints(FORM_HINTS);
 	}, [setHints, setTitleSuffix]);
 

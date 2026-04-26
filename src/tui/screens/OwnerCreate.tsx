@@ -25,7 +25,7 @@ export function OwnerCreate(): JSX.Element | null {
 	const { goBack } = useNavigation();
 
 	useEffect(() => {
-		setTitleSuffix("New");
+		setTitleSuffix(null);
 		setHints(FORM_HINTS);
 	}, [setHints, setTitleSuffix]);
 
