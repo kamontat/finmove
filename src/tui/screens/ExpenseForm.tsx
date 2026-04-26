@@ -9,15 +9,15 @@ import type { FormFieldConfig } from "../models";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
-import { useNavigation } from "../states/navigation";
+import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function ExpenseForm(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { goBack, currentRoute } = useNavigation();
+	const { goBack } = useNavigation();
 	const { setFocus } = useFocus();
 	const { setHints } = useLayout();
 
-	const expenseId = currentRoute.props["expenseId"] as string | undefined;
+	const { expenseId } = useRouteProps("/trips/expenses/form");
 	const existingExpense = trip?.expenses.find((e) => e.id === expenseId);
 
 	useEffect(() => {

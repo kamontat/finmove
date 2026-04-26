@@ -8,17 +8,15 @@ import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
-import { useNavigation } from "../states/navigation";
-
-type SelectMode = "remove";
+import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function AccountList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { focus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
-	const { goTo, goBack, currentRoute } = useNavigation();
+	const { goTo, goBack } = useNavigation();
 
-	const selectMode = currentRoute.props["selectMode"] as SelectMode | undefined;
+	const { selectMode } = useRouteProps("/trips/accounts");
 
 	useEffect(() => {
 		setTitleSuffix(null);

@@ -7,14 +7,14 @@ import { FORM_HINTS } from "../constants/hints";
 import type { FormFieldConfig } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
-import { useNavigation } from "../states/navigation";
+import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function OwnerEdit(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { setHints, setTitleSuffix } = useLayout();
-	const { goBack, currentRoute } = useNavigation();
+	const { goBack } = useNavigation();
 
-	const ownerId = currentRoute.props["ownerId"] as string;
+	const { ownerId } = useRouteProps("/trips/owners/edit");
 	const owner = trip?.owners.find((o) => o.id === ownerId);
 
 	useEffect(() => {
