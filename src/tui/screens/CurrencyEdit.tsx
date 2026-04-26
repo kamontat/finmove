@@ -5,7 +5,7 @@ import type { CurrencyConfig } from "../../core/models";
 import { updateSettings } from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import type { FormFieldConfig } from "../models";
+import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
@@ -45,7 +45,7 @@ export function CurrencyEdit(): JSX.Element {
 		<Form
 			fields={fields}
 			onSubmit={(values) => {
-				const rate = Number.parseFloat(values["exchangeRate"] ?? "");
+				const rate = Number.parseFloat(getString(values, "exchangeRate"));
 				if (!Number.isNaN(rate)) {
 					const updated: Record<string, CurrencyConfig> = {
 						...trip.settings.currencies,

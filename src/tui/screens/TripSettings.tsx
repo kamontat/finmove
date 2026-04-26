@@ -3,7 +3,7 @@ import type { JSX } from "react";
 import { useEffect } from "react";
 import { updateSettings } from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
-import type { FormFieldConfig } from "../models";
+import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
@@ -104,10 +104,10 @@ export function TripSettings(): JSX.Element {
 			fields={fields}
 			onSubmit={(values) => {
 				updateSettings(trip.dirPath, {
-					name: values["name"] ?? settings.name,
-					startDate: values["startDate"] ?? settings.startDate,
-					endDate: values["endDate"] ?? settings.endDate,
-					exportPath: values["exportPath"] ?? settings.exportPath,
+					name: getString(values, "name") || settings.name,
+					startDate: getString(values, "startDate") || settings.startDate,
+					endDate: getString(values, "endDate") || settings.endDate,
+					exportPath: getString(values, "exportPath") || settings.exportPath,
 				});
 				reloadTrip();
 				goBack();

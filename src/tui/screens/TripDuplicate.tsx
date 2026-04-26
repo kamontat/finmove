@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { duplicateTrip, toDirName } from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import type { FormFieldConfig } from "../models";
+import { type FormFieldConfig, getString } from "../models";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
@@ -48,7 +48,7 @@ export function TripDuplicate(): JSX.Element {
 			<Form
 				fields={fields}
 				onSubmit={(values) => {
-					const name = values["newName"] ?? "";
+					const name = getString(values, "newName");
 					const dirName = toDirName(name, sourceStartDate);
 					const tripPath = join(dataDir, dirName);
 					if (existsSync(tripPath)) {

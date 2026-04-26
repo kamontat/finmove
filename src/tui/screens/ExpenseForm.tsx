@@ -9,7 +9,7 @@ import {
 	updateExpense,
 } from "../../core/services/expense";
 import { Form } from "../components/organisms/Form";
-import type { FormFieldConfig } from "../models";
+import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
@@ -129,34 +129,35 @@ export function ExpenseForm(): JSX.Element {
 	}
 
 	const handleSubmit = (values: Record<string, string>) => {
-		const tagsStr = values["tags"] ?? "";
+		const tagsStr = getString(values, "tags");
 		const tags = tagsStr ? tagsStr.split(",").map((s) => s.trim()) : [];
 
-		const ownersStr = values["owners"] ?? "";
+		const ownersStr = getString(values, "owners");
 		const ownerList =
 			ownersStr.trim() === ""
 				? undefined
 				: ownersStr.split(",").map((s) => s.trim());
 
-		const currency = values["currency"] ?? "THB";
-		const exchangeRateStr = values["exchangeRate"] ?? "";
+		const currency = getString(values, "currency") || "THB";
+		const exchangeRateStr = getString(values, "exchangeRate");
 
 		const id =
-			existingExpense?.id ?? nextExpenseId(trip, values["date"] ?? today());
+			existingExpense?.id ??
+			nextExpenseId(trip, getString(values, "date") || today());
 
 		const expense: Expense = {
 			id,
-			accountId: values["account"] ?? "",
-			date: values["date"] ?? "",
-			payee: values["payee"] ?? "",
-			category: values["category"] ?? "",
-			amount: Number.parseFloat(values["amount"] ?? "0"),
+			accountId: getString(values, "account"),
+			date: getString(values, "date"),
+			payee: getString(values, "payee"),
+			category: getString(values, "category"),
+			amount: Number.parseFloat(getString(values, "amount") || "0"),
 			currency,
 			...(exchangeRateStr && currency !== "THB"
 				? { exchangeRate: Number.parseFloat(exchangeRateStr) }
 				: {}),
 			...(ownerList ? { owners: ownerList } : {}),
-			description: values["description"] ?? "",
+			description: getString(values, "description"),
 			tags,
 		};
 

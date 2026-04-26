@@ -5,7 +5,7 @@ import { addAccount } from "../../core/services/account";
 import { isValidSlug, uniqueSlug } from "../../core/services/slug";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import type { FormFieldConfig } from "../models";
+import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
@@ -67,8 +67,8 @@ export function AccountCreate(): JSX.Element | null {
 		<Form
 			fields={fields}
 			onSubmit={(values) => {
-				const name = values["name"] ?? "";
-				const explicitId = (values["id"] ?? "").trim();
+				const name = getString(values, "name");
+				const explicitId = getString(values, "id").trim();
 				const id = explicitId === "" ? uniqueSlug(name, takenIds) : explicitId;
 
 				if (!isValidSlug(id)) {
@@ -80,13 +80,13 @@ export function AccountCreate(): JSX.Element | null {
 					throw new Error(`Account ID "${id}" already exists.`);
 				}
 
-				const ownersStr = values["owners"] ?? "";
+				const ownersStr = getString(values, "owners");
 				const owners = ownersStr.split(",").map((s) => s.trim());
 
 				addAccount(trip, {
 					id,
 					name,
-					type: (values["type"] ?? "Credit") as AccountType,
+					type: (getString(values, "type") || "Credit") as AccountType,
 					owners,
 				});
 				reloadTrip();

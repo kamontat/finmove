@@ -5,7 +5,7 @@ import type { AccountType } from "../../core/models";
 import { updateAccount } from "../../core/services/account";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import type { FormFieldConfig } from "../models";
+import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
@@ -62,9 +62,10 @@ export function AccountEdit(): JSX.Element {
 			<Form
 				fields={fields}
 				onSubmit={(values) => {
-					const name = values["name"] ?? account.name;
-					const typeStr = values["type"] ?? account.type;
-					const ownersStr = values["owners"] ?? account.owners.join(", ");
+					const name = getString(values, "name") || account.name;
+					const typeStr = getString(values, "type") || account.type;
+					const ownersStr =
+						getString(values, "owners") || account.owners.join(", ");
 					const owners = ownersStr.split(",").map((s) => s.trim());
 					updateAccount(trip, account.id, {
 						name,

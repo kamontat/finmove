@@ -4,7 +4,7 @@ import { addOwner } from "../../core/services/owner";
 import { isValidSlug, uniqueSlug } from "../../core/services/slug";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import type { FormFieldConfig } from "../models";
+import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
@@ -48,8 +48,8 @@ export function OwnerCreate(): JSX.Element | null {
 		<Form
 			fields={fields}
 			onSubmit={(values) => {
-				const name = values["name"] ?? "";
-				const explicitId = (values["id"] ?? "").trim();
+				const name = getString(values, "name");
+				const explicitId = getString(values, "id").trim();
 				const id = explicitId === "" ? uniqueSlug(name, takenIds) : explicitId;
 
 				if (!isValidSlug(id)) {

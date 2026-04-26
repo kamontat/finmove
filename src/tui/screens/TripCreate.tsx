@@ -10,7 +10,7 @@ import { isValidSlug } from "../../core/services/slug";
 import { createTrip, toDirName } from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import type { FormFieldConfig } from "../models";
+import { type FormFieldConfig, getString } from "../models";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
@@ -80,16 +80,16 @@ export function TripCreate(): JSX.Element {
 			<Form
 				fields={fields}
 				onSubmit={(values) => {
-					const name = values["name"] ?? "";
-					const startDate = values["startDate"] ?? today();
-					const endDate = values["endDate"] ?? addDays(today(), 1);
-					const explicitDirName = (values["dirName"] ?? "").trim();
+					const name = getString(values, "name");
+					const startDate = getString(values, "startDate") || today();
+					const endDate = getString(values, "endDate") || addDays(today(), 1);
+					const explicitDirName = getString(values, "dirName").trim();
 					const dirName =
 						explicitDirName === ""
 							? toDirName(name, startDate)
 							: explicitDirName;
 
-					const countriesStr = values["countries"] ?? "";
+					const countriesStr = getString(values, "countries");
 					const countries = countriesStr
 						.split(",")
 						.map((s) => s.trim())
