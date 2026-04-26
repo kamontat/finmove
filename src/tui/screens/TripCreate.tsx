@@ -5,6 +5,7 @@ import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Settings } from "../../core/models";
 import { addDays, today } from "../../core/services/date";
+import { isValidSlug } from "../../core/services/slug";
 import { createTrip, toDirName } from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
@@ -28,30 +29,6 @@ const DEFAULT_SETTINGS: Omit<Settings, "name" | "startDate" | "endDate"> = {
 	exportPath: "./expenses.csv",
 };
 
-const FIELDS: FormFieldConfig[] = [
-	{
-		key: "name",
-		label: "Trip Name",
-		type: "text",
-		required: true,
-		placeholder: "e.g. Japan Trip",
-	},
-	{
-		key: "startDate",
-		label: "Start Date",
-		type: "date",
-		required: true,
-		defaultValue: today(),
-	},
-	{
-		key: "endDate",
-		label: "End Date",
-		type: "date",
-		required: true,
-		defaultValue: addDays(today(), 1),
-	},
-];
-
 export function TripCreate(): JSX.Element {
 	const { goTo } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
@@ -65,6 +42,42 @@ export function TripCreate(): JSX.Element {
 		setHints(FORM_HINTS);
 	}, [setHints, setTitleSuffix]);
 
+	const fields: FormFieldConfig[] = [
+		{
+			key: "name",
+			label: "Trip Name",
+			type: "text",
+			required: true,
+			placeholder: "e.g. Japan Trip",
+		},
+		{
+			key: "dirName",
+			label: "Directory Name",
+			type: "text",
+			required: false,
+			placeholder: (values) => {
+				const name = values["name"] ?? "";
+				const startDate = values["startDate"] ?? today();
+				if (name === "") return "auto-generate from name + start year";
+				return toDirName(name, startDate);
+			},
+		},
+		{
+			key: "startDate",
+			label: "Start Date",
+			type: "date",
+			required: true,
+			defaultValue: today(),
+		},
+		{
+			key: "endDate",
+			label: "End Date",
+			type: "date",
+			required: true,
+			defaultValue: addDays(today(), 1),
+		},
+	];
+
 	return (
 		<Box flexDirection="column">
 			{error && (
@@ -73,15 +86,27 @@ export function TripCreate(): JSX.Element {
 				</Text>
 			)}
 			<Form
-				fields={FIELDS}
+				fields={fields}
 				onSubmit={(values) => {
 					const name = values["name"] ?? "";
 					const startDate = values["startDate"] ?? today();
 					const endDate = values["endDate"] ?? addDays(today(), 1);
-					const dirName = toDirName(name, startDate);
+					const explicitDirName = (values["dirName"] ?? "").trim();
+					const dirName =
+						explicitDirName === ""
+							? toDirName(name, startDate)
+							: explicitDirName;
+
+					if (!isValidSlug(dirName)) {
+						setError(
+							`Directory name "${dirName}" is invalid. Use lowercase letters, digits, and hyphens.`,
+						);
+						return;
+					}
+
 					const tripPath = join(dataDir, dirName);
 					if (existsSync(tripPath)) {
-						setError(`Trip "${name}" already exists (${dirName})`);
+						setError(`Trip directory "${dirName}" already exists`);
 						return;
 					}
 					setError(null);
