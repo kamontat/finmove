@@ -25,7 +25,7 @@ export interface RouteParams {
 	"/trips/accounts/new": { tripDirPath: string };
 	"/trips/accounts/edit": { tripDirPath: string; accountId: string };
 
-	"/trips/expenses": { tripDirPath: string };
+	"/trips/expenses": { tripDirPath: string; selectMode?: "remove" };
 	"/trips/expenses/form": { tripDirPath: string; expenseId?: string };
 
 	"/trips/settings": { tripDirPath: string; tripName?: string };
