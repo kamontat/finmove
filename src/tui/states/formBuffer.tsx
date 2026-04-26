@@ -2,6 +2,7 @@ import {
 	createContext,
 	type JSX,
 	type ReactNode,
+	useCallback,
 	useContext,
 	useMemo,
 	useSyncExternalStore,
@@ -53,12 +54,16 @@ export function useFormBuffer(formId: string): UseFormBufferResult {
 		() => store.get(formId) ?? EMPTY,
 		() => store.get(formId) ?? EMPTY,
 	);
-	return {
-		values,
-		setField: (key, value) => store.setField(formId, key, value),
-		setValues: (v) => store.setValues(formId, v),
-		clear: () => store.clear(formId),
-	};
+	const setField = useCallback(
+		(key: string, value: FieldValue) => store.setField(formId, key, value),
+		[store, formId],
+	);
+	const setValues = useCallback(
+		(v: FormValues) => store.setValues(formId, v),
+		[store, formId],
+	);
+	const clear = useCallback(() => store.clear(formId), [store, formId]);
+	return { values, setField, setValues, clear };
 }
 
 interface UseFormBufferAdminResult {
@@ -67,7 +72,9 @@ interface UseFormBufferAdminResult {
 
 export function useFormBufferAdmin(): UseFormBufferAdminResult {
 	const store = useStore();
-	return {
-		clearByPrefix: (prefix) => store.clearByPrefix(prefix),
-	};
+	const clearByPrefix = useCallback(
+		(prefix: string) => store.clearByPrefix(prefix),
+		[store],
+	);
+	return { clearByPrefix };
 }
