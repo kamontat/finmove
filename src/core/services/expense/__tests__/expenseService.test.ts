@@ -115,6 +115,53 @@ describe("addExpense", () => {
 			}),
 		).toThrow('Owner "ghost" not found');
 	});
+
+	test("merges trip default tags into new expense", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		trip.settings.tags = ["Zvent: 001 Test (Jan 2026)", "team-lunch"];
+		addExpense(trip, sampleExpense);
+
+		const reloaded = loadTrip(tripDir);
+		expect(reloaded.expenses[0].tags).toEqual([
+			"Zvent: 001 Test (Jan 2026)",
+			"team-lunch",
+			"food",
+		]);
+	});
+
+	test("dedupes user tags that match a default tag", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		trip.settings.tags = ["food", "Zvent: 001 Test (Jan 2026)"];
+		addExpense(trip, sampleExpense);
+
+		const reloaded = loadTrip(tripDir);
+		expect(reloaded.expenses[0].tags).toEqual([
+			"food",
+			"Zvent: 001 Test (Jan 2026)",
+		]);
+	});
+
+	test("leaves expense.tags untouched when settings.tags is empty", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		// settings.tags defaults to [] in sampleSettings
+		addExpense(trip, sampleExpense);
+
+		const reloaded = loadTrip(tripDir);
+		expect(reloaded.expenses[0].tags).toEqual(["food"]);
+	});
+
+	test("preserves order: defaults first, then user tags", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		trip.settings.tags = ["a", "b"];
+		addExpense(trip, { ...sampleExpense, tags: ["x", "y"] });
+
+		const reloaded = loadTrip(tripDir);
+		expect(reloaded.expenses[0].tags).toEqual(["a", "b", "x", "y"]);
+	});
 });
 
 describe("updateExpense", () => {

@@ -22,9 +22,15 @@ export function addExpense(trip: Trip, expense: Expense): void {
 		}
 	}
 
+	const merged: string[] = [...trip.settings.tags];
+	for (const tag of expense.tags) {
+		if (!merged.includes(tag)) merged.push(tag);
+	}
+	const expenseToWrite: Expense = { ...expense, tags: merged };
+
 	const filePath = join(trip.dirPath, "expenses.yaml");
 	const data = parse(readFileSync(filePath, "utf-8")) ?? { expenses: [] };
-	data.expenses.push(expense);
+	data.expenses.push(expenseToWrite);
 	writeFileSync(filePath, stringify(data));
-	trip.expenses.push(expense);
+	trip.expenses.push(expenseToWrite);
 }
