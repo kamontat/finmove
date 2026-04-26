@@ -22,7 +22,7 @@ export function TripOverview(): JSX.Element {
 			[
 				{ label: "Owners", value: "owners", key: "o" },
 				{ label: "Accounts", value: "accounts", key: "a" },
-				{ label: "Expenses", value: "expenses", key: "e" },
+				{ label: "Expenses", value: "expenses", key: "p" },
 				{ label: "Settings", value: "settings", key: "s" },
 			],
 			(value) => {
