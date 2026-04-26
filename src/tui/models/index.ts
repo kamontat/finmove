@@ -136,7 +136,7 @@ interface FormFieldBase {
 export type TextFormField = FormFieldBase & {
 	type: "text";
 	defaultValue?: string;
-	placeholder?: string;
+	placeholder?: string | ((values: Record<string, string>) => string);
 };
 
 export type SelectFormField = FormFieldBase & {

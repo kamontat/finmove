@@ -156,7 +156,10 @@ export function Form({
 						preview = field.defaultValue;
 					}
 				} else if (field.type === "text" && field.placeholder !== undefined) {
-					preview = field.placeholder;
+					preview =
+						typeof field.placeholder === "function"
+							? field.placeholder(values)
+							: field.placeholder;
 				}
 
 				return (
@@ -193,7 +196,12 @@ export function Form({
 								{field.type === "text" && (
 									<TextInput
 										{...(field.placeholder !== undefined
-											? { placeholder: field.placeholder }
+											? {
+													placeholder:
+														typeof field.placeholder === "function"
+															? field.placeholder(values)
+															: field.placeholder,
+												}
 											: {})}
 										{...(currentValue !== ""
 											? { defaultValue: currentValue }
