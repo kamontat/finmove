@@ -84,7 +84,6 @@ export function TagList(): JSX.Element {
 						goBack();
 					}
 				}}
-				onCancel={goBack}
 			/>
 		);
 	}
