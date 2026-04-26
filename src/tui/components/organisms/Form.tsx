@@ -67,8 +67,6 @@ export function Form({
 			const val = values[field.key] ?? "";
 			if (val !== "") {
 				result[field.key] = val;
-			} else if (field.type === "text" && field.placeholder !== undefined) {
-				result[field.key] = field.placeholder;
 			} else if (field.defaultValue !== undefined) {
 				result[field.key] = field.defaultValue;
 			} else {
