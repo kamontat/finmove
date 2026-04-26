@@ -9,7 +9,7 @@ import {
 	useRef,
 	useState,
 } from "react";
-import type { RouteParams, RoutePath } from "../models";
+import type { RouteEntry, RouteParams, RoutePath } from "../models";
 import { routes } from "../router";
 import { useData } from "./data";
 import { useFocus } from "./focus";
@@ -22,7 +22,7 @@ type GoToOptions<P extends RoutePath> = {
 	: { props: RouteParams[P] });
 
 interface NavigationContextValue {
-	currentRoute: { path: RoutePath; props: Record<string, unknown> };
+	currentRoute: RouteEntry;
 	goTo: <P extends RoutePath>(path: P, options?: GoToOptions<P>) => void;
 	goBack: () => void;
 	goExit: () => void;
@@ -31,14 +31,12 @@ interface NavigationContextValue {
 const NavigationContext = createContext<NavigationContextValue | null>(null);
 
 interface NavigationProviderProps {
-	initialPath: RoutePath;
-	initialProps?: Record<string, unknown>;
+	initial: RouteEntry;
 	children: ReactNode;
 }
 
 export function NavigationProvider({
-	initialPath,
-	initialProps = {},
+	initial,
 	children,
 }: NavigationProviderProps): JSX.Element {
 	const { exit } = useApp();
@@ -46,35 +44,29 @@ export function NavigationProvider({
 	const { resetLayout } = useLayout();
 	const { loadTripByPath, clearTrip } = useData();
 
-	const [currentRoute, setCurrentRoute] = useState<{
-		path: RoutePath;
-		props: Record<string, unknown>;
-	}>({ path: initialPath, props: initialProps });
-	const historyRef = useRef<
-		{ path: RoutePath; props: Record<string, unknown> }[]
-	>([]);
+	const [currentRoute, setCurrentRoute] = useState<RouteEntry>(initial);
+	const historyRef = useRef<RouteEntry[]>([]);
 
 	const syncTripData = useCallback(
-		(path: RoutePath, props: Record<string, unknown>) => {
-			if (path === "/trips") {
+		(entry: RouteEntry) => {
+			if (entry.path === "/trips") {
 				clearTrip();
-			} else {
-				const tripDirPath = props["tripDirPath"];
-				if (typeof tripDirPath === "string") {
-					loadTripByPath(tripDirPath);
-				}
+				return;
+			}
+			if ("tripDirPath" in entry.props) {
+				loadTripByPath(entry.props.tripDirPath);
 			}
 		},
 		[clearTrip, loadTripByPath],
 	);
 
 	const applyRoute = useCallback(
-		(entry: { path: RoutePath; props: Record<string, unknown> }) => {
+		(entry: RouteEntry) => {
 			const config = routes[entry.path];
 			resetLayout();
 			setFocus(config.defaultFocus);
 			setMenuAvailable(false);
-			syncTripData(entry.path, entry.props);
+			syncTripData(entry);
 			setCurrentRoute(entry);
 		},
 		[resetLayout, setFocus, setMenuAvailable, syncTripData],
@@ -83,8 +75,8 @@ export function NavigationProvider({
 	const goTo = useCallback(
 		<P extends RoutePath>(path: P, options?: GoToOptions<P>) => {
 			const props =
-				(options as { props?: Record<string, unknown> } | undefined)?.props ??
-				{};
+				(options as { props?: RouteParams[P] } | undefined)?.props ??
+				({} as RouteParams[P]);
 			const replace = options?.replace ?? false;
 
 			setCurrentRoute((prev) => {
@@ -94,7 +86,7 @@ export function NavigationProvider({
 				return prev; // actual update happens in applyRoute
 			});
 
-			applyRoute({ path, props });
+			applyRoute({ path, props } as RouteEntry);
 		},
 		[applyRoute],
 	);

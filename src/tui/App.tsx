@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import type { AppArgs } from "../core/parseArgs";
 import { useGlobalKeys } from "./hooks/useGlobalKeys";
 import { Default } from "./layouts/Default";
-import type { RoutePath } from "./models";
+import type { RouteEntry } from "./models";
 import { routes } from "./router";
 import { DataProvider, useData } from "./states/data";
 import { FocusProvider, useFocus } from "./states/focus";
@@ -11,30 +11,32 @@ import { HelpProvider } from "./states/help";
 import { LayoutProvider, useLayout } from "./states/layout";
 import { NavigationProvider, useNavigation } from "./states/navigation";
 
-function resolveInitialRoute(args: AppArgs): {
-	path: RoutePath;
-	props: Record<string, unknown>;
-} {
+function resolveInitialRoute(args: AppArgs): RouteEntry {
 	if (args.trip) {
 		const tripDirPath = `${args.dataDir}/${args.trip}`;
-		const props = { tripDirPath, dataDir: args.dataDir };
 		if (args.page) {
-			const pageMap: Record<string, RoutePath> = {
-				owners: "/trips/owners",
-				accounts: "/trips/accounts",
-				expenses: "/trips/expenses",
-				export: "/trips/settings/export",
-			};
-			const path = pageMap[args.page];
-			if (path) return { path, props };
+			if (args.page === "owners") {
+				return { path: "/trips/owners", props: { tripDirPath } };
+			}
+			if (args.page === "accounts") {
+				return { path: "/trips/accounts", props: { tripDirPath } };
+			}
+			if (args.page === "expenses") {
+				return { path: "/trips/expenses", props: { tripDirPath } };
+			}
+			if (args.page === "export") {
+				return {
+					path: "/trips/settings/export",
+					props: { tripDirPath },
+				};
+			}
 		}
-		return { path: "/trips/overview", props };
+		return {
+			path: "/trips/overview",
+			props: { tripDirPath, dataDir: args.dataDir },
+		};
 	}
 	return { path: "/trips", props: { dataDir: args.dataDir } };
-}
-
-function expenseFormLabel(props: Record<string, unknown>): string {
-	return props["expenseId"] ? "Edit" : "New";
 }
 
 function Router(): JSX.Element {
@@ -56,29 +58,53 @@ function Router(): JSX.Element {
 
 	// Build breadcrumb title from route hierarchy
 	const breadcrumbs: string[] = [];
-	const path = currentRoute.path;
 
-	const p = path as string;
-	if (p === "/trips") {
-		breadcrumbs.push("Trips");
-	} else if (p === "/trips/new") {
-		breadcrumbs.push("Trips", "New");
-	} else if (p === "/trips/duplicate") {
-		breadcrumbs.push("Trips", "Duplicate");
-	} else {
-		breadcrumbs.push("Trips");
-		if (trip) {
-			breadcrumbs.push(trip.settings.name);
+	switch (currentRoute.path) {
+		case "/trips":
+			breadcrumbs.push("Trips");
+			break;
+		case "/trips/new":
+			breadcrumbs.push("Trips", "New");
+			break;
+		case "/trips/duplicate":
+			breadcrumbs.push("Trips", "Duplicate");
+			break;
+		default: {
+			breadcrumbs.push("Trips");
+			if (trip) {
+				breadcrumbs.push(trip.settings.name);
+			}
+			switch (currentRoute.path) {
+				case "/trips/owners":
+					breadcrumbs.push("Owners");
+					break;
+				case "/trips/owners/new":
+					breadcrumbs.push("Owners", "New");
+					break;
+				case "/trips/owners/edit":
+					breadcrumbs.push("Owners", "Edit");
+					break;
+				case "/trips/accounts":
+					breadcrumbs.push("Accounts");
+					break;
+				case "/trips/accounts/new":
+					breadcrumbs.push("Accounts", "New");
+					break;
+				case "/trips/accounts/edit":
+					breadcrumbs.push("Accounts", "Edit");
+					break;
+				case "/trips/expenses":
+					breadcrumbs.push("Expenses");
+					break;
+				case "/trips/expenses/form":
+					breadcrumbs.push(
+						"Expenses",
+						currentRoute.props.expenseId ? "Edit" : "New",
+					);
+					break;
+			}
+			break;
 		}
-		if (p === "/trips/owners") breadcrumbs.push("Owners");
-		else if (p === "/trips/owners/new") breadcrumbs.push("Owners", "New");
-		else if (p === "/trips/owners/edit") breadcrumbs.push("Owners", "Edit");
-		else if (p === "/trips/accounts") breadcrumbs.push("Accounts");
-		else if (p === "/trips/accounts/new") breadcrumbs.push("Accounts", "New");
-		else if (p === "/trips/accounts/edit") breadcrumbs.push("Accounts", "Edit");
-		else if (p === "/trips/expenses") breadcrumbs.push("Expenses");
-		else if (p === "/trips/expenses/form")
-			breadcrumbs.push("Expenses", expenseFormLabel(currentRoute.props));
 	}
 
 	if (titleSuffix) {
@@ -104,14 +130,14 @@ interface AppProps {
 }
 
 export function App({ args }: AppProps): JSX.Element {
-	const { path, props } = resolveInitialRoute(args);
+	const initial = resolveInitialRoute(args);
 
 	return (
 		<DataProvider>
 			<FocusProvider>
 				<HelpProvider>
 					<LayoutProvider>
-						<NavigationProvider initialPath={path} initialProps={props}>
+						<NavigationProvider initial={initial}>
 							<Router />
 						</NavigationProvider>
 					</LayoutProvider>
