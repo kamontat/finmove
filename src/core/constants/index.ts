@@ -4,10 +4,3 @@ export {
 	DEFAULT_EXPORT_PATH,
 	DEFAULT_TRIP_SETTINGS,
 } from "./defaults";
-export {
-	ZVENT_DEFAULT_ID,
-	ZVENT_ID_PATTERN,
-	ZVENT_MONTHS,
-	ZVENT_TAG_PREFIX,
-	ZVENT_TAG_REGEX,
-} from "./zvent";
