@@ -35,6 +35,12 @@ export function AccountEdit(): JSX.Element {
 		}
 	}, [account, buffer]);
 
+	useEffect(() => {
+		if (account && buffer.values["type"] === undefined) {
+			buffer.setField("type", account.type);
+		}
+	}, [account, buffer]);
+
 	if (!trip) return <Text dimColor>Loading...</Text>;
 	if (!account) return <Text dimColor>Account "{accountId}" not found.</Text>;
 
@@ -59,6 +65,15 @@ export function AccountEdit(): JSX.Element {
 				{ label: "Debit", value: "Debit" },
 			],
 			defaultValue: account.type,
+			onEdit: () =>
+				goTo("/trips/accounts/edit/type", {
+					props: {
+						tripDirPath,
+						accountId,
+						formId,
+						fieldKey: "type",
+					},
+				}),
 		},
 		{
 			key: "owners",

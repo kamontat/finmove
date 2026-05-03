@@ -66,6 +66,10 @@ export function ExpenseForm(): JSX.Element {
 					label: `${a.name} (${a.type})`,
 					value: a.id,
 				})),
+				onEdit: () =>
+					goTo("/trips/expenses/form/account", {
+						props: { tripDirPath, formId, fieldKey: "account" },
+					}),
 				...(existingExpense ? { defaultValue: existingExpense.accountId } : {}),
 			},
 			{
@@ -91,6 +95,10 @@ export function ExpenseForm(): JSX.Element {
 					label: c,
 					value: c,
 				})),
+				onEdit: () =>
+					goTo("/trips/expenses/form/category", {
+						props: { tripDirPath, formId, fieldKey: "category" },
+					}),
 				...(existingExpense ? { defaultValue: existingExpense.category } : {}),
 			},
 			{
@@ -108,6 +116,10 @@ export function ExpenseForm(): JSX.Element {
 				type: "select",
 				required: true,
 				options: allCurrencies.map((c) => ({ label: c, value: c })),
+				onEdit: () =>
+					goTo("/trips/expenses/form/currency", {
+						props: { tripDirPath, formId, fieldKey: "currency" },
+					}),
 				defaultValue: existingExpense?.currency ?? "THB",
 			},
 			{

@@ -58,6 +58,10 @@ export function AccountCreate(): JSX.Element | null {
 				{ label: "Debit", value: "Debit" },
 			],
 			defaultValue: "Credit",
+			onEdit: () =>
+				goTo("/trips/accounts/new/type", {
+					props: { tripDirPath, formId: FORM_ID, fieldKey: "type" },
+				}),
 		},
 		{
 			key: "owners",

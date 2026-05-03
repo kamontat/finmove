@@ -4,11 +4,7 @@ import type { FieldValue, FormFieldConfig } from "../../models";
 import { useFocus } from "../../states/focus";
 import { useFormBuffer } from "../../states/formBuffer";
 import { DateInput } from "../atoms/DateInput";
-import { DropdownSelect } from "../atoms/DropdownSelect";
-import { InlineSelect } from "../atoms/InlineSelect";
 import { TextInput } from "../atoms/TextInput";
-
-const INLINE_SELECT_THRESHOLD = 3;
 
 interface FormProps {
 	fields: FormFieldConfig[];
@@ -153,7 +149,7 @@ export function Form({
 				} else {
 					const field = fields[cursor];
 					if (!field) return;
-					if (field.type === "multiselect") {
+					if (field.type === "multiselect" || field.type === "select") {
 						field.onEdit();
 					} else {
 						enterEdit();
@@ -248,42 +244,20 @@ export function Form({
 							)}
 						</Text>
 
-						{isEditing && field.type !== "multiselect" && (
-							<Box marginLeft={4}>
-								{field.type === "text" && (
-									<TextInput
-										{...(field.placeholder !== undefined
-											? {
-													placeholder:
-														typeof field.placeholder === "function"
-															? field.placeholder(stringValuesOnly(values))
-															: field.placeholder,
-												}
-											: {})}
-										{...(typeof currentValue === "string" && currentValue !== ""
-											? { defaultValue: currentValue }
-											: field.defaultValue !== undefined
-												? { defaultValue: field.defaultValue }
+						{isEditing &&
+							field.type !== "multiselect" &&
+							field.type !== "select" && (
+								<Box marginLeft={4}>
+									{field.type === "text" && (
+										<TextInput
+											{...(field.placeholder !== undefined
+												? {
+														placeholder:
+															typeof field.placeholder === "function"
+																? field.placeholder(stringValuesOnly(values))
+																: field.placeholder,
+													}
 												: {})}
-										onSubmit={(val) => setStringValue(field.key, val)}
-										onCancel={cancelEdit}
-									/>
-								)}
-								{field.type === "date" && (
-									<DateInput
-										defaultValue={
-											typeof currentValue === "string" && currentValue !== ""
-												? currentValue
-												: (field.defaultValue ?? "2026-01-01")
-										}
-										onSubmit={(val) => setStringValue(field.key, val)}
-										onCancel={cancelEdit}
-									/>
-								)}
-								{field.type === "select" &&
-									field.options.length <= INLINE_SELECT_THRESHOLD && (
-										<InlineSelect
-											options={field.options}
 											{...(typeof currentValue === "string" &&
 											currentValue !== ""
 												? { defaultValue: currentValue }
@@ -294,22 +268,19 @@ export function Form({
 											onCancel={cancelEdit}
 										/>
 									)}
-								{field.type === "select" &&
-									field.options.length > INLINE_SELECT_THRESHOLD && (
-										<DropdownSelect
-											options={field.options}
-											{...(typeof currentValue === "string" &&
-											currentValue !== ""
-												? { defaultValue: currentValue }
-												: field.defaultValue !== undefined
-													? { defaultValue: field.defaultValue }
-													: {})}
+									{field.type === "date" && (
+										<DateInput
+											defaultValue={
+												typeof currentValue === "string" && currentValue !== ""
+													? currentValue
+													: (field.defaultValue ?? "2026-01-01")
+											}
 											onSubmit={(val) => setStringValue(field.key, val)}
 											onCancel={cancelEdit}
 										/>
 									)}
-							</Box>
-						)}
+								</Box>
+							)}
 					</Box>
 				);
 			})}
