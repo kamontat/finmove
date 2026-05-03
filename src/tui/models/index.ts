@@ -124,6 +124,33 @@ export interface RouteParams {
 		formId: string;
 		fieldKey: string;
 	};
+
+	"/trips/expenses/form/account": {
+		tripDirPath: string;
+		formId: string;
+		fieldKey: string;
+	};
+	"/trips/expenses/form/category": {
+		tripDirPath: string;
+		formId: string;
+		fieldKey: string;
+	};
+	"/trips/expenses/form/currency": {
+		tripDirPath: string;
+		formId: string;
+		fieldKey: string;
+	};
+	"/trips/accounts/new/type": {
+		tripDirPath: string;
+		formId: string;
+		fieldKey: string;
+	};
+	"/trips/accounts/edit/type": {
+		tripDirPath: string;
+		accountId: string;
+		formId: string;
+		fieldKey: string;
+	};
 }
 
 export type RoutePath = keyof RouteParams;

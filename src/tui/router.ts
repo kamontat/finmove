@@ -3,15 +3,19 @@ import type { Routes } from "./models";
 import { AccountCreate } from "./screens/AccountCreate";
 import { AccountEdit } from "./screens/AccountEdit";
 import { AccountList } from "./screens/AccountList";
+import { AccountSelect } from "./screens/AccountSelect";
+import { AccountTypeSelect } from "./screens/AccountTypeSelect";
 import { CategoryCreate } from "./screens/CategoryCreate";
 import { CategoryEdit } from "./screens/CategoryEdit";
 import { CategoryList } from "./screens/CategoryList";
+import { CategorySelect } from "./screens/CategorySelect";
 import { CountryCreate } from "./screens/CountryCreate";
 import { CountryEdit } from "./screens/CountryEdit";
 import { CountryList } from "./screens/CountryList";
 import { CurrencyCreate } from "./screens/CurrencyCreate";
 import { CurrencyEdit } from "./screens/CurrencyEdit";
 import { CurrencyList } from "./screens/CurrencyList";
+import { CurrencySelect } from "./screens/CurrencySelect";
 import { ExpenseForm } from "./screens/ExpenseForm";
 import { ExpenseList } from "./screens/ExpenseList";
 import { ExportScreen } from "./screens/Export";
@@ -102,6 +106,16 @@ export const routes: Routes = {
 		title: "Select Owners",
 		defaultFocus: "main",
 	},
+	"/trips/accounts/new/type": {
+		component: AccountTypeSelect as unknown as ComponentType,
+		title: "Select Account Type",
+		defaultFocus: "main",
+	},
+	"/trips/accounts/edit/type": {
+		component: AccountTypeSelect as unknown as ComponentType,
+		title: "Select Account Type",
+		defaultFocus: "main",
+	},
 	"/trips/expenses": {
 		component: ExpenseList as unknown as ComponentType,
 		title: "Expenses",
@@ -120,6 +134,21 @@ export const routes: Routes = {
 	"/trips/expenses/form/tags": {
 		component: TagSelect as unknown as ComponentType,
 		title: "Select Tags",
+		defaultFocus: "main",
+	},
+	"/trips/expenses/form/account": {
+		component: AccountSelect as unknown as ComponentType,
+		title: "Select Account",
+		defaultFocus: "main",
+	},
+	"/trips/expenses/form/category": {
+		component: CategorySelect as unknown as ComponentType,
+		title: "Select Category",
+		defaultFocus: "main",
+	},
+	"/trips/expenses/form/currency": {
+		component: CurrencySelect as unknown as ComponentType,
+		title: "Select Currency",
 		defaultFocus: "main",
 	},
 	"/trips/settings": {
