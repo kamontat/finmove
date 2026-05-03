@@ -124,11 +124,20 @@ export function useNavigation(): NavigationContextValue {
 	return ctx;
 }
 
-export function useRouteProps<P extends RoutePath>(path: P): RouteParams[P] {
+export function useRouteProps<P extends RoutePath>(path: P): RouteParams[P];
+export function useRouteProps<P extends RoutePath>(
+	paths: readonly P[],
+): RouteParams[P];
+export function useRouteProps<P extends RoutePath>(
+	pathOrPaths: P | readonly P[],
+): RouteParams[P] {
 	const { currentRoute } = useNavigation();
-	if (currentRoute.path !== path) {
+	const allowed: readonly RoutePath[] = Array.isArray(pathOrPaths)
+		? pathOrPaths
+		: [pathOrPaths as P];
+	if (!allowed.includes(currentRoute.path)) {
 		throw new Error(
-			`useRouteProps("${path}") called on route ${currentRoute.path}`,
+			`useRouteProps(${JSON.stringify(pathOrPaths)}) called on route ${currentRoute.path}`,
 		);
 	}
 	return currentRoute.props as RouteParams[P];

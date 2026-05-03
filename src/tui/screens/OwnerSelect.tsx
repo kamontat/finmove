@@ -20,7 +20,11 @@ export function OwnerSelect(): JSX.Element {
 	const { goBack } = useNavigation();
 	const { setHints, setMenu, setBorderColor, setTitleSuffix } = useLayout();
 
-	const props = useRouteProps("/trips/expenses/form/owners");
+	const props = useRouteProps([
+		"/trips/accounts/new/owners",
+		"/trips/accounts/edit/owners",
+		"/trips/expenses/form/owners",
+	] as const);
 	const formId = props.formId;
 	const fieldKey = props.fieldKey;
 
