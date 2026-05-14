@@ -11,9 +11,9 @@ import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripCreateCountryList(): JSX.Element {
 	const { focus } = useFocus();
-	const { goTo } = useNavigation();
+	const { goTo, goBack } = useNavigation();
 	const { setHints, setColor, setTitleSuffix } = useLayout();
-	const { setMenu } = useMenu();
+	const { setMenu, armed, setActiveIndex } = useMenu();
 
 	const { dataDir = "./data", formId = "trip-new" } = useRouteProps(
 		"/trips/new/countries",
@@ -31,7 +31,27 @@ export function TripCreateCountryList(): JSX.Element {
 		setMenu(
 			[
 				{ label: "Add", value: "add", key: "a" },
-				...(hasItems ? [{ label: "Delete", value: "delete", key: "x" }] : []),
+				...(hasItems
+					? [
+							{
+								label: "Delete",
+								value: "delete",
+								key: "x",
+								mainAction: {
+									confirmCount: 2,
+									onConfirm: (i: number) => {
+										const target = countries[i];
+										if (target === undefined) return;
+										const remaining = countries.filter((c) => c !== target);
+										buffer.setField("countries", remaining);
+										if (remaining.length === 0) {
+											goBack();
+										}
+									},
+								},
+							},
+						]
+					: []),
 			],
 			(value) => {
 				if (value === "add") {
@@ -45,12 +65,14 @@ export function TripCreateCountryList(): JSX.Element {
 	}, [
 		dataDir,
 		formId,
-		countries.length,
+		countries,
+		buffer,
 		setMenu,
 		setHints,
 		setColor,
 		setTitleSuffix,
 		goTo,
+		goBack,
 	]);
 
 	if (countries.length === 0) {
@@ -63,6 +85,8 @@ export function TripCreateCountryList(): JSX.Element {
 			onChange={() => {
 				/* read-only navigation; edit is via Delete + Add */
 			}}
+			onHighlight={(_, i) => setActiveIndex(i)}
+			armedRowIndex={armed?.value === "delete" ? armed.index : null}
 			isActive={focus === "main"}
 		/>
 	);
