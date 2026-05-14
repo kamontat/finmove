@@ -65,7 +65,31 @@ export class MenuStore {
     if (!opt) return;
 
     if (focus === "main" && opt.mainAction && this.activeIndex !== null) {
-      // implemented in later tasks
+      const index = this.activeIndex;
+      const action = opt.mainAction;
+      const confirmCount = action.confirmCount ?? 1;
+
+      const armedMatches =
+        this.armed !== null &&
+        this.armed.value === opt.value &&
+        this.armed.index === index;
+
+      if (armedMatches) {
+        // handled in next task
+        return;
+      }
+
+      const checkOk = action.check ? action.check(index) : true;
+      if (!checkOk) {
+        this.armed = null;
+        return;
+      }
+
+      this.armed = { value: opt.value, index, count: 1 };
+      if (this.armed.count >= confirmCount) {
+        action.onConfirm(index);
+        this.armed = null;
+      }
       return;
     }
 

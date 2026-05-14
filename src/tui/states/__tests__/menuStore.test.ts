@@ -88,4 +88,18 @@ describe("MenuStore", () => {
     store.trigger("delete", "main");
     expect(calls).toEqual(["delete"]);
   });
+
+  test("trigger fires onConfirm immediately when confirmCount is 1 (default)", () => {
+    const store = new MenuStore();
+    const confirmed: number[] = [];
+    store.setMenu(
+      [{ label: "Duplicate", value: "duplicate", key: "d",
+        mainAction: { onConfirm: (i) => confirmed.push(i) } }],
+      () => {},
+    );
+    store.setActiveIndex(2);
+    store.trigger("duplicate", "main");
+    expect(confirmed).toEqual([2]);
+    expect(store.getArmed()).toBeNull();
+  });
 });
