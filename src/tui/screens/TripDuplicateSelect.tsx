@@ -48,13 +48,8 @@ export function TripDuplicateSelect(): JSX.Element {
 				onChange={(dirPath) => {
 					const trip = trips.find((t) => t.dirPath === dirPath);
 					if (!trip) return;
-					goTo("/trips/duplicate/new", {
-						props: {
-							dataDir,
-							sourceDirPath: trip.dirPath,
-							sourceName: trip.settings.name,
-							sourceStartDate: trip.settings.startDate,
-						},
+					goTo("/trips/new", {
+						props: { dataDir, duplicateFromDirPath: trip.dirPath },
 					});
 				}}
 				isActive

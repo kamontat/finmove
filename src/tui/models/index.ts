@@ -9,12 +9,6 @@ export interface RouteParams {
 	"/trips/duplicate": { dataDir?: string };
 	"/trips/delete": { dataDir?: string };
 	"/trips/new": { dataDir?: string; duplicateFromDirPath?: string };
-	"/trips/duplicate/new": {
-		dataDir?: string;
-		sourceDirPath: string;
-		sourceName: string;
-		sourceStartDate: string;
-	};
 	"/trips/overview": {
 		tripDirPath: string;
 		tripName?: string;

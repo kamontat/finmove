@@ -41,7 +41,6 @@ import { TripCreateCountryAdd } from "./screens/TripCreateCountryAdd";
 import { TripCreateCountryDelete } from "./screens/TripCreateCountryDelete";
 import { TripCreateCountryList } from "./screens/TripCreateCountryList";
 import { TripDelete } from "./screens/TripDelete";
-import { TripDuplicateForm } from "./screens/TripDuplicateForm";
 import { TripDuplicateSelect } from "./screens/TripDuplicateSelect";
 import { TripForm } from "./screens/TripForm";
 import { TripList } from "./screens/TripList";
@@ -81,11 +80,6 @@ export const routes: Routes = {
 	},
 	"/trips/duplicate": {
 		component: TripDuplicateSelect as unknown as ComponentType,
-		title: "Duplicate Trip",
-		defaultFocus: "main",
-	},
-	"/trips/duplicate/new": {
-		component: TripDuplicateForm as unknown as ComponentType,
 		title: "Duplicate Trip",
 		defaultFocus: "main",
 	},
