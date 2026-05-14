@@ -24,7 +24,7 @@ export function TripDuplicateForm(): JSX.Element {
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		setTitleSuffix(`Duplicate: ${sourceName}`);
+		setTitleSuffix(sourceName);
 		setHints(FORM_HINTS);
 	}, [setHints, setTitleSuffix, sourceName]);
 
