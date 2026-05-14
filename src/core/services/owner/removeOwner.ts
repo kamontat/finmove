@@ -11,7 +11,7 @@ export function removeOwner(trip: Trip, ownerId: string): void {
 	}
 
 	const refs = findOwnerReferences(trip, ownerId);
-	if (refs.accounts.length + refs.expenses.length > 0) {
+	if (refs.accounts.length > 0 || refs.expenses.length > 0) {
 		throw new Error(
 			`Owner "${ownerId}" is referenced by ${refs.accounts.length} account(s) and ${refs.expenses.length} expense(s)`,
 		);

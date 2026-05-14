@@ -143,6 +143,34 @@ describe("removeOwner", () => {
 		const reloaded = loadTrip(tripDir);
 		expect(reloaded.owners).toHaveLength(1);
 	});
+
+	test("throws with correct counts when both accounts and expenses reference the owner", () => {
+		const tripDir = setupTrip({
+			accounts: [
+				{ id: "a1", name: "Visa", type: AccountType.Credit, owners: ["alice"] },
+			],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "a1",
+					date: "2026-01-01",
+					payee: "Cafe",
+					category: "Food",
+					amount: 100,
+					currency: "THB",
+					owners: ["alice"],
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const trip = loadTrip(tripDir);
+		expect(() => removeOwner(trip, "alice")).toThrow(
+			'Owner "alice" is referenced by 1 account(s) and 1 expense(s)',
+		);
+		const reloaded = loadTrip(tripDir);
+		expect(reloaded.owners).toHaveLength(1);
+	});
 });
 
 describe("findOwnerReferences", () => {
