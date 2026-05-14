@@ -16,11 +16,12 @@ export function ExpenseDuplicateSelect(): JSX.Element {
 	const { goTo } = useNavigation();
 
 	useEffect(() => {
-		setBorderColor(null);
+		setBorderColor("yellow");
 		setMenu([], () => {});
 		setHints(SELECT_DUPLICATE_HINTS);
 		setTitleSuffix(null);
 		return () => {
+			setBorderColor(null);
 			setTitleSuffix(null);
 		};
 	}, [setBorderColor, setMenu, setHints, setTitleSuffix]);

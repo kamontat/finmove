@@ -15,7 +15,7 @@ export function TripDuplicateSelect(): JSX.Element {
 	const [trips] = useState<Trip[]>(() => listTrips(dataDir));
 
 	useEffect(() => {
-		setBorderColor(null);
+		setBorderColor("yellow");
 		setMenu([], () => {});
 		setHints([
 			{ key: "↑↓", label: "Navigate" },
@@ -25,6 +25,7 @@ export function TripDuplicateSelect(): JSX.Element {
 		]);
 		setTitleSuffix(null);
 		return () => {
+			setBorderColor(null);
 			setTitleSuffix(null);
 		};
 	}, [setBorderColor, setMenu, setHints, setTitleSuffix]);
