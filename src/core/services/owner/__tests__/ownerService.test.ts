@@ -3,6 +3,7 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { stringify } from "yaml";
 import type { Account, Expense, Settings } from "../../../models";
+import { AccountType } from "../../../models";
 import { loadTrip } from "../../trip/loadTrip";
 import { addOwner } from "../addOwner";
 import { findOwnerReferences } from "../findOwnerReferences";
@@ -116,7 +117,7 @@ describe("findOwnerReferences", () => {
 	test("finds owner referenced by an account", () => {
 		const tripDir = setupTrip({
 			accounts: [
-				{ id: "a1", name: "Visa", type: "Credit", owners: ["alice"] } as Account,
+				{ id: "a1", name: "Visa", type: AccountType.Credit, owners: ["alice"] },
 			],
 		});
 		const trip = loadTrip(tripDir);
@@ -176,7 +177,7 @@ describe("findOwnerReferences", () => {
 	test("returns both accounts and expenses when both reference the owner", () => {
 		const tripDir = setupTrip({
 			accounts: [
-				{ id: "a1", name: "Visa", type: "Credit", owners: ["alice"] } as Account,
+				{ id: "a1", name: "Visa", type: AccountType.Credit, owners: ["alice"] },
 			],
 			expenses: [
 				{
