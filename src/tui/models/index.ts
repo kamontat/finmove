@@ -7,7 +7,7 @@ export type FieldValue = string | string[];
 export interface RouteParams {
 	"/trips": { dataDir?: string; selectMode?: "delete" | "duplicate" };
 	"/trips/new": { dataDir?: string };
-	"/trips/duplicate": {
+	"/trips/duplicate/new": {
 		dataDir?: string;
 		sourceDirPath: string;
 		sourceName: string;

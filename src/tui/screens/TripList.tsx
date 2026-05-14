@@ -119,7 +119,7 @@ export function TripList(): JSX.Element {
 					onChange={(dirPath) => {
 						const trip = trips.find((t) => t.dirPath === dirPath);
 						if (!trip) return;
-						goTo("/trips/duplicate", {
+						goTo("/trips/duplicate/new", {
 							props: {
 								dataDir,
 								sourceDirPath: trip.dirPath,

@@ -10,7 +10,7 @@ import { type FormFieldConfig, getString } from "../models";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
-export function TripDuplicate(): JSX.Element {
+export function TripDuplicateForm(): JSX.Element {
 	const { goBack } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
 
@@ -19,7 +19,7 @@ export function TripDuplicate(): JSX.Element {
 		sourceDirPath,
 		sourceName,
 		sourceStartDate,
-	} = useRouteProps("/trips/duplicate");
+	} = useRouteProps("/trips/duplicate/new");
 
 	const [error, setError] = useState<string | null>(null);
 
