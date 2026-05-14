@@ -1,7 +1,10 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
-import { removeAccount } from "../../core/services/account";
+import {
+	findAccountReferences,
+	removeAccount,
+} from "../../core/services/account";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
@@ -89,11 +92,18 @@ export function AccountList(): JSX.Element {
 					detail: `(${a.type})`,
 				}))}
 				onConfirm={(value) => {
-					removeAccount(trip, value);
-					reloadTrip();
-					if (trip.accounts.length === 0) {
-						goBack();
+					const refs = findAccountReferences(trip, value);
+					if (refs.expenses.length === 0) {
+						removeAccount(trip, value);
+						reloadTrip();
+						if (trip.accounts.length === 0) {
+							goBack();
+						}
+						return;
 					}
+					goTo("/trips/accounts/references", {
+						props: { tripDirPath: trip.dirPath, accountId: value },
+					});
 				}}
 			/>
 		);

@@ -1,7 +1,7 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
-import { removeOwner } from "../../core/services/owner";
+import { findOwnerReferences, removeOwner } from "../../core/services/owner";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
@@ -81,11 +81,18 @@ export function OwnerList(): JSX.Element {
 					detail: `(${o.id})`,
 				}))}
 				onConfirm={(value) => {
-					removeOwner(trip, value);
-					reloadTrip();
-					if (trip.owners.length === 0) {
-						goBack();
+					const refs = findOwnerReferences(trip, value);
+					if (refs.accounts.length === 0 && refs.expenses.length === 0) {
+						removeOwner(trip, value);
+						reloadTrip();
+						if (trip.owners.length === 0) {
+							goBack();
+						}
+						return;
 					}
+					goTo("/trips/owners/references", {
+						props: { tripDirPath: trip.dirPath, ownerId: value },
+					});
 				}}
 			/>
 		);
