@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import { duplicateTrip, toDirName } from "../../core/services/trip";
+import { duplicateTrip, loadTrip, toDirName } from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
 import { type FormFieldConfig, getString } from "../models";
@@ -56,7 +56,13 @@ export function TripDuplicateForm(): JSX.Element {
 						return;
 					}
 					setError(null);
-					duplicateTrip(dataDir, sourceDirPath, dirName, name);
+					const sourceTrip = loadTrip(sourceDirPath);
+					duplicateTrip(dataDir, sourceDirPath, dirName, {
+						name,
+						startDate: sourceTrip.settings.startDate,
+						endDate: sourceTrip.settings.endDate,
+						countries: sourceTrip.settings.countries,
+					});
 					goBack();
 					goBack();
 				}}
