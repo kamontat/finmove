@@ -94,7 +94,7 @@ The screens that set a non-null color (and thus need the `setColor({ border, tit
 - `src/tui/screens/TripDelete.tsx` — red
 - `src/tui/screens/TripDuplicateSelect.tsx` — yellow
 
-The remaining 10 screens (lists and selectors that only call `setBorderColor(null)` defensively) migrate to `setColor({})`. These are listed in the implementation plan; the change is mechanical.
+The remaining 15 screens (lists and selectors that only call `setBorderColor(null)` defensively) migrate to `setColor({})`. These are listed in the implementation plan; the change is mechanical.
 
 ## Inner Header Text in Duplicate-Pickers
 
@@ -104,7 +104,7 @@ The remaining 10 screens (lists and selectors that only call `setBorderColor(nul
 
 - `src/tui/states/layout.tsx` — interface change, state shape, setter rename, `resetLayout` updated
 - `src/tui/layouts/Default.tsx` — consume `colors.border` and `colors.title`
-- 23 screen files under `src/tui/screens/` — mechanical migration of `setBorderColor` → `setColor`
+- 28 screen files under `src/tui/screens/` — mechanical migration of `setBorderColor` → `setColor`
 - `src/tui/screens/ExpenseDuplicateSelect.tsx`, `src/tui/screens/TripDuplicateSelect.tsx` — additionally flip the inner-header literal color from `"cyan"` to `"yellow"`
 
 ## Out of Scope
