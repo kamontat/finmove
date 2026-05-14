@@ -131,4 +131,38 @@ describe("MenuStore", () => {
     expect(confirmed).toEqual([1]);
     expect(store.getArmed()).toBeNull();
   });
+
+  test("trigger does not arm when check returns false", () => {
+    const store = new MenuStore();
+    const confirmed: number[] = [];
+    store.setMenu(
+      [{ label: "Delete", value: "delete", key: "x",
+        mainAction: {
+          confirmCount: 2,
+          check: () => false,
+          onConfirm: (i) => confirmed.push(i),
+        } }],
+      () => {},
+    );
+    store.setActiveIndex(0);
+    store.trigger("delete", "main");
+    expect(confirmed).toEqual([]);
+    expect(store.getArmed()).toBeNull();
+  });
+
+  test("trigger arms when check returns true", () => {
+    const store = new MenuStore();
+    store.setMenu(
+      [{ label: "Delete", value: "delete", key: "x",
+        mainAction: {
+          confirmCount: 2,
+          check: () => true,
+          onConfirm: () => {},
+        } }],
+      () => {},
+    );
+    store.setActiveIndex(0);
+    store.trigger("delete", "main");
+    expect(store.getArmed()).toEqual({ value: "delete", index: 0, count: 1 });
+  });
 });
