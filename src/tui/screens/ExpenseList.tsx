@@ -94,6 +94,19 @@ export function ExpenseList(): JSX.Element {
 		return <Text dimColor>Loading...</Text>;
 	}
 
+	const headers = ["Date", "Account", "Payee", "Category", "Amount", "Tags"];
+	const rows = trip.expenses.map((e) => {
+		const account = trip.accounts.find((a) => a.id === e.accountId);
+		return [
+			e.date,
+			account?.name ?? e.accountId,
+			e.payee,
+			e.category,
+			`${e.amount} ${e.currency}`,
+			e.tags.length > 0 ? String(e.tags.length) : "",
+		];
+	});
+
 	if (selectMode === "remove") {
 		if (trip.expenses.length === 0) {
 			return <Text dimColor>No expenses.</Text>;
@@ -122,34 +135,14 @@ export function ExpenseList(): JSX.Element {
 			return <Text dimColor>No expenses.</Text>;
 		}
 
-		const dupHeaders = [
-			"Date",
-			"Account",
-			"Payee",
-			"Category",
-			"Amount",
-			"Tags",
-		];
-		const dupRows = trip.expenses.map((e) => {
-			const account = trip.accounts.find((a) => a.id === e.accountId);
-			return [
-				e.date,
-				account?.name ?? e.accountId,
-				e.payee,
-				e.category,
-				`${e.amount} ${e.currency}`,
-				e.tags.length > 0 ? String(e.tags.length) : "",
-			];
-		});
-
 		return (
 			<Box flexDirection="column">
 				<Text bold color="cyan">
 					Select an expense to duplicate:
 				</Text>
 				<TableSelect
-					headers={dupHeaders}
-					rows={dupRows}
+					headers={headers}
+					rows={rows}
 					onChange={(rowIndex) => {
 						const expense = trip.expenses[rowIndex];
 						if (!expense) return;
@@ -169,19 +162,6 @@ export function ExpenseList(): JSX.Element {
 	if (trip.expenses.length === 0) {
 		return <Text dimColor>No expenses yet.</Text>;
 	}
-
-	const headers = ["Date", "Account", "Payee", "Category", "Amount", "Tags"];
-	const rows = trip.expenses.map((e) => {
-		const account = trip.accounts.find((a) => a.id === e.accountId);
-		return [
-			e.date,
-			account?.name ?? e.accountId,
-			e.payee,
-			e.category,
-			`${e.amount} ${e.currency}`,
-			e.tags.length > 0 ? String(e.tags.length) : "",
-		];
-	});
 
 	return (
 		<TableSelect
