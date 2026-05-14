@@ -16,13 +16,13 @@ interface MenuSnapshot {
 	onSelect: ((value: string) => void) | null;
 	armed: ArmedState | null;
 	armedHint: string | null;
-	activeIndex: number | null;
 }
 
 interface MenuContextValue extends MenuSnapshot {
 	setMenu: (options: MenuOption[], onSelect: (value: string) => void) => void;
 	setActiveIndex: (index: number | null) => void;
 	trigger: (value: string, focus: FocusZone) => void;
+	resetMenu: () => void;
 	reset: () => void;
 }
 
@@ -38,7 +38,6 @@ function snapshotOf(store: MenuStore): MenuSnapshot {
 		onSelect: store.getOnSelect(),
 		armed: store.getArmed(),
 		armedHint: store.getArmedHint(),
-		activeIndex: store.getActiveIndex(),
 	};
 }
 
@@ -80,15 +79,21 @@ export function MenuProvider({ children }: MenuProviderProps): JSX.Element {
 		refresh();
 	}, [refresh]);
 
+	const resetMenu = useCallback(() => {
+		storeRef.current.setMenu([], () => {});
+		refresh();
+	}, [refresh]);
+
 	const value = useMemo<MenuContextValue>(
 		() => ({
 			...snapshot,
 			setMenu,
 			setActiveIndex,
 			trigger,
+			resetMenu,
 			reset,
 		}),
-		[snapshot, setMenu, setActiveIndex, trigger, reset],
+		[snapshot, setMenu, setActiveIndex, trigger, resetMenu, reset],
 	);
 
 	return <MenuContext.Provider value={value}>{children}</MenuContext.Provider>;

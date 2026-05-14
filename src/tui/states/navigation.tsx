@@ -14,6 +14,7 @@ import { routes } from "../router";
 import { useData } from "./data";
 import { useFocus } from "./focus";
 import { useLayout } from "./layout";
+import { useMenu } from "./menu";
 
 type GoToOptions<P extends RoutePath> = {
 	replace?: boolean;
@@ -42,6 +43,7 @@ export function NavigationProvider({
 	const { exit } = useApp();
 	const { setFocus, setMenuAvailable } = useFocus();
 	const { resetLayout } = useLayout();
+	const { resetMenu } = useMenu();
 	const { loadTripByPath, clearTrip } = useData();
 
 	const [currentRoute, setCurrentRoute] = useState<RouteEntry>(initial);
@@ -64,12 +66,13 @@ export function NavigationProvider({
 		(entry: RouteEntry) => {
 			const config = routes[entry.path];
 			resetLayout();
+			resetMenu();
 			setFocus(config.defaultFocus);
 			setMenuAvailable(false);
 			syncTripData(entry);
 			setCurrentRoute(entry);
 		},
-		[resetLayout, setFocus, setMenuAvailable, syncTripData],
+		[resetLayout, resetMenu, setFocus, setMenuAvailable, syncTripData],
 	);
 
 	const goTo = useCallback(
