@@ -138,6 +138,32 @@ describe("removeAccount", () => {
 		trip = loadTrip(tripDir);
 		expect(trip.accounts).toHaveLength(0);
 	});
+
+	test("throws when an expense references the account", () => {
+		const tripDir = setupTrip({
+			expenses: [
+				{
+					id: "e1",
+					accountId: "a1",
+					date: "2026-01-01",
+					payee: "Cafe",
+					category: "Food",
+					amount: 100,
+					currency: "THB",
+					owners: ["alice"],
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const trip = loadTrip(tripDir);
+		expect(() => removeAccount(trip, "a1")).toThrow(
+			'Account "a1" is referenced by 1 expense(s)',
+		);
+
+		const reloaded = loadTrip(tripDir);
+		expect(reloaded.accounts).toHaveLength(1);
+	});
 });
 
 describe("findAccountReferences", () => {
