@@ -62,9 +62,7 @@ export function OwnerReferences(): JSX.Element {
 			{ key: "q/esc", label: "Back" },
 			{ key: "e", label: "Exit" },
 		]);
-		setTitleSuffix(
-			owner ? `References: ${owner.name}` : `References: ${ownerId}`,
-		);
+		setTitleSuffix(owner?.name ?? ownerId);
 		return () => {
 			setBorderColor(null);
 			setTitleSuffix(null);

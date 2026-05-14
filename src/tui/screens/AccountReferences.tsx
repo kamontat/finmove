@@ -50,9 +50,7 @@ export function AccountReferences(): JSX.Element {
 			{ key: "q/esc", label: "Back" },
 			{ key: "e", label: "Exit" },
 		]);
-		setTitleSuffix(
-			account ? `References: ${account.name}` : `References: ${accountId}`,
-		);
+		setTitleSuffix(account?.name ?? accountId);
 		return () => {
 			setBorderColor(null);
 			setTitleSuffix(null);
