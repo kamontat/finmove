@@ -9,7 +9,8 @@ export const DEFAULT_CATEGORIES: readonly string[] = [
 	"Hotels",
 	"Transportation",
 	"Shopping",
-	"Eating",
+	"Food",
+	"Beverages",
 	"Activities",
 ];
 
