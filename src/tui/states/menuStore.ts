@@ -75,7 +75,13 @@ export class MenuStore {
         this.armed.index === index;
 
       if (armedMatches) {
-        // handled in next task
+        const newCount = this.armed!.count + 1;
+        if (newCount >= confirmCount) {
+          action.onConfirm(index);
+          this.armed = null;
+        } else {
+          this.armed = { value: opt.value, index, count: newCount };
+        }
         return;
       }
 
