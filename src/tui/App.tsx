@@ -109,6 +109,9 @@ function Router(): JSX.Element {
 				case "/trips/expenses":
 					breadcrumbs.push("Expenses");
 					break;
+				case "/trips/expenses/delete":
+					breadcrumbs.push("Expenses", "Delete");
+					break;
 				case "/trips/expenses/form":
 					breadcrumbs.push(
 						"Expenses",

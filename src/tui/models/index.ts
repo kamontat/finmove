@@ -33,7 +33,10 @@ export interface RouteParams {
 
 	"/trips/expenses": {
 		tripDirPath: string;
-		selectMode?: "remove" | "duplicate";
+		selectMode?: "duplicate";
+	};
+	"/trips/expenses/delete": {
+		tripDirPath: string;
 	};
 	"/trips/expenses/form": {
 		tripDirPath: string;

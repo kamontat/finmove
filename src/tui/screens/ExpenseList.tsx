@@ -1,14 +1,8 @@
 import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
-import { removeExpense } from "../../core/services/expense";
-import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { TableSelect } from "../components/molecules/TableSelect";
-import {
-	LIST_HINTS,
-	SELECT_DUPLICATE_HINTS,
-	SELECT_REMOVE_HINTS,
-} from "../constants/hints";
+import { LIST_HINTS, SELECT_DUPLICATE_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useFormBufferAdmin } from "../states/formBuffer";
@@ -16,10 +10,10 @@ import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function ExpenseList(): JSX.Element {
-	const { trip, reloadTrip } = useData();
+	const { trip } = useData();
 	const { focus, setFocus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
-	const { goTo, goBack } = useNavigation();
+	const { goTo } = useNavigation();
 
 	const { selectMode } = useRouteProps("/trips/expenses");
 
@@ -40,13 +34,6 @@ export function ExpenseList(): JSX.Element {
 		const tripDirPath = trip.dirPath;
 		const hasExpenses = trip.expenses.length > 0;
 
-		if (selectMode === "remove") {
-			setBorderColor("red");
-			setMenu([], () => {});
-			setHints(SELECT_REMOVE_HINTS);
-			return;
-		}
-
 		if (selectMode === "duplicate") {
 			setBorderColor(null);
 			setMenu([], () => {});
@@ -61,7 +48,7 @@ export function ExpenseList(): JSX.Element {
 				...(hasExpenses
 					? [
 							{ label: "Duplicate", value: "duplicate", key: "d" },
-							{ label: "Remove", value: "remove", key: "x" },
+							{ label: "Delete", value: "delete", key: "x" },
 						]
 					: []),
 			],
@@ -72,10 +59,8 @@ export function ExpenseList(): JSX.Element {
 					goTo("/trips/expenses", {
 						props: { tripDirPath, selectMode: "duplicate" },
 					});
-				} else if (value === "remove" && hasExpenses) {
-					goTo("/trips/expenses", {
-						props: { tripDirPath, selectMode: "remove" },
-					});
+				} else if (value === "delete" && hasExpenses) {
+					goTo("/trips/expenses/delete", { props: { tripDirPath } });
 				}
 			},
 		);
@@ -106,29 +91,6 @@ export function ExpenseList(): JSX.Element {
 			e.tags.length > 0 ? String(e.tags.length) : "",
 		];
 	});
-
-	if (selectMode === "remove") {
-		if (trip.expenses.length === 0) {
-			return <Text dimColor>No expenses.</Text>;
-		}
-		return (
-			<RemoveSelector
-				header="Select an expense to remove:"
-				options={trip.expenses.map((e) => ({
-					label: e.payee,
-					value: e.id,
-					detail: `(${e.date} · ${e.amount} ${e.currency})`,
-				}))}
-				onConfirm={(value) => {
-					removeExpense(trip, value);
-					reloadTrip();
-					if (trip.expenses.length === 0) {
-						goBack();
-					}
-				}}
-			/>
-		);
-	}
 
 	if (selectMode === "duplicate") {
 		if (trip.expenses.length === 0) {

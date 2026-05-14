@@ -21,6 +21,7 @@ import { CurrencyDelete } from "./screens/CurrencyDelete";
 import { CurrencyEdit } from "./screens/CurrencyEdit";
 import { CurrencyList } from "./screens/CurrencyList";
 import { CurrencySelect } from "./screens/CurrencySelect";
+import { ExpenseDelete } from "./screens/ExpenseDelete";
 import { ExpenseForm } from "./screens/ExpenseForm";
 import { ExpenseList } from "./screens/ExpenseList";
 import { ExportScreen } from "./screens/Export";
@@ -153,6 +154,11 @@ export const routes: Routes = {
 	"/trips/expenses": {
 		component: ExpenseList as unknown as ComponentType,
 		title: "Expenses",
+		defaultFocus: "main",
+	},
+	"/trips/expenses/delete": {
+		component: ExpenseDelete as unknown as ComponentType,
+		title: "Delete Expense",
 		defaultFocus: "main",
 	},
 	"/trips/expenses/form": {
