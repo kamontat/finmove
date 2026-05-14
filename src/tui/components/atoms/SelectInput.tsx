@@ -10,14 +10,18 @@ interface SelectInputProps {
 	options: SelectOption[];
 	onChange: (value: string) => void;
 	isActive?: boolean;
+	onCancel?: () => void;
+	initialIndex?: number;
 }
 
 export function SelectInput({
 	options,
 	onChange,
 	isActive = true,
+	onCancel,
+	initialIndex,
 }: SelectInputProps): JSX.Element {
-	const [cursor, setCursor] = useState(0);
+	const [cursor, setCursor] = useState(initialIndex ?? 0);
 	const { focus } = useFocus();
 
 	// Arrow navigation and Enter only when focused
@@ -30,6 +34,8 @@ export function SelectInput({
 			} else if (key.return) {
 				const opt = options[cursor];
 				if (opt) onChange(opt.value);
+			} else if (key.escape) {
+				onCancel?.();
 			}
 		},
 		{ isActive },

@@ -288,7 +288,18 @@ export function Form({
 									<SelectInput
 										options={field.options}
 										isActive={true}
+										initialIndex={Math.max(
+											0,
+											field.options.findIndex(
+												(o) =>
+													o.value ===
+													(typeof currentValue === "string" && currentValue !== ""
+														? currentValue
+														: field.defaultValue),
+											),
+										)}
 										onChange={(val) => setStringValue(field.key, val)}
+										onCancel={cancelEdit}
 									/>
 								)}
 							</Box>
