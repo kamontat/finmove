@@ -17,7 +17,7 @@ import { useNavigation, useRouteProps } from "../states/navigation";
 
 const FORM_ID = "trip-new";
 
-export function TripCreate(): JSX.Element {
+export function TripForm(): JSX.Element {
 	const { goTo } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
 	const buffer = useFormBuffer(FORM_ID);

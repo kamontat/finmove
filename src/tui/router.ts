@@ -37,13 +37,13 @@ import { TagDelete } from "./screens/TagDelete";
 import { TagEdit } from "./screens/TagEdit";
 import { TagList } from "./screens/TagList";
 import { TagSelect } from "./screens/TagSelect";
-import { TripCreate } from "./screens/TripCreate";
 import { TripCreateCountryAdd } from "./screens/TripCreateCountryAdd";
 import { TripCreateCountryDelete } from "./screens/TripCreateCountryDelete";
 import { TripCreateCountryList } from "./screens/TripCreateCountryList";
 import { TripDelete } from "./screens/TripDelete";
 import { TripDuplicateForm } from "./screens/TripDuplicateForm";
 import { TripDuplicateSelect } from "./screens/TripDuplicateSelect";
+import { TripForm } from "./screens/TripForm";
 import { TripList } from "./screens/TripList";
 import { TripOverview } from "./screens/TripOverview";
 import { TripSettings } from "./screens/TripSettings";
@@ -60,7 +60,7 @@ export const routes: Routes = {
 		defaultFocus: "main",
 	},
 	"/trips/new": {
-		component: TripCreate as unknown as ComponentType,
+		component: TripForm as unknown as ComponentType,
 		title: "New Trip",
 		defaultFocus: "main",
 	},
