@@ -3,6 +3,7 @@ import type { Routes } from "./models";
 import { AccountCreate } from "./screens/AccountCreate";
 import { AccountEdit } from "./screens/AccountEdit";
 import { AccountList } from "./screens/AccountList";
+import { AccountReferences } from "./screens/AccountReferences";
 import { AccountSelect } from "./screens/AccountSelect";
 import { AccountTypeSelect } from "./screens/AccountTypeSelect";
 import { CategoryCreate } from "./screens/CategoryCreate";
@@ -22,6 +23,7 @@ import { ExportScreen } from "./screens/Export";
 import { OwnerCreate } from "./screens/OwnerCreate";
 import { OwnerEdit } from "./screens/OwnerEdit";
 import { OwnerList } from "./screens/OwnerList";
+import { OwnerReferences } from "./screens/OwnerReferences";
 import { OwnerSelect } from "./screens/OwnerSelect";
 import { TagCreate } from "./screens/TagCreate";
 import { TagEdit } from "./screens/TagEdit";
@@ -81,6 +83,11 @@ export const routes: Routes = {
 		title: "Owner",
 		defaultFocus: "main",
 	},
+	"/trips/owners/references": {
+		component: OwnerReferences as unknown as ComponentType,
+		title: "References",
+		defaultFocus: "main",
+	},
 	"/trips/accounts": {
 		component: AccountList as unknown as ComponentType,
 		title: "Accounts",
@@ -94,6 +101,11 @@ export const routes: Routes = {
 	"/trips/accounts/edit": {
 		component: AccountEdit as unknown as ComponentType,
 		title: "Account",
+		defaultFocus: "main",
+	},
+	"/trips/accounts/references": {
+		component: AccountReferences as unknown as ComponentType,
+		title: "References",
 		defaultFocus: "main",
 	},
 	"/trips/accounts/new/owners": {

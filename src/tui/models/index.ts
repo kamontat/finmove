@@ -22,10 +22,12 @@ export interface RouteParams {
 	"/trips/owners": { tripDirPath: string; selectMode?: "remove" };
 	"/trips/owners/new": { tripDirPath: string };
 	"/trips/owners/edit": { tripDirPath: string; ownerId: string };
+	"/trips/owners/references": { tripDirPath: string; ownerId: string };
 
 	"/trips/accounts": { tripDirPath: string; selectMode?: "remove" };
 	"/trips/accounts/new": { tripDirPath: string };
 	"/trips/accounts/edit": { tripDirPath: string; accountId: string };
+	"/trips/accounts/references": { tripDirPath: string; accountId: string };
 
 	"/trips/expenses": {
 		tripDirPath: string;
