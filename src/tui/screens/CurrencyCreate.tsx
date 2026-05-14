@@ -21,7 +21,7 @@ const FIELDS: FormFieldConfig[] = [
 		key: "exchangeRate",
 		label: "Exchange Rate (to THB)",
 		type: "text",
-		required: true,
+		required: false,
 		placeholder: "e.g. 0.23",
 	},
 ];
@@ -43,15 +43,21 @@ export function CurrencyCreate(): JSX.Element | null {
 			fields={FIELDS}
 			onSubmit={(values) => {
 				const code = getString(values, "code").trim().toUpperCase();
-				const rate = Number.parseFloat(getString(values, "exchangeRate"));
-				if (code && !Number.isNaN(rate)) {
-					const updated: Record<string, CurrencyConfig> = {
-						...trip.settings.currencies,
-						[code]: { exchangeRate: rate },
-					};
-					updateSettings(trip.dirPath, { currencies: updated });
-					reloadTrip();
+				if (!code) {
+					goBack();
+					return;
 				}
+				const rateStr = getString(values, "exchangeRate").trim();
+				const rate = rateStr === "" ? Number.NaN : Number.parseFloat(rateStr);
+				const config: CurrencyConfig = Number.isFinite(rate)
+					? { exchangeRate: rate }
+					: {};
+				const updated: Record<string, CurrencyConfig> = {
+					...trip.settings.currencies,
+					[code]: config,
+				};
+				updateSettings(trip.dirPath, { currencies: updated });
+				reloadTrip();
 				goBack();
 			}}
 		/>
