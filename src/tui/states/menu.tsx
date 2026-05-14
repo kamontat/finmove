@@ -11,12 +11,15 @@ import {
 import type { FocusZone } from "../models";
 import { type ArmedState, type MenuOption, MenuStore } from "./menuStore";
 
-interface MenuContextValue {
+interface MenuSnapshot {
 	options: MenuOption[];
 	onSelect: ((value: string) => void) | null;
 	armed: ArmedState | null;
 	armedHint: string | null;
 	activeIndex: number | null;
+}
+
+interface MenuContextValue extends MenuSnapshot {
 	setMenu: (options: MenuOption[], onSelect: (value: string) => void) => void;
 	setActiveIndex: (index: number | null) => void;
 	trigger: (value: string, focus: FocusZone) => void;
@@ -29,59 +32,64 @@ interface MenuProviderProps {
 	children: ReactNode;
 }
 
+function snapshotOf(store: MenuStore): MenuSnapshot {
+	return {
+		options: store.getOptions(),
+		onSelect: store.getOnSelect(),
+		armed: store.getArmed(),
+		armedHint: store.getArmedHint(),
+		activeIndex: store.getActiveIndex(),
+	};
+}
+
 export function MenuProvider({ children }: MenuProviderProps): JSX.Element {
 	const storeRef = useRef<MenuStore>(new MenuStore());
-	const [, setTick] = useState(0);
-	const bump = useCallback(() => setTick((t) => t + 1), []);
+	const [snapshot, setSnapshot] = useState<MenuSnapshot>(() =>
+		snapshotOf(storeRef.current),
+	);
+	const refresh = useCallback(() => {
+		setSnapshot(snapshotOf(storeRef.current));
+	}, []);
 
 	const setMenu = useCallback(
 		(options: MenuOption[], onSelect: (value: string) => void) => {
 			storeRef.current.setMenu(options, onSelect);
-			bump();
+			refresh();
 		},
-		[bump],
+		[refresh],
 	);
 
 	const setActiveIndex = useCallback(
 		(index: number | null) => {
-			const before = storeRef.current.getActiveIndex();
-			const beforeArmed = storeRef.current.getArmed();
 			storeRef.current.setActiveIndex(index);
-			if (before !== index || beforeArmed !== storeRef.current.getArmed()) {
-				bump();
-			}
+			refresh();
 		},
-		[bump],
+		[refresh],
 	);
 
 	const trigger = useCallback(
 		(value: string, focus: FocusZone) => {
 			storeRef.current.trigger(value, focus);
-			bump();
+			refresh();
 		},
-		[bump],
+		[refresh],
 	);
 
 	const reset = useCallback(() => {
 		storeRef.current.reset();
-		bump();
-	}, [bump]);
+		refresh();
+	}, [refresh]);
 
-	const value = useMemo<MenuContextValue>(() => {
-		const s = storeRef.current;
-		return {
-			options: s.getOptions(),
-			onSelect: s.getOnSelect(),
-			armed: s.getArmed(),
-			armedHint: s.getArmedHint(),
-			activeIndex: s.getActiveIndex(),
+	const value = useMemo<MenuContextValue>(
+		() => ({
+			...snapshot,
 			setMenu,
 			setActiveIndex,
 			trigger,
 			reset,
-		};
-		// biome-ignore lint/correctness/useExhaustiveDependencies: bumped via setTick
-	}, [setMenu, setActiveIndex, trigger, reset]);
+		}),
+		[snapshot, setMenu, setActiveIndex, trigger, reset],
+	);
 
 	return <MenuContext.Provider value={value}>{children}</MenuContext.Provider>;
 }
