@@ -36,12 +36,12 @@ export function ExpenseDuplicateSelect(): JSX.Element {
 	const rows = trip.expenses.map((e) => {
 		const account = trip.accounts.find((a) => a.id === e.accountId);
 		return [
-			e.date,
-			account?.name ?? e.accountId,
-			e.payee,
-			e.category,
-			`${e.amount} ${e.currency}`,
-			e.tags.length > 0 ? String(e.tags.length) : "",
+			{ text: e.date },
+			{ text: account?.name ?? e.accountId },
+			{ text: e.payee },
+			{ text: e.category },
+			{ text: `${e.amount} ${e.currency}` },
+			{ text: e.tags.length > 0 ? String(e.tags.length) : "" },
 		];
 	});
 
