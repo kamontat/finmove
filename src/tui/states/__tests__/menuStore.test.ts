@@ -41,4 +41,26 @@ describe("MenuStore", () => {
     store.setMenu([], () => {});
     expect(store.getArmed()).toBeNull();
   });
+
+  test("trigger calls onSelect when focus is menu", () => {
+    const store = new MenuStore();
+    const calls: string[] = [];
+    store.setMenu(
+      [{ label: "Add", value: "add", key: "a" }],
+      (value) => calls.push(value),
+    );
+    store.trigger("add", "menu");
+    expect(calls).toEqual(["add"]);
+  });
+
+  test("trigger ignores unknown values", () => {
+    const store = new MenuStore();
+    const calls: string[] = [];
+    store.setMenu(
+      [{ label: "Add", value: "add", key: "a" }],
+      (value) => calls.push(value),
+    );
+    store.trigger("missing", "menu");
+    expect(calls).toEqual([]);
+  });
 });

@@ -60,7 +60,16 @@ export class MenuStore {
     this.armed = null;
   }
 
-  trigger(_value: string, _focus: FocusZone): void {
-    // implemented in later tasks
+  trigger(value: string, focus: FocusZone): void {
+    const opt = this.options.find((o) => o.value === value);
+    if (!opt) return;
+
+    if (focus === "main" && opt.mainAction && this.activeIndex !== null) {
+      // implemented in later tasks
+      return;
+    }
+
+    this.armed = null;
+    this.onSelect?.(value);
   }
 }
