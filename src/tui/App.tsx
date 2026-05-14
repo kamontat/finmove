@@ -126,7 +126,11 @@ function Router(): JSX.Element {
 				case "/trips/expenses/form":
 					breadcrumbs.push(
 						"Expenses",
-						currentRoute.props.expenseId ? "Edit" : "New",
+						currentRoute.props.expenseId
+							? "Edit"
+							: currentRoute.props.duplicateFromId
+								? "Duplicate"
+								: "New",
 					);
 					break;
 			}

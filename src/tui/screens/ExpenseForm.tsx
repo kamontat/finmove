@@ -50,7 +50,7 @@ export function ExpenseForm(): JSX.Element {
 
 	useEffect(() => {
 		if (isDuplicate && duplicateSource) {
-			setTitleSuffix(`Duplicate of: ${duplicateSource.payee}`);
+			setTitleSuffix(duplicateSource.payee);
 		} else {
 			setTitleSuffix(null);
 		}
