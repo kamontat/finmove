@@ -57,20 +57,30 @@ export function ExpenseForm(): JSX.Element {
 		return () => setTitleSuffix(null);
 	}, [isDuplicate, duplicateSource, setTitleSuffix]);
 
-	// Seed buffer with existing expense's owners + tags on mount (edit mode only)
 	useEffect(() => {
 		const source = existingExpense ?? duplicateSource;
-		if (!source) return;
-		if (buffer.values["owners"] === undefined) {
-			const ownerIds = Array.isArray(source.owners)
-				? source.owners.map((o) => (typeof o === "string" ? o : o.id))
-				: [];
-			buffer.setField("owners", ownerIds);
+		if (source) {
+			if (buffer.values["owners"] === undefined) {
+				const ownerIds = Array.isArray(source.owners)
+					? source.owners.map((o) => (typeof o === "string" ? o : o.id))
+					: [];
+				buffer.setField("owners", ownerIds);
+			}
+			if (buffer.values["tags"] === undefined) {
+				buffer.setField("tags", source.tags);
+			}
+			return;
 		}
+		if (!trip) return;
 		if (buffer.values["tags"] === undefined) {
-			buffer.setField("tags", source.tags);
+			const defaults = trip.settings.tags
+				.filter((t) => t.default)
+				.map((t) => t.value);
+			if (defaults.length > 0) {
+				buffer.setField("tags", defaults);
+			}
 		}
-	}, [existingExpense, duplicateSource, buffer]);
+	}, [existingExpense, duplicateSource, trip, buffer]);
 
 	const fields = useMemo((): FormFieldConfig[] => {
 		if (!trip) return [];
