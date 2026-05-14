@@ -1,6 +1,10 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
+import {
+	findAccountReferences,
+	removeAccount,
+} from "../../core/services/account";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { LIST_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
@@ -11,11 +15,11 @@ import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 
 export function AccountList(): JSX.Element {
-	const { trip } = useData();
+	const { trip, reloadTrip } = useData();
 	const { focus, setFocus } = useFocus();
 	const { setHints, setColor, setTitleSuffix } = useLayout();
-	const { setMenu } = useMenu();
-	const { goTo } = useNavigation();
+	const { setMenu, armed, setActiveIndex } = useMenu();
+	const { goTo, goBack } = useNavigation();
 
 	const { clearByPrefix } = useFormBufferAdmin();
 	useEffect(() => {
@@ -39,7 +43,37 @@ export function AccountList(): JSX.Element {
 			[
 				{ label: "Add", value: "add", key: "a" },
 				...(hasAccounts
-					? [{ label: "Delete", value: "delete", key: "x" }]
+					? [
+							{
+								label: "Delete",
+								value: "delete",
+								key: "x",
+								mainAction: {
+									confirmCount: 2,
+									check: (i: number) => {
+										const acc = trip.accounts[i];
+										if (!acc) return false;
+										const refs = findAccountReferences(trip, acc.id);
+										if (refs.expenses.length > 0) {
+											goTo("/trips/accounts/references", {
+												props: { tripDirPath, accountId: acc.id },
+											});
+											return false;
+										}
+										return true;
+									},
+									onConfirm: (i: number) => {
+										const acc = trip.accounts[i];
+										if (!acc) return;
+										removeAccount(trip, acc.id);
+										reloadTrip();
+										if (trip.accounts.length === 0) {
+											goBack();
+										}
+									},
+								},
+							},
+						]
 					: []),
 			],
 			(value) => {
@@ -51,7 +85,16 @@ export function AccountList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [trip, setMenu, setHints, setColor, setTitleSuffix, goTo]);
+	}, [
+		trip,
+		reloadTrip,
+		setMenu,
+		setHints,
+		setColor,
+		setTitleSuffix,
+		goTo,
+		goBack,
+	]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
@@ -73,6 +116,8 @@ export function AccountList(): JSX.Element {
 					props: { tripDirPath: trip.dirPath, accountId },
 				});
 			}}
+			onHighlight={(_, i) => setActiveIndex(i)}
+			armedRowIndex={armed?.value === "delete" ? armed.index : null}
 			isActive={focus === "main"}
 		/>
 	);
