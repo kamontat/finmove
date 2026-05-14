@@ -7,7 +7,12 @@ import { DEFAULT_TRIP_SETTINGS } from "../../core/constants";
 import type { Settings } from "../../core/models";
 import { addDays, today } from "../../core/services/date";
 import { isValidSlug } from "../../core/services/slug";
-import { createTrip, toDirName } from "../../core/services/trip";
+import {
+	createTrip,
+	duplicateTrip,
+	loadTrip,
+	toDirName,
+} from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
 import { type FormFieldConfig, getString, getStringArray } from "../models";
@@ -15,21 +20,41 @@ import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
-const FORM_ID = "trip-new";
-
-export function TripCreate(): JSX.Element {
-	const { goTo } = useNavigation();
+export function TripForm(): JSX.Element {
+	const { goTo, goBack } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
-	const buffer = useFormBuffer(FORM_ID);
 
-	const { dataDir = "./data" } = useRouteProps("/trips/new");
+	const { dataDir = "./data", duplicateFromDirPath } =
+		useRouteProps("/trips/new");
+
+	const duplicateSource = duplicateFromDirPath
+		? loadTrip(duplicateFromDirPath)
+		: null;
+	const isDuplicate = duplicateSource !== null;
+
+	const formId = duplicateFromDirPath
+		? `trip-duplicate-${duplicateFromDirPath}`
+		: "trip-new";
+	const buffer = useFormBuffer(formId);
 
 	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		setTitleSuffix(null);
+		if (isDuplicate && duplicateSource) {
+			setTitleSuffix(`Duplicate of: ${duplicateSource.settings.name}`);
+		} else {
+			setTitleSuffix(null);
+		}
 		setHints(FORM_HINTS);
-	}, [setHints, setTitleSuffix]);
+		return () => setTitleSuffix(null);
+	}, [isDuplicate, duplicateSource, setHints, setTitleSuffix]);
+
+	useEffect(() => {
+		if (!duplicateSource) return;
+		if (buffer.values["countries"] === undefined) {
+			buffer.setField("countries", duplicateSource.settings.countries);
+		}
+	}, [duplicateSource, buffer]);
 
 	const fields: FormFieldConfig[] = [
 		{
@@ -56,21 +81,22 @@ export function TripCreate(): JSX.Element {
 			label: "Start Date",
 			type: "date",
 			required: true,
-			defaultValue: today(),
+			defaultValue: duplicateSource?.settings.startDate ?? today(),
 		},
 		{
 			key: "endDate",
 			label: "End Date",
 			type: "date",
 			required: true,
-			defaultValue: addDays(today(), 1),
+			defaultValue: duplicateSource?.settings.endDate ?? addDays(today(), 1),
 		},
 		{
 			key: "countries",
 			label: "Countries",
 			type: "multiselect",
 			required: false,
-			onEdit: () => goTo("/trips/new/countries", { props: { dataDir } }),
+			onEdit: () =>
+				goTo("/trips/new/countries", { props: { dataDir, formId } }),
 		},
 	];
 
@@ -82,7 +108,7 @@ export function TripCreate(): JSX.Element {
 				</Text>
 			)}
 			<Form
-				formId={FORM_ID}
+				formId={formId}
 				fields={fields}
 				onSubmit={(values) => {
 					const name = getString(values, "name");
@@ -109,6 +135,19 @@ export function TripCreate(): JSX.Element {
 						return;
 					}
 					setError(null);
+
+					if (duplicateSource) {
+						duplicateTrip(dataDir, duplicateSource.dirPath, dirName, {
+							name,
+							startDate,
+							endDate,
+							countries,
+						});
+						buffer.clear();
+						goBack(2);
+						return;
+					}
+
 					const settings: Settings = {
 						...DEFAULT_TRIP_SETTINGS,
 						name,

@@ -1,5 +1,6 @@
 export { createTrip } from "./createTrip";
 export { deleteTrip } from "./deleteTrip";
+export type { DuplicateTripOverrides } from "./duplicateTrip";
 export { duplicateTrip } from "./duplicateTrip";
 export type { TripStatus } from "./getTripStatus";
 export { getTripStatus } from "./getTripStatus";

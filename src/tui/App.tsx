@@ -73,9 +73,6 @@ function Router(): JSX.Element {
 		case "/trips/duplicate":
 			breadcrumbs.push("Trips", "Duplicate");
 			break;
-		case "/trips/duplicate/new":
-			breadcrumbs.push("Trips", "Duplicate", "New");
-			break;
 		default: {
 			breadcrumbs.push("Trips");
 			if (trip) {

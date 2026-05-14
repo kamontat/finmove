@@ -226,7 +226,11 @@ export function ExpenseForm(): JSX.Element {
 		reloadTrip();
 		buffer.clear();
 		setFocus("menu");
-		goBack();
+		if (isDuplicate) {
+			goBack(2);
+		} else {
+			goBack();
+		}
 	};
 
 	return <Form formId={formId} fields={fields} onSubmit={handleSubmit} />;

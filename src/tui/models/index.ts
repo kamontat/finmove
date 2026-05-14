@@ -8,13 +8,7 @@ export interface RouteParams {
 	"/trips": { dataDir?: string };
 	"/trips/duplicate": { dataDir?: string };
 	"/trips/delete": { dataDir?: string };
-	"/trips/new": { dataDir?: string };
-	"/trips/duplicate/new": {
-		dataDir?: string;
-		sourceDirPath: string;
-		sourceName: string;
-		sourceStartDate: string;
-	};
+	"/trips/new": { dataDir?: string; duplicateFromDirPath?: string };
 	"/trips/overview": {
 		tripDirPath: string;
 		tripName?: string;
@@ -126,12 +120,15 @@ export interface RouteParams {
 
 	"/trips/new/countries": {
 		dataDir?: string;
+		formId?: string;
 	};
 	"/trips/new/countries/delete": {
 		dataDir?: string;
+		formId?: string;
 	};
 	"/trips/new/countries/new": {
 		dataDir?: string;
+		formId?: string;
 	};
 
 	"/trips/accounts/new/owners": {

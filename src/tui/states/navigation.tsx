@@ -24,7 +24,7 @@ type GoToOptions<P extends RoutePath> = {
 interface NavigationContextValue {
 	currentRoute: RouteEntry;
 	goTo: <P extends RoutePath>(path: P, options?: GoToOptions<P>) => void;
-	goBack: () => void;
+	goBack: (steps?: number) => void;
 	goExit: () => void;
 }
 
@@ -91,14 +91,24 @@ export function NavigationProvider({
 		[applyRoute],
 	);
 
-	const goBack = useCallback(() => {
-		const prev = historyRef.current.pop();
-		if (prev) {
-			applyRoute(prev);
-		} else {
-			exit();
-		}
-	}, [applyRoute, exit]);
+	const goBack = useCallback(
+		(steps: number = 1) => {
+			if (steps <= 0) return;
+			let target: RouteEntry | undefined;
+			for (let i = 0; i < steps; i++) {
+				const prev = historyRef.current.pop();
+				if (!prev) {
+					exit();
+					return;
+				}
+				target = prev;
+			}
+			if (target) {
+				applyRoute(target);
+			}
+		},
+		[applyRoute, exit],
+	);
 
 	const goExit = useCallback(() => {
 		exit();
