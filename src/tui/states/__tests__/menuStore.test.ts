@@ -102,4 +102,18 @@ describe("MenuStore", () => {
     expect(confirmed).toEqual([2]);
     expect(store.getArmed()).toBeNull();
   });
+
+  test("trigger arms on first press when confirmCount is 2", () => {
+    const store = new MenuStore();
+    const confirmed: number[] = [];
+    store.setMenu(
+      [{ label: "Delete", value: "delete", key: "x",
+        mainAction: { confirmCount: 2, onConfirm: (i) => confirmed.push(i) } }],
+      () => {},
+    );
+    store.setActiveIndex(1);
+    store.trigger("delete", "main");
+    expect(confirmed).toEqual([]);
+    expect(store.getArmed()).toEqual({ value: "delete", index: 1, count: 1 });
+  });
 });
