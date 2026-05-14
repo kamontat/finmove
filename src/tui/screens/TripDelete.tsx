@@ -9,22 +9,22 @@ import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripDelete(): JSX.Element {
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 	const { goBack } = useNavigation();
 	const { dataDir = "./data" } = useRouteProps("/trips/delete");
 
 	const [trips, setTrips] = useState<Trip[]>(() => listTrips(dataDir));
 
 	useEffect(() => {
-		setBorderColor("red");
+		setColor({ border: "red", title: "red" });
 		setMenu([], () => {});
 		setHints(SELECT_REMOVE_HINTS);
 		setTitleSuffix(null);
 		return () => {
-			setBorderColor(null);
+			setColor({});
 			setTitleSuffix(null);
 		};
-	}, [setBorderColor, setMenu, setHints, setTitleSuffix]);
+	}, [setColor, setMenu, setHints, setTitleSuffix]);
 
 	if (trips.length === 0) {
 		return <Text dimColor>No trips.</Text>;

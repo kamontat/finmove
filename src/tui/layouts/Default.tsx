@@ -17,7 +17,7 @@ export function Default({
 	children,
 }: DefaultLayoutProps): JSX.Element {
 	const { focus } = useFocus();
-	const { menuOptions, onMenuSelect, hints, borderColor } = useLayout();
+	const { menuOptions, onMenuSelect, hints, colors } = useLayout();
 	const { stdout } = useStdout();
 
 	const terminalRows = stdout?.rows ?? 24;
@@ -32,7 +32,8 @@ export function Default({
 	const reserved = titleHeight + mainBorderHeight + menuHeight + helpHeight;
 	const mainHeight = Math.max(3, terminalRows - reserved);
 
-	const activeBorderColor = borderColor ?? defaultBorderColor ?? "cyan";
+	const activeBorderColor = colors.border ?? defaultBorderColor ?? "cyan";
+	const activeTitleColor = colors.title ?? defaultBorderColor ?? "cyan";
 	const mainBorderColor =
 		focus === "main" || focus === "input" ? activeBorderColor : "gray";
 	const menuBorderColor = focus === "menu" ? activeBorderColor : "gray";
@@ -40,7 +41,7 @@ export function Default({
 	return (
 		<Box flexDirection="column" width="100%">
 			{/* Title */}
-			<Text bold color="cyan">
+			<Text bold color={activeTitleColor}>
 				{" "}
 				{title}
 			</Text>

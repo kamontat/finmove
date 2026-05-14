@@ -14,7 +14,7 @@ import { useNavigation, useRouteProps } from "../states/navigation";
 export function TripList(): JSX.Element {
 	const { goTo } = useNavigation();
 	const { focus } = useFocus();
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 
 	const { dataDir = "./data" } = useRouteProps("/trips");
 
@@ -29,7 +29,7 @@ export function TripList(): JSX.Element {
 
 	useEffect(() => {
 		setTitleSuffix(null);
-		setBorderColor(null);
+		setColor({});
 
 		setMenu(
 			[
@@ -53,7 +53,7 @@ export function TripList(): JSX.Element {
 		trips.length,
 		setMenu,
 		setHints,
-		setBorderColor,
+		setColor,
 		setTitleSuffix,
 		goTo,
 	]);

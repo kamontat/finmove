@@ -14,7 +14,7 @@ import { useNavigation, useRouteProps } from "../states/navigation";
 export function AccountReferences(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { focus } = useFocus();
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 	const { goTo, goBack } = useNavigation();
 
 	const { tripDirPath, accountId } = useRouteProps(
@@ -42,7 +42,7 @@ export function AccountReferences(): JSX.Element {
 	const account = trip?.accounts.find((a) => a.id === accountId);
 
 	useEffect(() => {
-		setBorderColor("red");
+		setColor({ border: "red", title: "red" });
 		setMenu([], () => {});
 		setHints([
 			{ key: "↑↓", label: "Navigate" },
@@ -52,10 +52,10 @@ export function AccountReferences(): JSX.Element {
 		]);
 		setTitleSuffix(account?.name ?? accountId);
 		return () => {
-			setBorderColor(null);
+			setColor({});
 			setTitleSuffix(null);
 		};
-	}, [setBorderColor, setMenu, setHints, setTitleSuffix, account, accountId]);
+	}, [setColor, setMenu, setHints, setTitleSuffix, account, accountId]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

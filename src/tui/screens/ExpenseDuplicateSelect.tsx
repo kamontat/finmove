@@ -12,19 +12,19 @@ import { buildExpenseListRows, EXPENSE_LIST_HEADERS } from "./expenseListRow";
 export function ExpenseDuplicateSelect(): JSX.Element {
 	const { trip } = useData();
 	const { focus } = useFocus();
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 	const { goTo } = useNavigation();
 
 	useEffect(() => {
-		setBorderColor("yellow");
+		setColor({ border: "yellow", title: "yellow" });
 		setMenu([], () => {});
 		setHints(SELECT_DUPLICATE_HINTS);
 		setTitleSuffix(null);
 		return () => {
-			setBorderColor(null);
+			setColor({});
 			setTitleSuffix(null);
 		};
-	}, [setBorderColor, setMenu, setHints, setTitleSuffix]);
+	}, [setColor, setMenu, setHints, setTitleSuffix]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
@@ -39,7 +39,7 @@ export function ExpenseDuplicateSelect(): JSX.Element {
 
 	return (
 		<Box flexDirection="column">
-			<Text bold color="cyan">
+			<Text bold color="yellow">
 				Select an expense to duplicate:
 			</Text>
 			<TableSelect

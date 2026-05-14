@@ -11,7 +11,7 @@ import { useNavigation, useRouteProps } from "../states/navigation";
 export function OwnerReferences(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { focus } = useFocus();
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 	const { goTo, goBack } = useNavigation();
 
 	const { tripDirPath, ownerId } = useRouteProps("/trips/owners/references");
@@ -51,7 +51,7 @@ export function OwnerReferences(): JSX.Element {
 	const owner = trip?.owners.find((o) => o.id === ownerId);
 
 	useEffect(() => {
-		setBorderColor("red");
+		setColor({ border: "red", title: "red" });
 		setMenu([], () => {});
 		setHints([
 			...(hasAccounts && hasExpenses
@@ -64,11 +64,11 @@ export function OwnerReferences(): JSX.Element {
 		]);
 		setTitleSuffix(owner?.name ?? ownerId);
 		return () => {
-			setBorderColor(null);
+			setColor({});
 			setTitleSuffix(null);
 		};
 	}, [
-		setBorderColor,
+		setColor,
 		setMenu,
 		setHints,
 		setTitleSuffix,

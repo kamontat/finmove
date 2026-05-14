@@ -8,14 +8,14 @@ import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripDuplicateSelect(): JSX.Element {
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 	const { goTo } = useNavigation();
 	const { dataDir = "./data" } = useRouteProps("/trips/duplicate");
 
 	const [trips] = useState<Trip[]>(() => listTrips(dataDir));
 
 	useEffect(() => {
-		setBorderColor("yellow");
+		setColor({ border: "yellow", title: "yellow" });
 		setMenu([], () => {});
 		setHints([
 			{ key: "↑↓", label: "Navigate" },
@@ -25,10 +25,10 @@ export function TripDuplicateSelect(): JSX.Element {
 		]);
 		setTitleSuffix(null);
 		return () => {
-			setBorderColor(null);
+			setColor({});
 			setTitleSuffix(null);
 		};
-	}, [setBorderColor, setMenu, setHints, setTitleSuffix]);
+	}, [setColor, setMenu, setHints, setTitleSuffix]);
 
 	if (trips.length === 0) {
 		return <Text dimColor>No trips.</Text>;
@@ -36,7 +36,7 @@ export function TripDuplicateSelect(): JSX.Element {
 
 	return (
 		<Box flexDirection="column">
-			<Text bold color="cyan">
+			<Text bold color="yellow">
 				Select a trip to duplicate:
 			</Text>
 			<ListSelect

@@ -10,15 +10,20 @@ import {
 } from "react";
 import type { HelpHint, SelectOption } from "../models";
 
+export interface LayoutColors {
+	border?: string;
+	title?: string;
+}
+
 interface LayoutContextValue {
 	menuOptions: SelectOption[];
 	onMenuSelect: ((value: string) => void) | null;
 	hints: HelpHint[];
-	borderColor: string | null;
+	colors: LayoutColors;
 	titleSuffix: string | null;
 	setMenu: (options: SelectOption[], onSelect: (value: string) => void) => void;
 	setHints: (hints: HelpHint[]) => void;
-	setBorderColor: (color: string | null) => void;
+	setColor: (colors: LayoutColors) => void;
 	setTitleSuffix: (suffix: string | null) => void;
 	resetLayout: () => void;
 }
@@ -32,7 +37,7 @@ interface LayoutProviderProps {
 export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 	const [menuOptions, setMenuOptions] = useState<SelectOption[]>([]);
 	const [hints, setHintsState] = useState<HelpHint[]>([]);
-	const [borderColor, setBorderColorState] = useState<string | null>(null);
+	const [colors, setColorsState] = useState<LayoutColors>({});
 	const [titleSuffix, setTitleSuffixState] = useState<string | null>(null);
 	const [callbackTick, setCallbackTick] = useState(0);
 	const onMenuSelectRef = useRef<((value: string) => void) | null>(null);
@@ -50,8 +55,8 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 		setHintsState(newHints);
 	}, []);
 
-	const setBorderColor = useCallback((color: string | null) => {
-		setBorderColorState(color);
+	const setColor = useCallback((next: LayoutColors) => {
+		setColorsState(next);
 	}, []);
 
 	const setTitleSuffix = useCallback((suffix: string | null) => {
@@ -61,7 +66,7 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 	const resetLayout = useCallback(() => {
 		setMenuOptions([]);
 		setHintsState([]);
-		setBorderColorState(null);
+		setColorsState({});
 		setTitleSuffixState(null);
 		onMenuSelectRef.current = null;
 		setCallbackTick((t) => t + 1);
@@ -75,11 +80,11 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 			menuOptions,
 			onMenuSelect: onMenuSelectSnapshot,
 			hints,
-			borderColor,
+			colors,
 			titleSuffix,
 			setMenu,
 			setHints,
-			setBorderColor,
+			setColor,
 			setTitleSuffix,
 			resetLayout,
 		}),
@@ -87,11 +92,11 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 			menuOptions,
 			onMenuSelectSnapshot,
 			hints,
-			borderColor,
+			colors,
 			titleSuffix,
 			setMenu,
 			setHints,
-			setBorderColor,
+			setColor,
 			setTitleSuffix,
 			resetLayout,
 		],

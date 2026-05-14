@@ -18,7 +18,7 @@ const HINTS: HelpHint[] = [
 export function OwnerSelect(): JSX.Element {
 	const { trip } = useData();
 	const { goBack } = useNavigation();
-	const { setHints, setMenu, setBorderColor, setTitleSuffix } = useLayout();
+	const { setHints, setMenu, setColor, setTitleSuffix } = useLayout();
 
 	const props = useRouteProps([
 		"/trips/accounts/new/owners",
@@ -32,10 +32,10 @@ export function OwnerSelect(): JSX.Element {
 
 	useEffect(() => {
 		setTitleSuffix("Select Owners");
-		setBorderColor(null);
+		setColor({});
 		setMenu([], () => {});
 		setHints(HINTS);
-	}, [setHints, setMenu, setBorderColor, setTitleSuffix]);
+	}, [setHints, setMenu, setColor, setTitleSuffix]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

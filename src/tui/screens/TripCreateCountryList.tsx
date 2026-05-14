@@ -11,7 +11,7 @@ import { useNavigation, useRouteProps } from "../states/navigation";
 export function TripCreateCountryList(): JSX.Element {
 	const { focus } = useFocus();
 	const { goTo } = useNavigation();
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 
 	const { dataDir = "./data", formId = "trip-new" } = useRouteProps(
 		"/trips/new/countries",
@@ -23,7 +23,7 @@ export function TripCreateCountryList(): JSX.Element {
 
 	useEffect(() => {
 		setTitleSuffix("Countries");
-		setBorderColor(null);
+		setColor({});
 		const hasItems = countries.length > 0;
 
 		setMenu(
@@ -46,7 +46,7 @@ export function TripCreateCountryList(): JSX.Element {
 		countries.length,
 		setMenu,
 		setHints,
-		setBorderColor,
+		setColor,
 		setTitleSuffix,
 		goTo,
 	]);
