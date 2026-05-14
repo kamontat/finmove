@@ -38,9 +38,12 @@ export function TagDelete(): JSX.Element {
 
 	return (
 		<RemoveSelector
-			options={tags.map((t) => ({ label: t, value: t }))}
+			options={tags.map((t) => ({
+				label: t.default ? `${t.value} [default]` : t.value,
+				value: t.value,
+			}))}
 			onConfirm={(value) => {
-				const remaining = tags.filter((t) => t !== value);
+				const remaining = tags.filter((t) => t.value !== value);
 				updateSettings(trip.dirPath, { tags: remaining });
 				reloadTrip();
 				if (remaining.length === 0) {
