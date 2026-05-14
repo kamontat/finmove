@@ -8,6 +8,7 @@ import { AccountReferences } from "./screens/AccountReferences";
 import { AccountSelect } from "./screens/AccountSelect";
 import { AccountTypeSelect } from "./screens/AccountTypeSelect";
 import { CategoryCreate } from "./screens/CategoryCreate";
+import { CategoryDelete } from "./screens/CategoryDelete";
 import { CategoryEdit } from "./screens/CategoryEdit";
 import { CategoryList } from "./screens/CategoryList";
 import { CategorySelect } from "./screens/CategorySelect";
@@ -199,6 +200,11 @@ export const routes: Routes = {
 		component: CategoryList as unknown as ComponentType,
 		title: (props) => props.tripName ?? "Categories",
 		defaultFocus: "menu",
+	},
+	"/trips/settings/categories/delete": {
+		component: CategoryDelete as unknown as ComponentType,
+		title: (props) => props.tripName ?? "Category",
+		defaultFocus: "main",
 	},
 	"/trips/settings/categories/new": {
 		component: CategoryCreate as unknown as ComponentType,

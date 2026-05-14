@@ -1,43 +1,32 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
-import { updateSettings } from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
-import { RemoveSelector } from "../components/molecules/RemoveSelector";
-import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
+import { LIST_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
-import { useNavigation, useRouteProps } from "../states/navigation";
+import { useNavigation } from "../states/navigation";
 
 export function CategoryList(): JSX.Element {
-	const { trip, reloadTrip } = useData();
+	const { trip } = useData();
 	const { focus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
-	const { goTo, goBack } = useNavigation();
-
-	const { selectMode } = useRouteProps("/trips/settings/categories");
+	const { goTo } = useNavigation();
 
 	useEffect(() => {
 		setTitleSuffix("Settings > Categories");
+		setBorderColor(null);
 		if (!trip) return;
 
 		const tripDirPath = trip.dirPath;
 		const tripName = trip.settings.name;
 		const hasItems = trip.settings.categories.length > 0;
 
-		if (selectMode === "remove") {
-			setBorderColor("red");
-			setMenu([], () => {});
-			setHints(SELECT_REMOVE_HINTS);
-			return;
-		}
-
-		setBorderColor(null);
 		setMenu(
 			[
 				{ label: "Add", value: "add", key: "a" },
-				...(hasItems ? [{ label: "Delete", value: "delete", key: "d" }] : []),
+				...(hasItems ? [{ label: "Delete", value: "delete", key: "x" }] : []),
 			],
 			(value) => {
 				if (value === "add") {
@@ -45,48 +34,20 @@ export function CategoryList(): JSX.Element {
 						props: { tripDirPath, tripName },
 					});
 				} else if (value === "delete" && hasItems) {
-					goTo("/trips/settings/categories", {
-						props: { tripDirPath, tripName, selectMode: "remove" },
+					goTo("/trips/settings/categories/delete", {
+						props: { tripDirPath, tripName },
 					});
 				}
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [
-		trip,
-		selectMode,
-		setMenu,
-		setHints,
-		setBorderColor,
-		setTitleSuffix,
-		goTo,
-	]);
+	}, [trip, setMenu, setHints, setBorderColor, setTitleSuffix, goTo]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
 	}
 
 	const { categories } = trip.settings;
-
-	if (selectMode === "remove") {
-		if (categories.length === 0) {
-			return <Text dimColor>No categories.</Text>;
-		}
-		return (
-			<RemoveSelector
-				header="Select a category to remove:"
-				options={categories.map((c) => ({ label: c, value: c }))}
-				onConfirm={(value) => {
-					const remaining = categories.filter((c) => c !== value);
-					updateSettings(trip.dirPath, { categories: remaining });
-					reloadTrip();
-					if (remaining.length === 0) {
-						goBack();
-					}
-				}}
-			/>
-		);
-	}
 
 	if (categories.length === 0) {
 		return <Text dimColor>No categories yet.</Text>;
