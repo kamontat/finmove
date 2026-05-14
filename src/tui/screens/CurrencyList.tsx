@@ -107,7 +107,7 @@ export function CurrencyList(): JSX.Element {
 				});
 			}}
 			onHighlight={(_, i) => setActiveIndex(i)}
-			armedRowIndex={armed?.value === "delete" ? armed.index : null}
+			armedRowIndex={armed?.index ?? null}
 			isActive={focus === "main"}
 		/>
 	);

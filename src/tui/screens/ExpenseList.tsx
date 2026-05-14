@@ -121,7 +121,7 @@ export function ExpenseList(): JSX.Element {
 				});
 			}}
 			onHighlight={setActiveIndex}
-			armedRowIndex={armed?.value === "delete" ? armed.index : null}
+			armedRowIndex={armed?.index ?? null}
 			isActive={focus === "main"}
 		/>
 	);

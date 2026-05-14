@@ -20,6 +20,7 @@ export function TripCreateCountryList(): JSX.Element {
 	);
 
 	const buffer = useFormBuffer(formId);
+	const { setField } = buffer;
 	const raw = buffer.values["countries"];
 	const countries = Array.isArray(raw) ? raw : [];
 
@@ -43,7 +44,7 @@ export function TripCreateCountryList(): JSX.Element {
 										const target = countries[i];
 										if (target === undefined) return;
 										const remaining = countries.filter((c) => c !== target);
-										buffer.setField("countries", remaining);
+										setField("countries", remaining);
 										if (remaining.length === 0) {
 											goBack();
 										}
@@ -66,7 +67,7 @@ export function TripCreateCountryList(): JSX.Element {
 		dataDir,
 		formId,
 		countries,
-		buffer,
+		setField,
 		setMenu,
 		setHints,
 		setColor,
@@ -86,7 +87,7 @@ export function TripCreateCountryList(): JSX.Element {
 				/* read-only navigation; edit is via Delete + Add */
 			}}
 			onHighlight={(_, i) => setActiveIndex(i)}
-			armedRowIndex={armed?.value === "delete" ? armed.index : null}
+			armedRowIndex={armed?.index ?? null}
 			isActive={focus === "main"}
 		/>
 	);
