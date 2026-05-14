@@ -1,3 +1,8 @@
 [tools]
 bun = "1.3.12"
-claude = "2.1.119"
+claude = "2.1.141"
+
+[shell_alias]
+start-dev = "bun run start"
+start-lint = "bun run fix && bun run check:type && bun run check"
+
