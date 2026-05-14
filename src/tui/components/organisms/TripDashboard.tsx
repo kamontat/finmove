@@ -82,28 +82,29 @@ function SectionHeader({ label }: { label: string }): JSX.Element {
 }
 
 function SpendBlock({ status }: Props): JSX.Element {
+	const labelWidth = "By currency".length;
 	return (
 		<Box flexDirection="column" width={38}>
 			<SectionHeader label="Spend" />
 			<Box>
-				<Text dimColor>Total</Text>
+				<Text dimColor>{"Total".padEnd(labelWidth)}</Text>
 				<Text>{"  "}</Text>
 				<Text bold>{formatThb(status.totalSpendThb)}</Text>
 			</Box>
 			<Box>
-				<Text dimColor>Avg/day</Text>
+				<Text dimColor>{"Avg/day".padEnd(labelWidth)}</Text>
 				<Text>{"  "}</Text>
 				<Text bold>{formatThb(status.avgPerDayThb)}</Text>
 			</Box>
 			<Box>
-				<Text dimColor>Expenses</Text>
+				<Text dimColor>{"Expenses".padEnd(labelWidth)}</Text>
 				<Text>{"  "}</Text>
 				<Text bold>{status.expenseCount}</Text>
 			</Box>
 			{status.byCurrency.length > 0 && (
 				<Box flexDirection="column">
 					<Box>
-						<Text dimColor>By currency</Text>
+						<Text dimColor>{"By currency".padEnd(labelWidth)}</Text>
 						<Text>{"  "}</Text>
 						{status.byCurrency[0] && (
 							<Text>
@@ -116,7 +117,7 @@ function SpendBlock({ status }: Props): JSX.Element {
 					</Box>
 					{status.byCurrency.slice(1).map((c) => (
 						<Box key={c.currency}>
-							<Text>{"             "}</Text>
+							<Text>{" ".repeat(labelWidth + 2)}</Text>
 							<Text>{formatOriginal(c.currency, c.amount)}</Text>
 						</Box>
 					))}
@@ -128,6 +129,10 @@ function SpendBlock({ status }: Props): JSX.Element {
 
 function CategoriesBlock({ status }: Props): JSX.Element {
 	const max = Math.max(1, ...status.topCategories.map((c) => c.amountThb));
+	const labelWidth = Math.max(
+		0,
+		...status.topCategories.map((c) => c.category.length),
+	);
 	const barWidth = 8;
 	return (
 		<Box flexDirection="column">
@@ -139,7 +144,8 @@ function CategoriesBlock({ status }: Props): JSX.Element {
 					const cells = Math.max(1, Math.round((c.amountThb / max) * barWidth));
 					return (
 						<Box key={c.category}>
-							<Text>{c.category.padEnd(12)}</Text>
+							<Text>{c.category.padEnd(labelWidth)}</Text>
+							<Text>{"  "}</Text>
 							<Text bold>{formatThb(c.amountThb).padStart(10)}</Text>
 							<Text>{"  "}</Text>
 							<Text color="cyan">{"█".repeat(cells)}</Text>
