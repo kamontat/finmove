@@ -1,6 +1,7 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
+import { validateTag } from "../../core/validators";
 import { updateSettings } from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
@@ -23,13 +24,27 @@ export function TagEdit(): JSX.Element {
 
 	if (!trip) return <Text dimColor>Loading...</Text>;
 
+	const originalTag = trip.settings.tags.find((t) => t.value === originalValue);
+	if (!originalTag) return <Text dimColor>Tag not found.</Text>;
+
 	const fields: FormFieldConfig[] = [
 		{
 			key: "value",
 			label: "Tag",
 			type: "text",
 			required: true,
-			defaultValue: originalValue,
+			defaultValue: originalTag.value,
+		},
+		{
+			key: "default",
+			label: "Default",
+			type: "select",
+			required: true,
+			options: [
+				{ label: "No", value: "false" },
+				{ label: "Yes", value: "true" },
+			],
+			defaultValue: originalTag.default ? "true" : "false",
 		},
 	];
 
@@ -38,14 +53,17 @@ export function TagEdit(): JSX.Element {
 			fields={fields}
 			onSubmit={(values) => {
 				const next = getString(values, "value").trim();
-				if (next) {
-					updateSettings(trip.dirPath, {
-						tags: trip.settings.tags.map((t) =>
-							t === originalValue ? next : t,
-						),
-					});
-					reloadTrip();
+				const errors = validateTag(next, trip.settings.tags, originalValue);
+				if (errors.length > 0) {
+					throw new Error(errors[0]);
 				}
+				const isDefault = getString(values, "default") === "true";
+				updateSettings(trip.dirPath, {
+					tags: trip.settings.tags.map((t) =>
+						t.value === originalValue ? { value: next, default: isDefault } : t,
+					),
+				});
+				reloadTrip();
 				goBack();
 			}}
 		/>
