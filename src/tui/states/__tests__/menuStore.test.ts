@@ -209,4 +209,21 @@ describe("MenuStore", () => {
     store.trigger("add", "main"); // different value, no mainAction → fall through
     expect(store.getArmed()).toBeNull();
   });
+
+  test("armedHint formats from armed option label and key", () => {
+    const store = new MenuStore();
+    store.setMenu(
+      [{ label: "Delete", value: "delete", key: "x",
+        mainAction: { confirmCount: 2, onConfirm: () => {} } }],
+      () => {},
+    );
+    store.setActiveIndex(0);
+    store.trigger("delete", "main");
+    expect(store.getArmedHint()).toBe("Press [x] again to confirm delete");
+  });
+
+  test("armedHint is null when not armed", () => {
+    const store = new MenuStore();
+    expect(store.getArmedHint()).toBeNull();
+  });
 });

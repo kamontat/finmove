@@ -42,7 +42,11 @@ export class MenuStore {
   }
 
   getArmedHint(): string | null {
-    return null;
+    if (this.armed === null) return null;
+    const opt = this.options.find((o) => o.value === this.armed?.value);
+    if (!opt) return null;
+    const keyLabel = opt.key ?? opt.value;
+    return `Press [${keyLabel}] again to confirm ${opt.label.toLowerCase()}`;
   }
 
   setMenu(options: MenuOption[], onSelect: (value: string) => void): void {
