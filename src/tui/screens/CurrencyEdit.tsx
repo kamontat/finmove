@@ -2,6 +2,7 @@ import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import type { CurrencyConfig } from "../../core/models";
+import { findCurrencyReferences } from "../../core/services/currency";
 import { updateSettings } from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
@@ -33,11 +34,20 @@ export function CurrencyEdit(): JSX.Element {
 
 	const fields: FormFieldConfig[] = [
 		{
+			key: "code",
+			label: "Currency Code",
+			type: "text",
+			required: true,
+			defaultValue: code,
+		},
+		{
 			key: "exchangeRate",
 			label: `Exchange Rate for ${code}`,
 			type: "text",
-			required: true,
-			defaultValue: String(existing.exchangeRate),
+			required: false,
+			...(existing.exchangeRate !== undefined
+				? { defaultValue: String(existing.exchangeRate) }
+				: {}),
 		},
 	];
 
@@ -45,15 +55,46 @@ export function CurrencyEdit(): JSX.Element {
 		<Form
 			fields={fields}
 			onSubmit={(values) => {
-				const rate = Number.parseFloat(getString(values, "exchangeRate"));
-				if (!Number.isNaN(rate)) {
+				const newCode = getString(values, "code").trim().toUpperCase();
+				if (!newCode) {
+					throw new Error("Currency code is required");
+				}
+
+				const rateStr = getString(values, "exchangeRate").trim();
+				const rate = rateStr === "" ? Number.NaN : Number.parseFloat(rateStr);
+				const config: CurrencyConfig = Number.isFinite(rate)
+					? { exchangeRate: rate }
+					: {};
+
+				if (newCode === code) {
 					const updated: Record<string, CurrencyConfig> = {
 						...trip.settings.currencies,
-						[code]: { exchangeRate: rate },
+						[code]: config,
 					};
 					updateSettings(trip.dirPath, { currencies: updated });
 					reloadTrip();
+					goBack();
+					return;
 				}
+
+				if (trip.settings.currencies[newCode] !== undefined) {
+					throw new Error(`Currency '${newCode}' already exists`);
+				}
+
+				const refs = findCurrencyReferences(trip, code);
+				if (refs.expenses.length > 0) {
+					throw new Error(
+						`Cannot rename: ${refs.expenses.length} expense(s) reference '${code}'`,
+					);
+				}
+
+				const { [code]: _removed, ...rest } = trip.settings.currencies;
+				const updated: Record<string, CurrencyConfig> = {
+					...rest,
+					[newCode]: config,
+				};
+				updateSettings(trip.dirPath, { currencies: updated });
+				reloadTrip();
 				goBack();
 			}}
 		/>
