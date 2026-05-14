@@ -1,3 +1,5 @@
+import type { Tag } from "./tag";
+
 export interface CurrencyConfig {
 	exchangeRate?: number;
 }
@@ -10,6 +12,6 @@ export interface Settings {
 	baseCurrency: "THB";
 	currencies: Record<string, CurrencyConfig>;
 	categories: string[];
-	tags: string[];
+	tags: Tag[];
 	exportPath: string;
 }

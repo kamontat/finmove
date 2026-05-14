@@ -16,7 +16,7 @@ const sampleSettings: Settings = {
 	baseCurrency: "THB",
 	currencies: { JPY: { exchangeRate: 0.23 } },
 	categories: ["Flight", "Hotels"],
-	tags: ["test"],
+	tags: [{ value: "test", default: false }],
 	exportPath: "./expenses.csv",
 };
 
@@ -85,7 +85,7 @@ describe("updateSettings", () => {
 		updateSettings(tripDir, { name: "New Name" });
 
 		const trip = loadTrip(tripDir);
-		expect(trip.settings.tags).toEqual(["test"]);
+		expect(trip.settings.tags).toEqual([{ value: "test", default: false }]);
 		expect(trip.settings.categories).toEqual(["Flight", "Hotels"]);
 		expect(trip.settings.currencies).toEqual({
 			JPY: { exchangeRate: 0.23 },

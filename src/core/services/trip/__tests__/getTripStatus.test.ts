@@ -512,7 +512,11 @@ describe("getTripStatus — categories and tags", () => {
 		const trip = makeTrip({
 			settings: {
 				...makeTrip().settings,
-				tags: ["biz", "fun", "family"],
+				tags: [
+					{ value: "biz", default: false },
+					{ value: "fun", default: false },
+					{ value: "family", default: false },
+				],
 			},
 			expenses: [
 				{

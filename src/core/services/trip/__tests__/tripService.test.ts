@@ -26,7 +26,7 @@ const sampleSettings: Settings = {
 		"Eating",
 		"Activities",
 	],
-	tags: ["test"],
+	tags: [{ value: "test", default: false }],
 	exportPath: "./expenses.csv",
 };
 
@@ -127,7 +127,7 @@ describe("duplicateTrip", () => {
 			baseCurrency: "THB",
 			currencies: { JPY: { exchangeRate: 0.23 } },
 			categories: ["Food", "Transport"],
-			tags: ["business"],
+			tags: [{ value: "business", default: false }],
 			exportPath: "./out.csv",
 		};
 		writeFileSync(join(sourcePath, "settings.yaml"), stringify(sourceSettings));
@@ -171,7 +171,7 @@ describe("duplicateTrip", () => {
 		expect(trip.settings.baseCurrency).toBe("THB");
 		expect(trip.settings.currencies).toEqual({ JPY: { exchangeRate: 0.23 } });
 		expect(trip.settings.categories).toEqual(["Food", "Transport"]);
-		expect(trip.settings.tags).toEqual(["business"]);
+		expect(trip.settings.tags).toEqual([{ value: "business", default: false }]);
 		expect(trip.settings.exportPath).toBe("./out.csv");
 	});
 
