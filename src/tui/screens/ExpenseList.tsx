@@ -1,10 +1,14 @@
-import { Text } from "ink";
+import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import { removeExpense } from "../../core/services/expense";
 import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { TableSelect } from "../components/molecules/TableSelect";
-import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
+import {
+	LIST_HINTS,
+	SELECT_DUPLICATE_HINTS,
+	SELECT_REMOVE_HINTS,
+} from "../constants/hints";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useFormBufferAdmin } from "../states/formBuffer";
@@ -43,17 +47,31 @@ export function ExpenseList(): JSX.Element {
 			return;
 		}
 
+		if (selectMode === "duplicate") {
+			setBorderColor(null);
+			setMenu([], () => {});
+			setHints(SELECT_DUPLICATE_HINTS);
+			return;
+		}
+
 		setBorderColor(null);
 		setMenu(
 			[
 				{ label: "Add", value: "add", key: "a" },
 				...(hasExpenses
-					? [{ label: "Remove", value: "remove", key: "x" }]
+					? [
+							{ label: "Duplicate", value: "duplicate", key: "d" },
+							{ label: "Remove", value: "remove", key: "x" },
+						]
 					: []),
 			],
 			(value) => {
 				if (value === "add") {
 					goTo("/trips/expenses/form", { props: { tripDirPath } });
+				} else if (value === "duplicate" && hasExpenses) {
+					goTo("/trips/expenses", {
+						props: { tripDirPath, selectMode: "duplicate" },
+					});
 				} else if (value === "remove" && hasExpenses) {
 					goTo("/trips/expenses", {
 						props: { tripDirPath, selectMode: "remove" },
@@ -96,6 +114,55 @@ export function ExpenseList(): JSX.Element {
 					}
 				}}
 			/>
+		);
+	}
+
+	if (selectMode === "duplicate") {
+		if (trip.expenses.length === 0) {
+			return <Text dimColor>No expenses.</Text>;
+		}
+
+		const dupHeaders = [
+			"Date",
+			"Account",
+			"Payee",
+			"Category",
+			"Amount",
+			"Tags",
+		];
+		const dupRows = trip.expenses.map((e) => {
+			const account = trip.accounts.find((a) => a.id === e.accountId);
+			return [
+				e.date,
+				account?.name ?? e.accountId,
+				e.payee,
+				e.category,
+				`${e.amount} ${e.currency}`,
+				e.tags.length > 0 ? String(e.tags.length) : "",
+			];
+		});
+
+		return (
+			<Box flexDirection="column">
+				<Text bold color="cyan">
+					Select an expense to duplicate:
+				</Text>
+				<TableSelect
+					headers={dupHeaders}
+					rows={dupRows}
+					onChange={(rowIndex) => {
+						const expense = trip.expenses[rowIndex];
+						if (!expense) return;
+						goTo("/trips/expenses/form", {
+							props: {
+								tripDirPath: trip.dirPath,
+								duplicateFromId: expense.id,
+							},
+						});
+					}}
+					isActive
+				/>
+			</Box>
 		);
 	}
 
