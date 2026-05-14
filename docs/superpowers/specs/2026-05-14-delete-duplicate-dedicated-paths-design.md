@@ -44,21 +44,21 @@ Out of scope:
 
 ### Added
 
-| New path | Component | Route title | Default focus | Border |
+| New path | Component | Title suffix | Default focus | Border |
 |---|---|---|---|---|
 | `/trips/delete` | `TripDelete` | `Delete` | `main` | `red` |
 | `/trips/duplicate` | `TripDuplicateSelect` | `Duplicate` | `main` | (default) |
-| `/trips/owners/delete` | `OwnerDelete` | `Delete` | `main` | `red` |
-| `/trips/accounts/delete` | `AccountDelete` | `Delete` | `main` | `red` |
-| `/trips/expenses/delete` | `ExpenseDelete` | `Delete` | `main` | `red` |
-| `/trips/expenses/duplicate` | `ExpenseDuplicateSelect` | `Duplicate` | `main` | (default) |
-| `/trips/settings/countries/delete` | `CountryDelete` | `Delete` | `main` | `red` |
-| `/trips/settings/categories/delete` | `CategoryDelete` | `Delete` | `main` | `red` |
-| `/trips/settings/tags/delete` | `TagDelete` | `Delete` | `main` | `red` |
-| `/trips/settings/currencies/delete` | `CurrencyDelete` | `Delete` | `main` | `red` |
-| `/trips/new/countries/delete` | `TripCreateCountryDelete` | `Delete` | `main` | `red` |
+| `/trips/owners/delete` | `OwnerDelete` | `Owners > Delete` | `main` | `red` |
+| `/trips/accounts/delete` | `AccountDelete` | `Accounts > Delete` | `main` | `red` |
+| `/trips/expenses/delete` | `ExpenseDelete` | `Expenses > Delete` | `main` | `red` |
+| `/trips/expenses/duplicate` | `ExpenseDuplicateSelect` | `Expenses > Duplicate` | `main` | (default) |
+| `/trips/settings/countries/delete` | `CountryDelete` | `Settings > Countries > Delete` | `main` | `red` |
+| `/trips/settings/categories/delete` | `CategoryDelete` | `Settings > Categories > Delete` | `main` | `red` |
+| `/trips/settings/tags/delete` | `TagDelete` | `Settings > Tags > Delete` | `main` | `red` |
+| `/trips/settings/currencies/delete` | `CurrencyDelete` | `Settings > Currencies > Delete` | `main` | `red` |
+| `/trips/new/countries/delete` | `TripCreateCountryDelete` | `Countries > Delete` | `main` | `red` |
 
-Route titles produce the breadcrumb segment automatically (e.g. `Trips > [tripName] > Owners > Delete` for `/trips/owners/delete`). Settings sub-routes use the `tripName` resolver pattern already in use.
+**Breadcrumb mechanism:** `App.tsx` builds the breadcrumb from a hardcoded `switch (currentRoute.path)` and appends `titleSuffix` from `useLayout()`. The route-table `title` field is currently unused for breadcrumbs. To minimise churn, the new screens set their breadcrumb segment via `setTitleSuffix(...)` rather than expanding the switch. This matches how settings list screens already inject `Settings > <section>` into the breadcrumb today. Route-table `title` entries are still added for consistency with sibling routes.
 
 ### Modified
 - `src/tui/models/index.ts`:
@@ -98,6 +98,5 @@ Manual verification (one trip with a few owners/accounts/expenses/etc.):
 ## Risks / non-risks
 
 - **Path-string typos:** caught at compile time by `RouteParams` since every `goTo` is typed.
-- **Forgotten breadcrumb segment:** the rendered breadcrumb is built from the route table; setting the route title is sufficient.
+- **Forgotten breadcrumb segment:** new screens must call `setTitleSuffix(...)` per the table above; without it, the breadcrumb loses the trailing `Delete`/`Duplicate` segment.
 - **Duplicate route name conflict on /trips:** resolved by renaming the existing form route to `/trips/duplicate/new`.
-- **`titleSuffix` misuse:** per CLAUDE.md, "Delete"/"Duplicate" go in the route title, not `titleSuffix`. Screens must not set `titleSuffix` to "Delete" or "Duplicate".
