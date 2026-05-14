@@ -17,7 +17,7 @@ export const FORM_HINTS: HelpHint[] = [
 
 export const SELECT_REMOVE_HINTS: HelpHint[] = [
 	{ key: "↑↓", label: "Navigate" },
-	{ key: "Enter", label: "Remove selected" },
+	{ key: "Enter", label: "Delete selected" },
 	{ key: "q/esc", label: "Back to list" },
 	{ key: "e", label: "Exit" },
 ];
