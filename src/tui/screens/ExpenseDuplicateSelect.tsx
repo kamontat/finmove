@@ -47,6 +47,7 @@ export function ExpenseDuplicateSelect(): JSX.Element {
 				const expense = trip.expenses[rowIndex];
 				if (!expense) return;
 				goTo("/trips/expenses/form", {
+					replace: true,
 					props: {
 						tripDirPath: trip.dirPath,
 						duplicateFromId: expense.id,
