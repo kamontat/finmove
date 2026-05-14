@@ -1,6 +1,7 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
+import { removeExpense } from "../../core/services/expense";
 import { TableSelect } from "../components/molecules/TableSelect";
 import { LIST_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
@@ -12,11 +13,11 @@ import { useNavigation } from "../states/navigation";
 import { buildExpenseListRows, EXPENSE_LIST_HEADERS } from "./expenseListRow";
 
 export function ExpenseList(): JSX.Element {
-	const { trip } = useData();
+	const { trip, reloadTrip } = useData();
 	const { focus, setFocus } = useFocus();
 	const { setHints, setColor, setTitleSuffix } = useLayout();
-	const { setMenu } = useMenu();
-	const { goTo } = useNavigation();
+	const { setMenu, armed, setActiveIndex } = useMenu();
+	const { goTo, goBack } = useNavigation();
 
 	const { clearByPrefix } = useFormBufferAdmin();
 	useEffect(() => {
@@ -41,8 +42,37 @@ export function ExpenseList(): JSX.Element {
 				{ label: "Add", value: "add", key: "a" },
 				...(hasExpenses
 					? [
-							{ label: "Duplicate", value: "duplicate", key: "d" },
-							{ label: "Delete", value: "delete", key: "x" },
+							{
+								label: "Duplicate",
+								value: "duplicate",
+								key: "d",
+								mainAction: {
+									onConfirm: (i: number) => {
+										const e = trip.expenses[i];
+										if (!e) return;
+										goTo("/trips/expenses/form", {
+											props: { tripDirPath, duplicateFromId: e.id },
+										});
+									},
+								},
+							},
+							{
+								label: "Delete",
+								value: "delete",
+								key: "x",
+								mainAction: {
+									confirmCount: 2,
+									onConfirm: (i: number) => {
+										const e = trip.expenses[i];
+										if (!e) return;
+										removeExpense(trip, e.id);
+										reloadTrip();
+										if (trip.expenses.length === 0) {
+											goBack();
+										}
+									},
+								},
+							},
 						]
 					: []),
 			],
@@ -57,7 +87,16 @@ export function ExpenseList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [trip, setMenu, setHints, setColor, setTitleSuffix, goTo]);
+	}, [
+		trip,
+		reloadTrip,
+		setMenu,
+		setHints,
+		setColor,
+		setTitleSuffix,
+		goTo,
+		goBack,
+	]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
@@ -81,6 +120,8 @@ export function ExpenseList(): JSX.Element {
 					props: { tripDirPath: trip.dirPath, expenseId: expense.id },
 				});
 			}}
+			onHighlight={setActiveIndex}
+			armedRowIndex={armed?.value === "delete" ? armed.index : null}
 			isActive={focus === "main"}
 		/>
 	);
