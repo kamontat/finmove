@@ -136,7 +136,7 @@ function CategoriesBlock({ status }: Props): JSX.Element {
 	);
 	const barWidth = 8;
 	return (
-		<Box flexDirection="column">
+		<Box flexDirection="column" width={38}>
 			<SectionHeader label="Top categories" />
 			{status.topCategories.length === 0 ? (
 				<Text dimColor>—</Text>
@@ -193,7 +193,7 @@ function typeAbbrev(type: AccountType): string {
 	return type === AccountType.Credit ? "Cr" : "Db";
 }
 
-export function AccountsBlock({ status }: Props): JSX.Element {
+function AccountsBlock({ status }: Props): JSX.Element {
 	const max = Math.max(1, ...status.byAccount.map((a) => a.totalThb));
 	const barWidth = 6;
 	return (
@@ -226,7 +226,7 @@ export function AccountsBlock({ status }: Props): JSX.Element {
 
 function CountsBlock({ status }: Props): JSX.Element {
 	return (
-		<Box flexDirection="column">
+		<Box flexDirection="column" width={38}>
 			<SectionHeader label="Counts" />
 			<Box>
 				<Text dimColor>Accounts</Text>
@@ -265,18 +265,17 @@ function WarningList({ status }: Props): JSX.Element {
 
 export function TripDashboard({ status }: Props): JSX.Element {
 	const hasOwners = status.ownerBalances.length > 0;
+	const hasAccountSpend = status.byAccount.length > 0;
 	return (
 		<Box flexDirection="column" gap={1}>
 			<StatusHeader status={status} />
 			<ProgressBar status={status} />
 
-			<Box flexDirection="row" gap={2}>
+			<Box flexDirection="row" flexWrap="wrap" gap={2}>
 				<SpendBlock status={status} />
-				<CategoriesBlock status={status} />
-			</Box>
-
-			<Box flexDirection="row" gap={2}>
 				{hasOwners && <OwnersBlock status={status} />}
+				<CategoriesBlock status={status} />
+				{hasAccountSpend && <AccountsBlock status={status} />}
 				<CountsBlock status={status} />
 			</Box>
 
