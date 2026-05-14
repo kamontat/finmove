@@ -6,11 +6,13 @@ import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 
 export function CountryDelete(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 	const { goBack } = useNavigation();
 
 	useEffect(() => {

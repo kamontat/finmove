@@ -9,12 +9,14 @@ import { LIST_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
 import { useFormBufferAdmin } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripList(): JSX.Element {
 	const { goTo } = useNavigation();
 	const { focus } = useFocus();
-	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 
 	const { dataDir = "./data" } = useRouteProps("/trips");
 

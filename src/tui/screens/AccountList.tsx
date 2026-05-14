@@ -7,12 +7,14 @@ import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useFormBufferAdmin } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 
 export function AccountList(): JSX.Element {
 	const { trip } = useData();
 	const { focus, setFocus } = useFocus();
-	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 	const { goTo } = useNavigation();
 
 	const { clearByPrefix } = useFormBufferAdmin();

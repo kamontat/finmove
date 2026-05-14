@@ -6,12 +6,14 @@ import { getTripStatus } from "../../core/services/trip";
 import { TripDashboard } from "../components/organisms/TripDashboard";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 
 export function TripOverview(): JSX.Element {
 	const { trip } = useData();
 	const { goTo } = useNavigation();
-	const { setMenu, setHints } = useLayout();
+	const { setHints } = useLayout();
+	const { setMenu } = useMenu();
 	useEffect(() => {
 		if (!trip) return;
 

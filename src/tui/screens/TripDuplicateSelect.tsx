@@ -5,10 +5,12 @@ import type { Trip } from "../../core/models";
 import { listTrips } from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripDuplicateSelect(): JSX.Element {
-	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 	const { goTo } = useNavigation();
 	const { dataDir = "./data" } = useRouteProps("/trips/duplicate");
 

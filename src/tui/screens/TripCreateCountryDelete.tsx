@@ -5,10 +5,12 @@ import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripCreateCountryDelete(): JSX.Element {
-	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 	const { goBack } = useNavigation();
 	const { formId = "trip-new" } = useRouteProps("/trips/new/countries/delete");
 

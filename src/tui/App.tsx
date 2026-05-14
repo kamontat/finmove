@@ -10,7 +10,7 @@ import { FocusProvider, useFocus } from "./states/focus";
 import { FormBufferProvider } from "./states/formBuffer";
 import { HelpProvider } from "./states/help";
 import { LayoutProvider, useLayout } from "./states/layout";
-import { MenuProvider } from "./states/menu";
+import { MenuProvider, useMenu } from "./states/menu";
 import { NavigationProvider, useNavigation } from "./states/navigation";
 
 function resolveInitialRoute(args: AppArgs): RouteEntry {
@@ -44,7 +44,8 @@ function resolveInitialRoute(args: AppArgs): RouteEntry {
 function Router(): JSX.Element {
 	const { currentRoute } = useNavigation();
 	const { setMenuAvailable } = useFocus();
-	const { menuOptions, titleSuffix } = useLayout();
+	const { titleSuffix } = useLayout();
+	const { options: menuOptions } = useMenu();
 	const { trip } = useData();
 
 	useGlobalKeys();

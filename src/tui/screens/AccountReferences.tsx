@@ -9,12 +9,14 @@ import { ListSelect } from "../components/molecules/ListSelect";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function AccountReferences(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { focus } = useFocus();
-	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 	const { goTo, goBack } = useNavigation();
 
 	const { tripDirPath, accountId } = useRouteProps(

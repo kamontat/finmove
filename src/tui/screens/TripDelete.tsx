@@ -6,10 +6,12 @@ import { deleteTrip, listTrips } from "../../core/services/trip";
 import { RemoveSelector } from "../components/molecules/RemoveSelector";
 import { SELECT_REMOVE_HINTS } from "../constants/hints";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripDelete(): JSX.Element {
-	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 	const { goBack } = useNavigation();
 	const { dataDir = "./data" } = useRouteProps("/trips/delete");
 

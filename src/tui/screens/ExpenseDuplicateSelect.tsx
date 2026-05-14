@@ -6,13 +6,15 @@ import { SELECT_DUPLICATE_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 import { buildExpenseListRows, EXPENSE_LIST_HEADERS } from "./expenseListRow";
 
 export function ExpenseDuplicateSelect(): JSX.Element {
 	const { trip } = useData();
 	const { focus } = useFocus();
-	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 	const { goTo } = useNavigation();
 
 	useEffect(() => {

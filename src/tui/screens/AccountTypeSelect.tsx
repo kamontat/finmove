@@ -4,6 +4,7 @@ import { SingleSelectList } from "../components/organisms/SingleSelectList";
 import type { HelpHint, SelectOption } from "../models";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 const HINTS: HelpHint[] = [
@@ -19,7 +20,8 @@ const OPTIONS: SelectOption[] = [
 
 export function AccountTypeSelect(): JSX.Element {
 	const { goBack } = useNavigation();
-	const { setHints, setMenu, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 
 	const props = useRouteProps([
 		"/trips/accounts/new/type",

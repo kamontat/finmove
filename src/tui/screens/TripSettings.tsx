@@ -6,12 +6,14 @@ import { Form } from "../components/organisms/Form";
 import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 
 export function TripSettings(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { goTo, goBack } = useNavigation();
-	const { setMenu, setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 
 	useEffect(() => {
 		setTitleSuffix("Settings");

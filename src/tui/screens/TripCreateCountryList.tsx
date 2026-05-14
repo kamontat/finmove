@@ -6,12 +6,14 @@ import { LIST_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripCreateCountryList(): JSX.Element {
 	const { focus } = useFocus();
 	const { goTo } = useNavigation();
-	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 
 	const { dataDir = "./data", formId = "trip-new" } = useRouteProps(
 		"/trips/new/countries",

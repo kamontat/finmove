@@ -6,6 +6,7 @@ import type { HelpHint } from "../models";
 import { useData } from "../states/data";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 const HINTS: HelpHint[] = [
@@ -18,7 +19,8 @@ const HINTS: HelpHint[] = [
 export function TagSelect(): JSX.Element {
 	const { trip } = useData();
 	const { goBack } = useNavigation();
-	const { setHints, setMenu, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setMenu } = useMenu();
 
 	const { formId, fieldKey } = useRouteProps("/trips/expenses/form/tags");
 	const buffer = useFormBuffer(formId);
