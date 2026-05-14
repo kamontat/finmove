@@ -2,10 +2,11 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { stringify } from "yaml";
-import type { Settings } from "../../../models";
+import type { Expense, Settings } from "../../../models";
 import { AccountType } from "../../../models";
 import { loadTrip } from "../../trip/loadTrip";
 import { addAccount } from "../addAccount";
+import { findAccountReferences } from "../findAccountReferences";
 import { getAccounts } from "../getAccounts";
 import { removeAccount } from "../removeAccount";
 import { updateAccount } from "../updateAccount";
@@ -24,7 +25,11 @@ const sampleSettings: Settings = {
 	exportPath: "./expenses.csv",
 };
 
-function setupTrip() {
+interface SetupOptions {
+	expenses?: Expense[];
+}
+
+function setupTrip(opts: SetupOptions = {}) {
 	const tripDir = join(TEST_DIR, "test-trip");
 	mkdirSync(tripDir, { recursive: true });
 	writeFileSync(join(tripDir, "settings.yaml"), stringify(sampleSettings));
@@ -38,7 +43,10 @@ function setupTrip() {
 			accounts: [{ id: "a1", name: "Visa", type: "Credit", owners: ["alice"] }],
 		}),
 	);
-	writeFileSync(join(tripDir, "expenses.yaml"), stringify({ expenses: [] }));
+	writeFileSync(
+		join(tripDir, "expenses.yaml"),
+		stringify({ expenses: opts.expenses ?? [] }),
+	);
 	return tripDir;
 }
 
@@ -129,5 +137,42 @@ describe("removeAccount", () => {
 
 		trip = loadTrip(tripDir);
 		expect(trip.accounts).toHaveLength(0);
+	});
+});
+
+describe("findAccountReferences", () => {
+	test("returns empty expenses when account is unreferenced", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		expect(findAccountReferences(trip, "a1")).toEqual({ expenses: [] });
+	});
+
+	test("finds account referenced by an expense", () => {
+		const tripDir = setupTrip({
+			expenses: [
+				{
+					id: "e1",
+					accountId: "a1",
+					date: "2026-01-01",
+					payee: "Cafe",
+					category: "Food",
+					amount: 100,
+					currency: "THB",
+					owners: ["alice"],
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const trip = loadTrip(tripDir);
+		const refs = findAccountReferences(trip, "a1");
+		expect(refs.expenses).toHaveLength(1);
+		expect(refs.expenses[0]?.id).toBe("e1");
+	});
+
+	test("returns empty when account does not exist", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		expect(findAccountReferences(trip, "nobody")).toEqual({ expenses: [] });
 	});
 });
