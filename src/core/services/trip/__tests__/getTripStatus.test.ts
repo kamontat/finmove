@@ -960,25 +960,23 @@ describe("getTripStatus — owner balances", () => {
 });
 
 describe("getTripStatus — byAccount", () => {
-	const baseAccounts = [
-		{
-			id: "acc-hsbc",
-			name: "HSBC Credit",
-			type: AccountType.Credit,
-			owners: [],
-		},
-		{
-			id: "acc-bkk",
-			name: "Bangkok Bank",
-			type: AccountType.Debit,
-			owners: [],
-		},
-	];
-
 	test("sums totalThb and expenseCount per account, sorted desc by totalThb", () => {
 		const s = getTripStatus(
 			makeTrip({
-				accounts: baseAccounts,
+				accounts: [
+					{
+						id: "acc-hsbc",
+						name: "HSBC Credit",
+						type: AccountType.Credit,
+						owners: [],
+					},
+					{
+						id: "acc-bkk",
+						name: "Bangkok Bank",
+						type: AccountType.Debit,
+						owners: [],
+					},
+				],
 				expenses: [
 					{
 						id: "e1",
