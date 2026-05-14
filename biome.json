@@ -1,6 +1,9 @@
 {
 	"$schema": "https://biomejs.dev/schemas/2.4.10/schema.json",
 	"extends": ["@kcconfigs/biome"],
+	"files": {
+		"includes": ["!.claude"]
+	},
 	"linter": {
 		"rules": {
 			"complexity": {
