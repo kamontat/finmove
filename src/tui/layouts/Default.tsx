@@ -4,6 +4,7 @@ import { SelectInput } from "../components/atoms/SelectInput";
 import { HelpBar } from "../components/molecules/HelpBar";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
+import { useMenu } from "../states/menu";
 
 interface DefaultLayoutProps {
 	title: string;
@@ -17,14 +18,18 @@ export function Default({
 	children,
 }: DefaultLayoutProps): JSX.Element {
 	const { focus } = useFocus();
-	const { menuOptions, onMenuSelect, hints, colors } = useLayout();
+	const { hints, colors } = useLayout();
+	const {
+		options: menuOptions,
+		onSelect: onMenuSelect,
+		armedHint,
+		trigger,
+	} = useMenu();
 	const { stdout } = useStdout();
 
 	const terminalRows = stdout?.rows ?? 24;
 	const hasMenu = menuOptions.length > 0 && onMenuSelect !== null;
 
-	// Height calculation:
-	// 1 title line + 2 main borders + 3 menu (if visible) + 1 help bar
 	const titleHeight = 1;
 	const mainBorderHeight = 2;
 	const menuHeight = hasMenu ? 3 : 0;
@@ -33,41 +38,39 @@ export function Default({
 	const mainHeight = Math.max(3, terminalRows - reserved);
 
 	const activeBorderColor = colors.border ?? defaultBorderColor ?? "cyan";
-	const activeTitleColor = colors.title ?? defaultBorderColor ?? "cyan";
 	const mainBorderColor =
 		focus === "main" || focus === "input" ? activeBorderColor : "gray";
 	const menuBorderColor = focus === "menu" ? activeBorderColor : "gray";
+	const titleColor = colors.title ?? "cyan";
 
 	return (
 		<Box flexDirection="column" width="100%">
-			{/* Title */}
-			<Text bold color={activeTitleColor}>
+			<Text bold color={titleColor}>
 				{" "}
 				{title}
 			</Text>
 
-			{/* Main box */}
 			<Box
 				borderStyle="round"
 				borderColor={mainBorderColor}
 				paddingX={1}
 				height={mainHeight}
+				flexDirection="column"
 			>
 				{children}
+				{armedHint !== null && <Text color="red">{armedHint}</Text>}
 			</Box>
 
-			{/* Menu box */}
-			{hasMenu && onMenuSelect && (
+			{hasMenu && (
 				<Box borderStyle="round" borderColor={menuBorderColor}>
 					<SelectInput
 						options={menuOptions}
-						onChange={onMenuSelect}
+						onChange={(value) => trigger(value, focus)}
 						isActive={focus === "menu"}
 					/>
 				</Box>
 			)}
 
-			{/* Help bar */}
 			<Box paddingX={1}>
 				<HelpBar hints={hints} />
 			</Box>
