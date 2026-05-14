@@ -2,17 +2,16 @@ import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
-import { deleteTrip, listTrips } from "../../core/services/trip";
+import { listTrips } from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
-import { RemoveSelector } from "../components/molecules/RemoveSelector";
-import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
+import { LIST_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
 import { useFormBufferAdmin } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripList(): JSX.Element {
-	const { goTo, goBack } = useNavigation();
+	const { goTo } = useNavigation();
 	const { focus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
 
@@ -23,17 +22,11 @@ export function TripList(): JSX.Element {
 		clearByPrefix("trip-");
 	}, [clearByPrefix]);
 
-	const [trips, setTrips] = useState<Trip[]>(() => listTrips(dataDir));
+	const [trips] = useState<Trip[]>(() => listTrips(dataDir));
 
 	useEffect(() => {
 		setTitleSuffix(null);
 
-		if (selectMode === "delete") {
-			setBorderColor("red");
-			setMenu([], () => {});
-			setHints(SELECT_REMOVE_HINTS);
-			return;
-		}
 		if (selectMode === "duplicate") {
 			setBorderColor(null);
 			setMenu([], () => {});
@@ -61,7 +54,7 @@ export function TripList(): JSX.Element {
 						props: { dataDir, selectMode: "duplicate" },
 					});
 				} else if (value === "delete" && trips.length > 0) {
-					goTo("/trips", { props: { dataDir, selectMode: "delete" } });
+					goTo("/trips/delete", { props: { dataDir } });
 				}
 			},
 		);
@@ -76,30 +69,6 @@ export function TripList(): JSX.Element {
 		setTitleSuffix,
 		goTo,
 	]);
-
-	if (selectMode === "delete") {
-		if (trips.length === 0) {
-			return <Text dimColor>No trips.</Text>;
-		}
-		return (
-			<RemoveSelector
-				header="Select a trip to delete:"
-				options={trips.map((t) => ({
-					label: t.settings.name,
-					value: t.dirPath,
-					detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
-				}))}
-				onConfirm={(dirPath) => {
-					deleteTrip(dirPath);
-					const next = listTrips(dataDir);
-					setTrips(next);
-					if (next.length === 0) {
-						goBack();
-					}
-				}}
-			/>
-		);
-	}
 
 	if (selectMode === "duplicate") {
 		if (trips.length === 0) {

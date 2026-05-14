@@ -5,7 +5,8 @@ export type FocusZone = "main" | "menu" | "input";
 export type FieldValue = string | string[];
 
 export interface RouteParams {
-	"/trips": { dataDir?: string; selectMode?: "delete" | "duplicate" };
+	"/trips": { dataDir?: string; selectMode?: "duplicate" };
+	"/trips/delete": { dataDir?: string };
 	"/trips/new": { dataDir?: string };
 	"/trips/duplicate/new": {
 		dataDir?: string;
