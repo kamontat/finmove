@@ -6,7 +6,7 @@ import { FORM_HINTS } from "../constants/hints";
 import { type FormFieldConfig, getString } from "../models";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
-import { useNavigation } from "../states/navigation";
+import { useNavigation, useRouteProps } from "../states/navigation";
 
 const FIELDS: FormFieldConfig[] = [
 	{
@@ -21,8 +21,9 @@ const FIELDS: FormFieldConfig[] = [
 export function TripCreateCountryAdd(): JSX.Element {
 	const { goBack } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
+	const { formId = "trip-new" } = useRouteProps("/trips/new/countries/new");
 
-	const buffer = useFormBuffer("trip-new");
+	const buffer = useFormBuffer(formId);
 	const raw = buffer.values["countries"];
 	const current = Array.isArray(raw) ? raw : [];
 

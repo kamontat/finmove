@@ -13,9 +13,11 @@ export function TripCreateCountryList(): JSX.Element {
 	const { goTo } = useNavigation();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
 
-	const { dataDir = "./data" } = useRouteProps("/trips/new/countries");
+	const { dataDir = "./data", formId = "trip-new" } = useRouteProps(
+		"/trips/new/countries",
+	);
 
-	const buffer = useFormBuffer("trip-new");
+	const buffer = useFormBuffer(formId);
 	const raw = buffer.values["countries"];
 	const countries = Array.isArray(raw) ? raw : [];
 
@@ -31,15 +33,16 @@ export function TripCreateCountryList(): JSX.Element {
 			],
 			(value) => {
 				if (value === "add") {
-					goTo("/trips/new/countries/new", { props: { dataDir } });
+					goTo("/trips/new/countries/new", { props: { dataDir, formId } });
 				} else if (value === "delete" && hasItems) {
-					goTo("/trips/new/countries/delete", { props: { dataDir } });
+					goTo("/trips/new/countries/delete", { props: { dataDir, formId } });
 				}
 			},
 		);
 		setHints(LIST_HINTS);
 	}, [
 		dataDir,
+		formId,
 		countries.length,
 		setMenu,
 		setHints,

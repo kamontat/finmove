@@ -95,7 +95,8 @@ export function TripForm(): JSX.Element {
 			label: "Countries",
 			type: "multiselect",
 			required: false,
-			onEdit: () => goTo("/trips/new/countries", { props: { dataDir } }),
+			onEdit: () =>
+				goTo("/trips/new/countries", { props: { dataDir, formId } }),
 		},
 	];
 

@@ -120,12 +120,15 @@ export interface RouteParams {
 
 	"/trips/new/countries": {
 		dataDir?: string;
+		formId?: string;
 	};
 	"/trips/new/countries/delete": {
 		dataDir?: string;
+		formId?: string;
 	};
 	"/trips/new/countries/new": {
 		dataDir?: string;
+		formId?: string;
 	};
 
 	"/trips/accounts/new/owners": {
