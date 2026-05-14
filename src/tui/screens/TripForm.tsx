@@ -41,7 +41,7 @@ export function TripForm(): JSX.Element {
 
 	useEffect(() => {
 		if (isDuplicate && duplicateSource) {
-			setTitleSuffix(`Duplicate of: ${duplicateSource.settings.name}`);
+			setTitleSuffix(duplicateSource.settings.name);
 		} else {
 			setTitleSuffix(null);
 		}

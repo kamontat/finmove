@@ -67,7 +67,10 @@ function Router(): JSX.Element {
 			breadcrumbs.push("Trips");
 			break;
 		case "/trips/new":
-			breadcrumbs.push("Trips", "New");
+			breadcrumbs.push(
+				"Trips",
+				currentRoute.props.duplicateFromDirPath ? "Duplicate" : "New",
+			);
 			break;
 		case "/trips/delete":
 			breadcrumbs.push("Trips", "Delete");
