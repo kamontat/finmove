@@ -21,7 +21,7 @@ import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripForm(): JSX.Element {
-	const { goTo, goBack } = useNavigation();
+	const { goTo } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
 
 	const { dataDir = "./data", duplicateFromDirPath } =
@@ -144,7 +144,7 @@ export function TripForm(): JSX.Element {
 							countries,
 						});
 						buffer.clear();
-						goBack(2);
+						goTo("/trips", { replace: true, props: { dataDir } });
 						return;
 					}
 
