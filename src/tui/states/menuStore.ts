@@ -53,6 +53,9 @@ export class MenuStore {
   }
 
   setActiveIndex(index: number | null): void {
+    if (this.armed !== null && index !== this.armed.index) {
+      this.armed = null;
+    }
     this.activeIndex = index;
   }
 

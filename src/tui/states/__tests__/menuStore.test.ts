@@ -165,4 +165,31 @@ describe("MenuStore", () => {
     store.trigger("delete", "main");
     expect(store.getArmed()).toEqual({ value: "delete", index: 0, count: 1 });
   });
+
+  test("setActiveIndex clears armed when index changes", () => {
+    const store = new MenuStore();
+    store.setMenu(
+      [{ label: "Delete", value: "delete", key: "x",
+        mainAction: { confirmCount: 2, onConfirm: () => {} } }],
+      () => {},
+    );
+    store.setActiveIndex(0);
+    store.trigger("delete", "main"); // arm at 0
+    expect(store.getArmed()).not.toBeNull();
+    store.setActiveIndex(1);
+    expect(store.getArmed()).toBeNull();
+  });
+
+  test("setActiveIndex keeps armed when same index re-sets", () => {
+    const store = new MenuStore();
+    store.setMenu(
+      [{ label: "Delete", value: "delete", key: "x",
+        mainAction: { confirmCount: 2, onConfirm: () => {} } }],
+      () => {},
+    );
+    store.setActiveIndex(0);
+    store.trigger("delete", "main"); // arm at 0
+    store.setActiveIndex(0); // same index
+    expect(store.getArmed()).toEqual({ value: "delete", index: 0, count: 1 });
+  });
 });
