@@ -7,6 +7,7 @@ import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
+import { buildExpenseListRows, EXPENSE_LIST_HEADERS } from "./expenseListRow";
 
 export function ExpenseDuplicateSelect(): JSX.Element {
 	const { trip } = useData();
@@ -32,18 +33,8 @@ export function ExpenseDuplicateSelect(): JSX.Element {
 		return <Text dimColor>No expenses.</Text>;
 	}
 
-	const headers = ["Date", "Account", "Payee", "Category", "Amount", "Tags"];
-	const rows = trip.expenses.map((e) => {
-		const account = trip.accounts.find((a) => a.id === e.accountId);
-		return [
-			{ text: e.date },
-			{ text: account?.name ?? e.accountId },
-			{ text: e.payee },
-			{ text: e.category },
-			{ text: `${e.amount} ${e.currency}` },
-			{ text: e.tags.length > 0 ? String(e.tags.length) : "" },
-		];
-	});
+	const headers = EXPENSE_LIST_HEADERS;
+	const rows = buildExpenseListRows(trip);
 
 	return (
 		<Box flexDirection="column">
