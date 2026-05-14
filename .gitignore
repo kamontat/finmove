@@ -216,6 +216,7 @@ $RECYCLE.BIN/
 
 # Git worktrees
 .worktrees/
+.claude/worktrees/
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,linux,node
 
