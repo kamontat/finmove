@@ -22,7 +22,7 @@ export function loadTrip(tripPath: string): Trip {
 	};
 
 	const { tags: normalizedTags, didNormalize } = normalizeTags(
-		parsedSettings.tags ?? [],
+		Array.isArray(parsedSettings.tags) ? parsedSettings.tags : [],
 	);
 
 	const settings: Settings = { ...parsedSettings, tags: normalizedTags };
