@@ -41,7 +41,9 @@ export function TagList(): JSX.Element {
 									onConfirm: (i: number) => {
 										const target = tags[i];
 										if (target === undefined) return;
-										const remaining = tags.filter((t) => t !== target);
+										const remaining = tags.filter(
+											(t) => t.value !== target.value,
+										);
 										updateSettings(trip.dirPath, { tags: remaining });
 										reloadTrip();
 										if (remaining.length === 0) {
@@ -89,7 +91,10 @@ export function TagList(): JSX.Element {
 
 	return (
 		<ListSelect
-			options={tags.map((t) => ({ label: t, value: t }))}
+			options={tags.map((t) => ({
+				label: t.default ? `${t.value} [default]` : t.value,
+				value: t.value,
+			}))}
 			onChange={(value) => {
 				goTo("/trips/settings/tags/edit", {
 					props: {
