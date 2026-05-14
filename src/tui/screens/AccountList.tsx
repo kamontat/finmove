@@ -12,7 +12,7 @@ import { useNavigation } from "../states/navigation";
 export function AccountList(): JSX.Element {
 	const { trip } = useData();
 	const { focus, setFocus } = useFocus();
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 	const { goTo } = useNavigation();
 
 	const { clearByPrefix } = useFormBufferAdmin();
@@ -27,7 +27,7 @@ export function AccountList(): JSX.Element {
 
 	useEffect(() => {
 		setTitleSuffix(null);
-		setBorderColor(null);
+		setColor({});
 		if (!trip) return;
 
 		const tripDirPath = trip.dirPath;
@@ -49,7 +49,7 @@ export function AccountList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [trip, setMenu, setHints, setBorderColor, setTitleSuffix, goTo]);
+	}, [trip, setMenu, setHints, setColor, setTitleSuffix, goTo]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

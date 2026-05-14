@@ -17,17 +17,17 @@ const HINTS: HelpHint[] = [
 export function CategorySelect(): JSX.Element {
 	const { trip } = useData();
 	const { goBack } = useNavigation();
-	const { setHints, setMenu, setBorderColor, setTitleSuffix } = useLayout();
+	const { setHints, setMenu, setColor, setTitleSuffix } = useLayout();
 
 	const { formId, fieldKey } = useRouteProps("/trips/expenses/form/category");
 	const buffer = useFormBuffer(formId);
 
 	useEffect(() => {
 		setTitleSuffix("Select Category");
-		setBorderColor(null);
+		setColor({});
 		setMenu([], () => {});
 		setHints(HINTS);
-	}, [setHints, setMenu, setBorderColor, setTitleSuffix]);
+	}, [setHints, setMenu, setColor, setTitleSuffix]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

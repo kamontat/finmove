@@ -10,19 +10,19 @@ import { useNavigation } from "../states/navigation";
 
 export function OwnerDelete(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 	const { goTo, goBack } = useNavigation();
 
 	useEffect(() => {
-		setBorderColor("red");
+		setColor({ border: "red", title: "red" });
 		setMenu([], () => {});
 		setHints(SELECT_REMOVE_HINTS);
 		setTitleSuffix(null);
 		return () => {
-			setBorderColor(null);
+			setColor({});
 			setTitleSuffix(null);
 		};
-	}, [setBorderColor, setMenu, setHints, setTitleSuffix]);
+	}, [setColor, setMenu, setHints, setTitleSuffix]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

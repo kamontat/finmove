@@ -19,7 +19,7 @@ const OPTIONS: SelectOption[] = [
 
 export function AccountTypeSelect(): JSX.Element {
 	const { goBack } = useNavigation();
-	const { setHints, setMenu, setBorderColor, setTitleSuffix } = useLayout();
+	const { setHints, setMenu, setColor, setTitleSuffix } = useLayout();
 
 	const props = useRouteProps([
 		"/trips/accounts/new/type",
@@ -32,10 +32,10 @@ export function AccountTypeSelect(): JSX.Element {
 
 	useEffect(() => {
 		setTitleSuffix("Select Account Type");
-		setBorderColor(null);
+		setColor({});
 		setMenu([], () => {});
 		setHints(HINTS);
-	}, [setHints, setMenu, setBorderColor, setTitleSuffix]);
+	}, [setHints, setMenu, setColor, setTitleSuffix]);
 
 	const initialRaw = buffer.values[fieldKey];
 	const initialValue = typeof initialRaw === "string" ? initialRaw : undefined;

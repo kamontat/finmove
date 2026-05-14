@@ -11,12 +11,12 @@ import { useNavigation } from "../states/navigation";
 export function TagList(): JSX.Element {
 	const { trip } = useData();
 	const { focus } = useFocus();
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 	const { goTo } = useNavigation();
 
 	useEffect(() => {
 		setTitleSuffix("Settings > Tags");
-		setBorderColor(null);
+		setColor({});
 		if (!trip) return;
 
 		const tripDirPath = trip.dirPath;
@@ -41,7 +41,7 @@ export function TagList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [trip, setMenu, setHints, setBorderColor, setTitleSuffix, goTo]);
+	}, [trip, setMenu, setHints, setColor, setTitleSuffix, goTo]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

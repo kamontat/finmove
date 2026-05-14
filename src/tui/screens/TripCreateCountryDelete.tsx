@@ -8,7 +8,7 @@ import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripCreateCountryDelete(): JSX.Element {
-	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
+	const { setMenu, setHints, setColor, setTitleSuffix } = useLayout();
 	const { goBack } = useNavigation();
 	const { formId = "trip-new" } = useRouteProps("/trips/new/countries/delete");
 
@@ -17,15 +17,15 @@ export function TripCreateCountryDelete(): JSX.Element {
 	const countries = Array.isArray(raw) ? raw : [];
 
 	useEffect(() => {
-		setBorderColor("red");
+		setColor({ border: "red", title: "red" });
 		setMenu([], () => {});
 		setHints(SELECT_REMOVE_HINTS);
 		setTitleSuffix("Countries > Delete");
 		return () => {
-			setBorderColor(null);
+			setColor({});
 			setTitleSuffix(null);
 		};
-	}, [setBorderColor, setMenu, setHints, setTitleSuffix]);
+	}, [setColor, setMenu, setHints, setTitleSuffix]);
 
 	if (countries.length === 0) {
 		return <Text dimColor>No countries.</Text>;
