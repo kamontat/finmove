@@ -11,16 +11,20 @@ interface TableSelectProps {
 	headers: string[];
 	rows: TableCell[][];
 	onChange: (rowIndex: number) => void;
+	onHighlight?: (rowIndex: number) => void;
 	onCancel?: () => void;
 	isActive?: boolean;
+	armedRowIndex?: number | null;
 }
 
 export function TableSelect({
 	headers,
 	rows,
 	onChange,
+	onHighlight,
 	onCancel,
 	isActive = true,
+	armedRowIndex,
 }: TableSelectProps): JSX.Element {
 	const colWidths = headers.map((h, i) => {
 		const maxData = rows.reduce(
@@ -46,18 +50,22 @@ export function TableSelect({
 				rowCount={rows.length}
 				renderRow={(rowIdx, selected) => {
 					const row = rows[rowIdx] ?? [];
+					const armed = armedRowIndex === rowIdx;
 					return (
 						<Box>
-							<Text inverse={selected}>{selected ? "> " : "  "}</Text>
+							<Text inverse={selected} {...(armed ? { color: "red" } : {})}>
+								{selected ? "> " : "  "}
+							</Text>
 							{headers.map((_, colIdx) => {
 								const cell = row[colIdx] ?? { text: "" };
 								const padded = padCell(cell.text, colIdx);
+								const cellColor = armed ? "red" : cell.color;
 								return (
 									<Text
 										// biome-ignore lint/suspicious/noArrayIndexKey: index is the stable id here
 										key={colIdx}
 										inverse={selected}
-										{...(cell.color ? { color: cell.color } : {})}
+										{...(cellColor !== undefined ? { color: cellColor } : {})}
 									>
 										{padded}
 									</Text>
@@ -67,6 +75,7 @@ export function TableSelect({
 					);
 				}}
 				onChange={onChange}
+				{...(onHighlight ? { onHighlight } : {})}
 				{...(onCancel ? { onCancel } : {})}
 				isActive={isActive}
 			/>
