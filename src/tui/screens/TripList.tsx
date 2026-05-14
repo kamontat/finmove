@@ -1,4 +1,4 @@
-import { Box, Text } from "ink";
+import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
@@ -15,7 +15,7 @@ export function TripList(): JSX.Element {
 	const { focus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
 
-	const { dataDir = "./data", selectMode } = useRouteProps("/trips");
+	const { dataDir = "./data" } = useRouteProps("/trips");
 
 	const { clearByPrefix } = useFormBufferAdmin();
 	useEffect(() => {
@@ -26,20 +26,8 @@ export function TripList(): JSX.Element {
 
 	useEffect(() => {
 		setTitleSuffix(null);
-
-		if (selectMode === "duplicate") {
-			setBorderColor(null);
-			setMenu([], () => {});
-			setHints([
-				{ key: "↑↓", label: "Navigate" },
-				{ key: "Enter", label: "Select trip" },
-				{ key: "q/esc", label: "Back to list" },
-				{ key: "e", label: "Exit" },
-			]);
-			return;
-		}
-
 		setBorderColor(null);
+
 		setMenu(
 			[
 				{ label: "Create", value: "create", key: "c" },
@@ -50,9 +38,7 @@ export function TripList(): JSX.Element {
 				if (value === "create") {
 					goTo("/trips/new", { props: { dataDir } });
 				} else if (value === "duplicate" && trips.length > 0) {
-					goTo("/trips", {
-						props: { dataDir, selectMode: "duplicate" },
-					});
+					goTo("/trips/duplicate", { props: { dataDir } });
 				} else if (value === "delete" && trips.length > 0) {
 					goTo("/trips/delete", { props: { dataDir } });
 				}
@@ -60,7 +46,6 @@ export function TripList(): JSX.Element {
 		);
 		setHints(LIST_HINTS);
 	}, [
-		selectMode,
 		dataDir,
 		trips.length,
 		setMenu,
@@ -69,39 +54,6 @@ export function TripList(): JSX.Element {
 		setTitleSuffix,
 		goTo,
 	]);
-
-	if (selectMode === "duplicate") {
-		if (trips.length === 0) {
-			return <Text dimColor>No trips.</Text>;
-		}
-		return (
-			<Box flexDirection="column">
-				<Text bold color="cyan">
-					Select a trip to duplicate:
-				</Text>
-				<ListSelect
-					options={trips.map((t) => ({
-						label: t.settings.name,
-						value: t.dirPath,
-						detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
-					}))}
-					onChange={(dirPath) => {
-						const trip = trips.find((t) => t.dirPath === dirPath);
-						if (!trip) return;
-						goTo("/trips/duplicate/new", {
-							props: {
-								dataDir,
-								sourceDirPath: trip.dirPath,
-								sourceName: trip.settings.name,
-								sourceStartDate: trip.settings.startDate,
-							},
-						});
-					}}
-					isActive
-				/>
-			</Box>
-		);
-	}
 
 	if (trips.length === 0) {
 		return <Text dimColor>No trips yet. Press [c] to create one.</Text>;

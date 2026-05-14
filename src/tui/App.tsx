@@ -70,6 +70,9 @@ function Router(): JSX.Element {
 		case "/trips/delete":
 			breadcrumbs.push("Trips", "Delete");
 			break;
+		case "/trips/duplicate":
+			breadcrumbs.push("Trips", "Duplicate");
+			break;
 		case "/trips/duplicate/new":
 			breadcrumbs.push("Trips", "Duplicate", "New");
 			break;
