@@ -146,8 +146,9 @@ describe("exportCSV", () => {
 		expect(lines[1]).toContain('"Has ""quotes"""');
 	});
 
-	test("uses trip-level exchange rate as fallback", () => {
+	test("throws when expense has no rate and trip rate is absent", () => {
 		const trip = makeTripFixture();
+		trip.settings.currencies = { JPY: {} };
 		trip.expenses = [
 			{
 				id: "e1",
@@ -157,17 +158,11 @@ describe("exportCSV", () => {
 				category: "Eating",
 				amount: 1000,
 				currency: "JPY",
-				// no exchangeRate — should use trip's 0.23
-				description: "Shopping",
+				description: "",
 				tags: [],
 				owners: ["alice"],
 			},
 		];
-		const csv = exportCSV(trip);
-		const lines = csv.trim().split("\n");
-		// 1000 * 0.23 = 230
-		expect(lines[1]).toBe(
-			'"Alice\'s Visa","Alice","2026-05-02","Shop","Eating","230.00","Shopping",""',
-		);
+		expect(() => exportCSV(trip)).toThrow("No exchange rate available for JPY");
 	});
 });

@@ -174,43 +174,6 @@ describe("getTripStatus — spend", () => {
 		expect(s.totalSpendThb).toBe(250);
 	});
 
-	test("excludes expenses with missing rate and emits warning", () => {
-		const s = getTripStatus(
-			makeTrip({
-				expenses: [
-					{
-						id: "e1",
-						accountId: "a",
-						date: "2026-04-16",
-						payee: "X",
-						category: "Food",
-						amount: 500,
-						currency: "THB",
-						description: "",
-						tags: [],
-					},
-					{
-						id: "e2",
-						accountId: "a",
-						date: "2026-04-17",
-						payee: "Y",
-						category: "Food",
-						amount: 1000,
-						currency: "JPY",
-						description: "",
-						tags: [],
-					},
-				],
-			}),
-			"2026-04-20",
-		);
-		expect(s.totalSpendThb).toBe(500);
-		expect(s.expenseCount).toBe(2);
-		expect(s.warnings).toContain(
-			"1 expense missing THB rate (excluded from totals)",
-		);
-	});
-
 	test("pluralizes missing-rate warning", () => {
 		const s = getTripStatus(
 			makeTrip({
@@ -362,6 +325,33 @@ describe("getTripStatus — spend", () => {
 			"2026-04-20",
 		);
 		expect(s.byCurrency).toEqual([{ currency: "JPY", amount: 1000 }]);
+	});
+
+	test("currency entry present without rate falls through to missing-rate warning", () => {
+		const trip = makeTrip({
+			settings: {
+				...makeTrip().settings,
+				currencies: { JPY: {} },
+			},
+			expenses: [
+				{
+					id: "e1",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "X",
+					category: "Food",
+					amount: 1000,
+					currency: "JPY",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.totalSpendThb).toBe(0);
+		expect(s.warnings).toContain(
+			"1 expense missing THB rate (excluded from totals)",
+		);
 	});
 });
 
