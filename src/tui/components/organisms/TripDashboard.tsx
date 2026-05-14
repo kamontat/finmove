@@ -199,27 +199,23 @@ function AccountsBlock({ status }: Props): JSX.Element {
 	return (
 		<Box flexDirection="column" width={38}>
 			<SectionHeader label="Accounts" />
-			{status.byAccount.length === 0 ? (
-				<Text dimColor>—</Text>
-			) : (
-				status.byAccount.map((a) => {
-					const cells = Math.max(1, Math.round((a.totalThb / max) * barWidth));
-					const countStr = `×${a.expenseCount}`.padStart(4);
-					return (
-						<Box key={a.accountId}>
-							<Text>{formatAccountName(a.name)}</Text>
-							<Text> </Text>
-							<Text dimColor>({typeAbbrev(a.type)})</Text>
-							<Text> </Text>
-							<Text dimColor>{countStr}</Text>
-							<Text> </Text>
-							<Text bold>{formatThb(a.totalThb).padStart(10)}</Text>
-							<Text> </Text>
-							<Text color="magenta">{"█".repeat(cells)}</Text>
-						</Box>
-					);
-				})
-			)}
+			{status.byAccount.map((a) => {
+				const cells = Math.max(1, Math.round((a.totalThb / max) * barWidth));
+				const countStr = `×${a.expenseCount}`.padStart(4);
+				return (
+					<Box key={a.accountId}>
+						<Text>{formatAccountName(a.name)}</Text>
+						<Text> </Text>
+						<Text dimColor>({typeAbbrev(a.type)})</Text>
+						<Text> </Text>
+						<Text dimColor>{countStr}</Text>
+						<Text> </Text>
+						<Text bold>{formatThb(a.totalThb).padStart(10)}</Text>
+						<Text> </Text>
+						<Text color="magenta">{"█".repeat(cells)}</Text>
+					</Box>
+				);
+			})}
 		</Box>
 	);
 }
