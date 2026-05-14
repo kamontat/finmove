@@ -91,4 +91,21 @@ describe("updateSettings", () => {
 			JPY: { exchangeRate: 0.23 },
 		});
 	});
+
+	test("round-trips currency config without exchangeRate", () => {
+		const tripDir = createFixture();
+		updateSettings(tripDir, {
+			currencies: {
+				JPY: { exchangeRate: 0.23 },
+				USD: {},
+			},
+		});
+
+		const trip = loadTrip(tripDir);
+		expect(trip.settings.currencies).toEqual({
+			JPY: { exchangeRate: 0.23 },
+			USD: {},
+		});
+		expect(trip.settings.currencies.USD?.exchangeRate).toBeUndefined();
+	});
 });

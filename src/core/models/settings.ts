@@ -1,5 +1,5 @@
 export interface CurrencyConfig {
-	exchangeRate: number;
+	exchangeRate?: number;
 }
 
 export interface Settings {
