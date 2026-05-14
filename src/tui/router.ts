@@ -17,6 +17,7 @@ import { CountryDelete } from "./screens/CountryDelete";
 import { CountryEdit } from "./screens/CountryEdit";
 import { CountryList } from "./screens/CountryList";
 import { CurrencyCreate } from "./screens/CurrencyCreate";
+import { CurrencyDelete } from "./screens/CurrencyDelete";
 import { CurrencyEdit } from "./screens/CurrencyEdit";
 import { CurrencyList } from "./screens/CurrencyList";
 import { CurrencySelect } from "./screens/CurrencySelect";
@@ -247,6 +248,11 @@ export const routes: Routes = {
 		component: CurrencyList as unknown as ComponentType,
 		title: (props) => props.tripName ?? "Currencies",
 		defaultFocus: "menu",
+	},
+	"/trips/settings/currencies/delete": {
+		component: CurrencyDelete as unknown as ComponentType,
+		title: (props) => props.tripName ?? "Currency",
+		defaultFocus: "main",
 	},
 	"/trips/settings/currencies/new": {
 		component: CurrencyCreate as unknown as ComponentType,

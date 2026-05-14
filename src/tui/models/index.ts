@@ -100,7 +100,10 @@ export interface RouteParams {
 	"/trips/settings/currencies": {
 		tripDirPath: string;
 		tripName?: string;
-		selectMode?: "remove";
+	};
+	"/trips/settings/currencies/delete": {
+		tripDirPath: string;
+		tripName?: string;
 	};
 	"/trips/settings/currencies/new": {
 		tripDirPath: string;
