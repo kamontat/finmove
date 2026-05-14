@@ -85,6 +85,9 @@ function Router(): JSX.Element {
 				case "/trips/owners/edit":
 					breadcrumbs.push("Owners", "Edit");
 					break;
+				case "/trips/owners/delete":
+					breadcrumbs.push("Owners", "Delete");
+					break;
 				case "/trips/owners/references":
 					breadcrumbs.push("Owners", "References");
 					break;

@@ -1,101 +1,50 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
-import { findOwnerReferences, removeOwner } from "../../core/services/owner";
 import { ListSelect } from "../components/molecules/ListSelect";
-import { RemoveSelector } from "../components/molecules/RemoveSelector";
-import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
+import { LIST_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
-import { useNavigation, useRouteProps } from "../states/navigation";
+import { useNavigation } from "../states/navigation";
 
 export function OwnerList(): JSX.Element {
-	const { trip, reloadTrip } = useData();
+	const { trip } = useData();
 	const { focus, setFocus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
-	const { goTo, goBack } = useNavigation();
-
-	const { selectMode } = useRouteProps("/trips/owners");
+	const { goTo } = useNavigation();
 
 	useEffect(() => {
-		if (!trip || selectMode) return;
+		if (!trip) return;
 		setFocus(trip.owners.length > 0 ? "main" : "menu");
-	}, [trip, selectMode, setFocus]);
+	}, [trip, setFocus]);
 
 	useEffect(() => {
 		setTitleSuffix(null);
+		setBorderColor(null);
 		if (!trip) return;
 
 		const tripDirPath = trip.dirPath;
 		const hasOwners = trip.owners.length > 0;
 
-		if (selectMode === "remove") {
-			setBorderColor("red");
-			setMenu([], () => {});
-			setHints(SELECT_REMOVE_HINTS);
-			return;
-		}
-
-		setBorderColor(null);
 		setMenu(
 			[
 				{ label: "Add", value: "add", key: "a" },
-				...(hasOwners ? [{ label: "Remove", value: "remove", key: "x" }] : []),
+				...(hasOwners ? [{ label: "Delete", value: "delete", key: "x" }] : []),
 			],
 			(value) => {
 				if (value === "add") {
 					goTo("/trips/owners/new", { props: { tripDirPath } });
-				} else if (value === "remove" && hasOwners) {
-					goTo("/trips/owners", {
-						props: { tripDirPath, selectMode: "remove" },
-					});
+				} else if (value === "delete" && hasOwners) {
+					goTo("/trips/owners/delete", { props: { tripDirPath } });
 				}
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [
-		trip,
-		selectMode,
-		setMenu,
-		setHints,
-		setBorderColor,
-		setTitleSuffix,
-		goTo,
-	]);
+	}, [trip, setMenu, setHints, setBorderColor, setTitleSuffix, goTo]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
-	}
-
-	if (selectMode === "remove") {
-		if (trip.owners.length === 0) {
-			return <Text dimColor>No owners.</Text>;
-		}
-		return (
-			<RemoveSelector
-				header="Select an owner to remove:"
-				options={trip.owners.map((o) => ({
-					label: o.name,
-					value: o.id,
-					detail: `(${o.id})`,
-				}))}
-				onConfirm={(value) => {
-					const refs = findOwnerReferences(trip, value);
-					if (refs.accounts.length === 0 && refs.expenses.length === 0) {
-						removeOwner(trip, value);
-						reloadTrip();
-						if (trip.owners.length === 0) {
-							goBack();
-						}
-						return;
-					}
-					goTo("/trips/owners/references", {
-						props: { tripDirPath: trip.dirPath, ownerId: value },
-					});
-				}}
-			/>
-		);
 	}
 
 	if (trip.owners.length === 0) {

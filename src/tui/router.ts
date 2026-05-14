@@ -21,6 +21,7 @@ import { ExpenseForm } from "./screens/ExpenseForm";
 import { ExpenseList } from "./screens/ExpenseList";
 import { ExportScreen } from "./screens/Export";
 import { OwnerCreate } from "./screens/OwnerCreate";
+import { OwnerDelete } from "./screens/OwnerDelete";
 import { OwnerEdit } from "./screens/OwnerEdit";
 import { OwnerList } from "./screens/OwnerList";
 import { OwnerReferences } from "./screens/OwnerReferences";
@@ -81,6 +82,11 @@ export const routes: Routes = {
 	"/trips/owners/edit": {
 		component: OwnerEdit as unknown as ComponentType,
 		title: "Owner",
+		defaultFocus: "main",
+	},
+	"/trips/owners/delete": {
+		component: OwnerDelete as unknown as ComponentType,
+		title: "Delete Owner",
 		defaultFocus: "main",
 	},
 	"/trips/owners/references": {
