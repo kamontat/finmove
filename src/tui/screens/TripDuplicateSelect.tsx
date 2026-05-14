@@ -1,4 +1,4 @@
-import { Box, Text } from "ink";
+import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
@@ -35,25 +35,20 @@ export function TripDuplicateSelect(): JSX.Element {
 	}
 
 	return (
-		<Box flexDirection="column">
-			<Text bold color="yellow">
-				Select a trip to duplicate:
-			</Text>
-			<ListSelect
-				options={trips.map((t) => ({
-					label: t.settings.name,
-					value: t.dirPath,
-					detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
-				}))}
-				onChange={(dirPath) => {
-					const trip = trips.find((t) => t.dirPath === dirPath);
-					if (!trip) return;
-					goTo("/trips/new", {
-						props: { dataDir, duplicateFromDirPath: trip.dirPath },
-					});
-				}}
-				isActive
-			/>
-		</Box>
+		<ListSelect
+			options={trips.map((t) => ({
+				label: t.settings.name,
+				value: t.dirPath,
+				detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
+			}))}
+			onChange={(dirPath) => {
+				const trip = trips.find((t) => t.dirPath === dirPath);
+				if (!trip) return;
+				goTo("/trips/new", {
+					props: { dataDir, duplicateFromDirPath: trip.dirPath },
+				});
+			}}
+			isActive
+		/>
 	);
 }

@@ -1,4 +1,4 @@
-import { Box, Text } from "ink";
+import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
 import { TableSelect } from "../components/molecules/TableSelect";
@@ -38,25 +38,20 @@ export function ExpenseDuplicateSelect(): JSX.Element {
 	const rows = buildExpenseListRows(trip);
 
 	return (
-		<Box flexDirection="column">
-			<Text bold color="yellow">
-				Select an expense to duplicate:
-			</Text>
-			<TableSelect
-				headers={headers}
-				rows={rows}
-				onChange={(rowIndex) => {
-					const expense = trip.expenses[rowIndex];
-					if (!expense) return;
-					goTo("/trips/expenses/form", {
-						props: {
-							tripDirPath: trip.dirPath,
-							duplicateFromId: expense.id,
-						},
-					});
-				}}
-				isActive={focus === "main"}
-			/>
-		</Box>
+		<TableSelect
+			headers={headers}
+			rows={rows}
+			onChange={(rowIndex) => {
+				const expense = trip.expenses[rowIndex];
+				if (!expense) return;
+				goTo("/trips/expenses/form", {
+					props: {
+						tripDirPath: trip.dirPath,
+						duplicateFromId: expense.id,
+					},
+				});
+			}}
+			isActive={focus === "main"}
+		/>
 	);
 }
