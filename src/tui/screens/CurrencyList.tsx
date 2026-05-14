@@ -1,6 +1,7 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
+import { updateSettings } from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { LIST_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
@@ -10,11 +11,11 @@ import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 
 export function CurrencyList(): JSX.Element {
-	const { trip } = useData();
+	const { trip, reloadTrip } = useData();
 	const { focus } = useFocus();
 	const { setHints, setColor, setTitleSuffix } = useLayout();
-	const { setMenu } = useMenu();
-	const { goTo } = useNavigation();
+	const { setMenu, armed, setActiveIndex } = useMenu();
+	const { goTo, goBack } = useNavigation();
 
 	useEffect(() => {
 		setTitleSuffix("Settings > Currencies");
@@ -23,12 +24,36 @@ export function CurrencyList(): JSX.Element {
 
 		const tripDirPath = trip.dirPath;
 		const tripName = trip.settings.name;
-		const hasItems = Object.keys(trip.settings.currencies).length > 0;
+		const currencies = trip.settings.currencies;
+		const entries = Object.entries(currencies);
+		const hasItems = entries.length > 0;
 
 		setMenu(
 			[
 				{ label: "Add", value: "add", key: "a" },
-				...(hasItems ? [{ label: "Delete", value: "delete", key: "x" }] : []),
+				...(hasItems
+					? [
+							{
+								label: "Delete",
+								value: "delete",
+								key: "x",
+								mainAction: {
+									confirmCount: 2,
+									onConfirm: (i: number) => {
+										const entry = entries[i];
+										if (!entry) return;
+										const [code] = entry;
+										const { [code]: _unused, ...rest } = currencies;
+										updateSettings(trip.dirPath, { currencies: rest });
+										reloadTrip();
+										if (Object.keys(rest).length === 0) {
+											goBack();
+										}
+									},
+								},
+							},
+						]
+					: []),
 			],
 			(value) => {
 				if (value === "add") {
@@ -43,7 +68,16 @@ export function CurrencyList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [trip, setMenu, setHints, setColor, setTitleSuffix, goTo]);
+	}, [
+		trip,
+		reloadTrip,
+		setMenu,
+		setHints,
+		setColor,
+		setTitleSuffix,
+		goTo,
+		goBack,
+	]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
@@ -72,6 +106,8 @@ export function CurrencyList(): JSX.Element {
 					},
 				});
 			}}
+			onHighlight={(_, i) => setActiveIndex(i)}
+			armedRowIndex={armed?.value === "delete" ? armed.index : null}
 			isActive={focus === "main"}
 		/>
 	);
