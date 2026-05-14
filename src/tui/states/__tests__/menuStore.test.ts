@@ -192,4 +192,21 @@ describe("MenuStore", () => {
     store.setActiveIndex(0); // same index
     expect(store.getArmed()).toEqual({ value: "delete", index: 0, count: 1 });
   });
+
+  test("trigger clears armed when falling through to onSelect", () => {
+    const store = new MenuStore();
+    store.setMenu(
+      [
+        { label: "Delete", value: "delete", key: "x",
+          mainAction: { confirmCount: 2, onConfirm: () => {} } },
+        { label: "Add", value: "add", key: "a" },
+      ],
+      () => {},
+    );
+    store.setActiveIndex(0);
+    store.trigger("delete", "main"); // arm
+    expect(store.getArmed()).not.toBeNull();
+    store.trigger("add", "main"); // different value, no mainAction → fall through
+    expect(store.getArmed()).toBeNull();
+  });
 });
