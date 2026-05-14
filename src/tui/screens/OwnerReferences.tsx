@@ -57,7 +57,9 @@ export function OwnerReferences(): JSX.Element {
     setBorderColor("red");
     setMenu([], () => {});
     setHints([
-      { key: "1/2", label: "Switch tab" },
+      ...(hasAccounts && hasExpenses
+        ? [{ key: "1/2", label: "Switch tab" }]
+        : []),
       { key: "↑↓", label: "Navigate" },
       { key: "Enter", label: "Edit" },
       { key: "q/esc", label: "Back" },
@@ -70,7 +72,16 @@ export function OwnerReferences(): JSX.Element {
       setBorderColor(null);
       setTitleSuffix(null);
     };
-  }, [setBorderColor, setMenu, setHints, setTitleSuffix, owner, ownerId]);
+  }, [
+    setBorderColor,
+    setMenu,
+    setHints,
+    setTitleSuffix,
+    owner,
+    ownerId,
+    hasAccounts,
+    hasExpenses,
+  ]);
 
   useInput((input) => {
     if (focus === "input") return;
