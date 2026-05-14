@@ -76,14 +76,12 @@ export class MenuStore {
 			const action = opt.mainAction;
 			const confirmCount = action.confirmCount ?? 1;
 
-			const armedMatches =
+			if (
 				this.armed !== null &&
 				this.armed.value === opt.value &&
-				this.armed.index === index;
-
-			if (armedMatches) {
-				// biome-ignore lint/style/noNonNullAssertion: armedMatches proves this.armed !== null
-				const newCount = this.armed!.count + 1;
+				this.armed.index === index
+			) {
+				const newCount = this.armed.count + 1;
 				if (newCount >= confirmCount) {
 					action.onConfirm(index);
 					this.armed = null;
