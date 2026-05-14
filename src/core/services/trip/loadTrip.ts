@@ -1,7 +1,14 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse, stringify } from "yaml";
-import type { Account, Expense, Owner, Settings, Tag, Trip } from "../../models";
+import type {
+	Account,
+	Expense,
+	Owner,
+	Settings,
+	Tag,
+	Trip,
+} from "../../models";
 
 export function loadTrip(tripPath: string): Trip {
 	const settingsPath = join(tripPath, "settings.yaml");

@@ -52,7 +52,9 @@ describe("loadTrip — tag normalization", () => {
 
 		loadTrip(tripDir);
 
-		const reparsed = parse(readFileSync(join(tripDir, "settings.yaml"), "utf-8"));
+		const reparsed = parse(
+			readFileSync(join(tripDir, "settings.yaml"), "utf-8"),
+		);
 		expect(reparsed.tags).toEqual([{ value: "biz", default: false }]);
 	});
 

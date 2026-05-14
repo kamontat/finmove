@@ -263,8 +263,7 @@ export function Form({
 															: field.placeholder,
 												}
 											: {})}
-										{...(typeof currentValue === "string" &&
-										currentValue !== ""
+										{...(typeof currentValue === "string" && currentValue !== ""
 											? { defaultValue: currentValue }
 											: field.defaultValue !== undefined
 												? { defaultValue: field.defaultValue }
@@ -293,7 +292,8 @@ export function Form({
 											field.options.findIndex(
 												(o) =>
 													o.value ===
-													(typeof currentValue === "string" && currentValue !== ""
+													(typeof currentValue === "string" &&
+													currentValue !== ""
 														? currentValue
 														: field.defaultValue),
 											),

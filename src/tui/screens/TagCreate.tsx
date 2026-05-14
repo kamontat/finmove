@@ -1,7 +1,7 @@
 import type { JSX } from "react";
 import { useEffect } from "react";
-import { validateTag } from "../../core/validators";
 import { updateSettings } from "../../core/services/trip";
+import { validateTag } from "../../core/validators";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
 import { type FormFieldConfig, getString } from "../models";
