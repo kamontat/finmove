@@ -42,7 +42,10 @@ export function CurrencyDelete(): JSX.Element {
 			options={entries.map(([code, config]) => ({
 				label: code,
 				value: code,
-				detail: `rate: ${config.exchangeRate}`,
+				detail:
+					config.exchangeRate !== undefined
+						? `rate: ${config.exchangeRate}`
+						: "rate: (not set)",
 			}))}
 			onConfirm={(value) => {
 				const { [value]: _unused, ...rest } = currencies;
