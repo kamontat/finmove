@@ -39,7 +39,10 @@ export function TagSelect(): JSX.Element {
 	const initialRaw = buffer.values[fieldKey];
 	const initialSelected = Array.isArray(initialRaw) ? initialRaw : [];
 
-	const options = trip.settings.tags.map((t) => ({ label: t, value: t }));
+	const options = trip.settings.tags.map((t) => ({
+		label: t.value,
+		value: t.value,
+	}));
 
 	return (
 		<MultiSelectList
