@@ -3,7 +3,7 @@ import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
 import { today } from "../../core/services/date";
-import { listTrips, sortTrips } from "../../core/services/trip";
+import { deleteTrip, listTrips, sortTrips } from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { LIST_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
@@ -13,10 +13,10 @@ import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripList(): JSX.Element {
-	const { goTo } = useNavigation();
+	const { goTo, goBack } = useNavigation();
 	const { focus } = useFocus();
 	const { setHints, setColor, setTitleSuffix } = useLayout();
-	const { setMenu } = useMenu();
+	const { setMenu, armed, setActiveIndex } = useMenu();
 
 	const { dataDir = "./data" } = useRouteProps("/trips");
 
@@ -25,7 +25,7 @@ export function TripList(): JSX.Element {
 		clearByPrefix("trip-");
 	}, [clearByPrefix]);
 
-	const [trips] = useState<Trip[]>(() =>
+	const [trips, setTrips] = useState<Trip[]>(() =>
 		sortTrips(listTrips(dataDir), today()),
 	);
 
@@ -36,8 +36,38 @@ export function TripList(): JSX.Element {
 		setMenu(
 			[
 				{ label: "Create", value: "create", key: "c" },
-				{ label: "Duplicate", value: "duplicate", key: "d" },
-				{ label: "Delete", value: "delete", key: "x" },
+				{
+					label: "Duplicate",
+					value: "duplicate",
+					key: "d",
+					mainAction: {
+						onConfirm: (i) => {
+							const t = trips[i];
+							if (!t) return;
+							goTo("/trips/new", {
+								props: { dataDir, duplicateFromDirPath: t.dirPath },
+							});
+						},
+					},
+				},
+				{
+					label: "Delete",
+					value: "delete",
+					key: "x",
+					mainAction: {
+						confirmCount: 2,
+						onConfirm: (i) => {
+							const t = trips[i];
+							if (!t) return;
+							deleteTrip(t.dirPath);
+							const next = sortTrips(listTrips(dataDir), today());
+							setTrips(next);
+							if (next.length === 0) {
+								goBack();
+							}
+						},
+					},
+				},
 			],
 			(value) => {
 				if (value === "create") {
@@ -52,12 +82,13 @@ export function TripList(): JSX.Element {
 		setHints(LIST_HINTS);
 	}, [
 		dataDir,
-		trips.length,
+		trips,
 		setMenu,
 		setHints,
 		setColor,
 		setTitleSuffix,
 		goTo,
+		goBack,
 	]);
 
 	if (trips.length === 0) {
@@ -83,6 +114,8 @@ export function TripList(): JSX.Element {
 					});
 				}
 			}}
+			onHighlight={(_, i) => setActiveIndex(i)}
+			armedRowIndex={armed?.value === "delete" ? armed.index : null}
 			isActive={focus === "main"}
 		/>
 	);
