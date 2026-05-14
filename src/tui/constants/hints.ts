@@ -21,3 +21,10 @@ export const SELECT_REMOVE_HINTS: HelpHint[] = [
 	{ key: "q/esc", label: "Back to list" },
 	{ key: "e", label: "Exit" },
 ];
+
+export const SELECT_DUPLICATE_HINTS: HelpHint[] = [
+	{ key: "↑↓", label: "Navigate" },
+	{ key: "Enter", label: "Duplicate" },
+	{ key: "q/esc", label: "Back to list" },
+	{ key: "e", label: "Exit" },
+];
