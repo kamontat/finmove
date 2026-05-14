@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { Routes } from "./models";
 import { AccountCreate } from "./screens/AccountCreate";
+import { AccountDelete } from "./screens/AccountDelete";
 import { AccountEdit } from "./screens/AccountEdit";
 import { AccountList } from "./screens/AccountList";
 import { AccountReferences } from "./screens/AccountReferences";
@@ -107,6 +108,11 @@ export const routes: Routes = {
 	"/trips/accounts/edit": {
 		component: AccountEdit as unknown as ComponentType,
 		title: "Account",
+		defaultFocus: "main",
+	},
+	"/trips/accounts/delete": {
+		component: AccountDelete as unknown as ComponentType,
+		title: "Delete Account",
 		defaultFocus: "main",
 	},
 	"/trips/accounts/references": {

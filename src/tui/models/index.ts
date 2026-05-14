@@ -25,9 +25,10 @@ export interface RouteParams {
 	"/trips/owners/delete": { tripDirPath: string };
 	"/trips/owners/references": { tripDirPath: string; ownerId: string };
 
-	"/trips/accounts": { tripDirPath: string; selectMode?: "remove" };
+	"/trips/accounts": { tripDirPath: string };
 	"/trips/accounts/new": { tripDirPath: string };
 	"/trips/accounts/edit": { tripDirPath: string; accountId: string };
+	"/trips/accounts/delete": { tripDirPath: string };
 	"/trips/accounts/references": { tripDirPath: string; accountId: string };
 
 	"/trips/expenses": {

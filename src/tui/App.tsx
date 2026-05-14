@@ -100,6 +100,9 @@ function Router(): JSX.Element {
 				case "/trips/accounts/edit":
 					breadcrumbs.push("Accounts", "Edit");
 					break;
+				case "/trips/accounts/delete":
+					breadcrumbs.push("Accounts", "Delete");
+					break;
 				case "/trips/accounts/references":
 					breadcrumbs.push("Accounts", "References");
 					break;
