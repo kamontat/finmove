@@ -1,112 +1,112 @@
 import type { FocusZone } from "../models";
 
 export interface MenuOptionMainAction {
-  confirmCount?: number;
-  check?: (index: number) => boolean;
-  onConfirm: (index: number) => void;
+	confirmCount?: number;
+	check?: (index: number) => boolean;
+	onConfirm: (index: number) => void;
 }
 
 export interface MenuOption {
-  label: string;
-  value: string;
-  key?: string;
-  mainAction?: MenuOptionMainAction;
+	label: string;
+	value: string;
+	key?: string;
+	mainAction?: MenuOptionMainAction;
 }
 
 export interface ArmedState {
-  value: string;
-  index: number;
-  count: number;
+	value: string;
+	index: number;
+	count: number;
 }
 
 export class MenuStore {
-  private options: MenuOption[] = [];
-  private onSelect: ((value: string) => void) | null = null;
-  private activeIndex: number | null = null;
-  private armed: ArmedState | null = null;
+	private options: MenuOption[] = [];
+	private onSelect: ((value: string) => void) | null = null;
+	private activeIndex: number | null = null;
+	private armed: ArmedState | null = null;
 
-  getOptions(): MenuOption[] {
-    return this.options;
-  }
+	getOptions(): MenuOption[] {
+		return this.options;
+	}
 
-  getOnSelect(): ((value: string) => void) | null {
-    return this.onSelect;
-  }
+	getOnSelect(): ((value: string) => void) | null {
+		return this.onSelect;
+	}
 
-  getArmed(): ArmedState | null {
-    return this.armed;
-  }
+	getArmed(): ArmedState | null {
+		return this.armed;
+	}
 
-  getActiveIndex(): number | null {
-    return this.activeIndex;
-  }
+	getActiveIndex(): number | null {
+		return this.activeIndex;
+	}
 
-  getArmedHint(): string | null {
-    if (this.armed === null) return null;
-    const opt = this.options.find((o) => o.value === this.armed?.value);
-    if (!opt) return null;
-    const keyLabel = opt.key ?? opt.value;
-    return `Press [${keyLabel}] again to confirm ${opt.label.toLowerCase()}`;
-  }
+	getArmedHint(): string | null {
+		if (this.armed === null) return null;
+		const opt = this.options.find((o) => o.value === this.armed?.value);
+		if (!opt) return null;
+		const keyLabel = opt.key ?? opt.value;
+		return `Press [${keyLabel}] again to confirm ${opt.label.toLowerCase()}`;
+	}
 
-  setMenu(options: MenuOption[], onSelect: (value: string) => void): void {
-    this.options = options;
-    this.onSelect = onSelect;
-    this.activeIndex = null;
-    this.armed = null;
-  }
+	setMenu(options: MenuOption[], onSelect: (value: string) => void): void {
+		this.options = options;
+		this.onSelect = onSelect;
+		this.activeIndex = null;
+		this.armed = null;
+	}
 
-  setActiveIndex(index: number | null): void {
-    if (this.armed !== null && index !== this.armed.index) {
-      this.armed = null;
-    }
-    this.activeIndex = index;
-  }
+	setActiveIndex(index: number | null): void {
+		if (this.armed !== null && index !== this.armed.index) {
+			this.armed = null;
+		}
+		this.activeIndex = index;
+	}
 
-  reset(): void {
-    this.armed = null;
-  }
+	reset(): void {
+		this.armed = null;
+	}
 
-  trigger(value: string, focus: FocusZone): void {
-    const opt = this.options.find((o) => o.value === value);
-    if (!opt) return;
+	trigger(value: string, focus: FocusZone): void {
+		const opt = this.options.find((o) => o.value === value);
+		if (!opt) return;
 
-    if (focus === "main" && opt.mainAction && this.activeIndex !== null) {
-      const index = this.activeIndex;
-      const action = opt.mainAction;
-      const confirmCount = action.confirmCount ?? 1;
+		if (focus === "main" && opt.mainAction && this.activeIndex !== null) {
+			const index = this.activeIndex;
+			const action = opt.mainAction;
+			const confirmCount = action.confirmCount ?? 1;
 
-      const armedMatches =
-        this.armed !== null &&
-        this.armed.value === opt.value &&
-        this.armed.index === index;
+			const armedMatches =
+				this.armed !== null &&
+				this.armed.value === opt.value &&
+				this.armed.index === index;
 
-      if (armedMatches) {
-        const newCount = this.armed!.count + 1;
-        if (newCount >= confirmCount) {
-          action.onConfirm(index);
-          this.armed = null;
-        } else {
-          this.armed = { value: opt.value, index, count: newCount };
-        }
-        return;
-      }
+			if (armedMatches) {
+				const newCount = this.armed?.count + 1;
+				if (newCount >= confirmCount) {
+					action.onConfirm(index);
+					this.armed = null;
+				} else {
+					this.armed = { value: opt.value, index, count: newCount };
+				}
+				return;
+			}
 
-      const checkOk = action.check ? action.check(index) : true;
-      if (!checkOk) {
-        this.armed = null;
-        return;
-      }
+			const checkOk = action.check ? action.check(index) : true;
+			if (!checkOk) {
+				this.armed = null;
+				return;
+			}
 
-      this.armed = { value: opt.value, index, count: 1 };
-      if (this.armed.count >= confirmCount) {
-        action.onConfirm(index);
-        this.armed = null;
-      }
-      return;
-    }
+			this.armed = { value: opt.value, index, count: 1 };
+			if (this.armed.count >= confirmCount) {
+				action.onConfirm(index);
+				this.armed = null;
+			}
+			return;
+		}
 
-    this.armed = null;
-    this.onSelect?.(value);
-  }
+		this.armed = null;
+		this.onSelect?.(value);
+	}
 }
