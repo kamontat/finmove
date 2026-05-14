@@ -2,9 +2,10 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { stringify } from "yaml";
-import type { Settings } from "../../../models";
+import type { Account, Expense, Settings } from "../../../models";
 import { loadTrip } from "../../trip/loadTrip";
 import { addOwner } from "../addOwner";
+import { findOwnerReferences } from "../findOwnerReferences";
 import { getOwners } from "../getOwners";
 import { removeOwner } from "../removeOwner";
 
@@ -22,7 +23,12 @@ const sampleSettings: Settings = {
 	exportPath: "./expenses.csv",
 };
 
-function setupTrip() {
+interface SetupOptions {
+	accounts?: Account[];
+	expenses?: Expense[];
+}
+
+function setupTrip(opts: SetupOptions = {}) {
 	const tripDir = join(TEST_DIR, "test-trip");
 	mkdirSync(tripDir, { recursive: true });
 	writeFileSync(join(tripDir, "settings.yaml"), stringify(sampleSettings));
@@ -30,8 +36,14 @@ function setupTrip() {
 		join(tripDir, "owners.yaml"),
 		stringify({ owners: [{ id: "alice", name: "Alice" }] }),
 	);
-	writeFileSync(join(tripDir, "accounts.yaml"), stringify({ accounts: [] }));
-	writeFileSync(join(tripDir, "expenses.yaml"), stringify({ expenses: [] }));
+	writeFileSync(
+		join(tripDir, "accounts.yaml"),
+		stringify({ accounts: opts.accounts ?? [] }),
+	);
+	writeFileSync(
+		join(tripDir, "expenses.yaml"),
+		stringify({ expenses: opts.expenses ?? [] }),
+	);
 	return tripDir;
 }
 
@@ -88,5 +100,111 @@ describe("removeOwner", () => {
 		expect(() => removeOwner(trip, "bob")).toThrow(
 			'Owner with id "bob" not found',
 		);
+	});
+});
+
+describe("findOwnerReferences", () => {
+	test("returns empty arrays when owner is unreferenced", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		expect(findOwnerReferences(trip, "alice")).toEqual({
+			accounts: [],
+			expenses: [],
+		});
+	});
+
+	test("finds owner referenced by an account", () => {
+		const tripDir = setupTrip({
+			accounts: [
+				{ id: "a1", name: "Visa", type: "Credit", owners: ["alice"] } as Account,
+			],
+		});
+		const trip = loadTrip(tripDir);
+		const refs = findOwnerReferences(trip, "alice");
+		expect(refs.accounts).toHaveLength(1);
+		expect(refs.accounts[0]?.id).toBe("a1");
+		expect(refs.expenses).toEqual([]);
+	});
+
+	test("finds owner referenced by an expense with string owners", () => {
+		const tripDir = setupTrip({
+			expenses: [
+				{
+					id: "e1",
+					accountId: "x",
+					date: "2026-01-01",
+					payee: "Cafe",
+					category: "Food",
+					amount: 100,
+					currency: "THB",
+					owners: ["alice"],
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const trip = loadTrip(tripDir);
+		const refs = findOwnerReferences(trip, "alice");
+		expect(refs.accounts).toEqual([]);
+		expect(refs.expenses).toHaveLength(1);
+		expect(refs.expenses[0]?.id).toBe("e1");
+	});
+
+	test("finds owner referenced by an expense with split owners", () => {
+		const tripDir = setupTrip({
+			expenses: [
+				{
+					id: "e2",
+					accountId: "x",
+					date: "2026-01-01",
+					payee: "Cafe",
+					category: "Food",
+					amount: 100,
+					currency: "THB",
+					owners: [{ id: "alice", split: "50%" }],
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const trip = loadTrip(tripDir);
+		const refs = findOwnerReferences(trip, "alice");
+		expect(refs.expenses).toHaveLength(1);
+		expect(refs.expenses[0]?.id).toBe("e2");
+	});
+
+	test("returns both accounts and expenses when both reference the owner", () => {
+		const tripDir = setupTrip({
+			accounts: [
+				{ id: "a1", name: "Visa", type: "Credit", owners: ["alice"] } as Account,
+			],
+			expenses: [
+				{
+					id: "e1",
+					accountId: "a1",
+					date: "2026-01-01",
+					payee: "Cafe",
+					category: "Food",
+					amount: 100,
+					currency: "THB",
+					owners: ["alice"],
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const trip = loadTrip(tripDir);
+		const refs = findOwnerReferences(trip, "alice");
+		expect(refs.accounts).toHaveLength(1);
+		expect(refs.expenses).toHaveLength(1);
+	});
+
+	test("returns empty when owner does not exist", () => {
+		const tripDir = setupTrip();
+		const trip = loadTrip(tripDir);
+		expect(findOwnerReferences(trip, "nobody")).toEqual({
+			accounts: [],
+			expenses: [],
+		});
 	});
 });
