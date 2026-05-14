@@ -20,12 +20,23 @@ export function ExpenseForm(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { goTo, goBack } = useNavigation();
 	const { setFocus } = useFocus();
-	const { setHints } = useLayout();
+	const { setHints, setTitleSuffix } = useLayout();
 
-	const { expenseId, tripDirPath } = useRouteProps("/trips/expenses/form");
+	const { expenseId, tripDirPath, duplicateFromId } = useRouteProps(
+		"/trips/expenses/form",
+	);
 	const existingExpense = trip?.expenses.find((e) => e.id === expenseId);
+	const duplicateSource = duplicateFromId
+		? trip?.expenses.find((e) => e.id === duplicateFromId)
+		: undefined;
+	const sourceForDefaults = existingExpense ?? duplicateSource;
+	const isDuplicate = !existingExpense && !!duplicateSource;
 
-	const formId = expenseId ? `expense-edit-${expenseId}` : "expense-new";
+	const formId = expenseId
+		? `expense-edit-${expenseId}`
+		: duplicateFromId
+			? `expense-duplicate-${duplicateFromId}`
+			: "expense-new";
 	const buffer = useFormBuffer(formId);
 
 	useEffect(() => {
@@ -37,19 +48,29 @@ export function ExpenseForm(): JSX.Element {
 		]);
 	}, [setHints]);
 
+	useEffect(() => {
+		if (isDuplicate && duplicateSource) {
+			setTitleSuffix(`Duplicate of: ${duplicateSource.payee}`);
+		} else {
+			setTitleSuffix(null);
+		}
+		return () => setTitleSuffix(null);
+	}, [isDuplicate, duplicateSource, setTitleSuffix]);
+
 	// Seed buffer with existing expense's owners + tags on mount (edit mode only)
 	useEffect(() => {
-		if (!existingExpense) return;
+		const source = existingExpense ?? duplicateSource;
+		if (!source) return;
 		if (buffer.values["owners"] === undefined) {
-			const ownerIds = Array.isArray(existingExpense.owners)
-				? existingExpense.owners.map((o) => (typeof o === "string" ? o : o.id))
+			const ownerIds = Array.isArray(source.owners)
+				? source.owners.map((o) => (typeof o === "string" ? o : o.id))
 				: [];
 			buffer.setField("owners", ownerIds);
 		}
 		if (buffer.values["tags"] === undefined) {
-			buffer.setField("tags", existingExpense.tags);
+			buffer.setField("tags", source.tags);
 		}
-	}, [existingExpense, buffer]);
+	}, [existingExpense, duplicateSource, buffer]);
 
 	const fields = useMemo((): FormFieldConfig[] => {
 		if (!trip) return [];
@@ -70,21 +91,23 @@ export function ExpenseForm(): JSX.Element {
 					goTo("/trips/expenses/form/account", {
 						props: { tripDirPath, formId, fieldKey: "account" },
 					}),
-				...(existingExpense ? { defaultValue: existingExpense.accountId } : {}),
+				...(sourceForDefaults
+					? { defaultValue: sourceForDefaults.accountId }
+					: {}),
 			},
 			{
 				key: "date",
 				label: "Date",
 				type: "date",
 				required: true,
-				defaultValue: existingExpense?.date ?? today(),
+				defaultValue: sourceForDefaults?.date ?? today(),
 			},
 			{
 				key: "payee",
 				label: "Payee",
 				type: "text",
 				required: true,
-				...(existingExpense ? { defaultValue: existingExpense.payee } : {}),
+				...(sourceForDefaults ? { defaultValue: sourceForDefaults.payee } : {}),
 			},
 			{
 				key: "category",
@@ -99,7 +122,9 @@ export function ExpenseForm(): JSX.Element {
 					goTo("/trips/expenses/form/category", {
 						props: { tripDirPath, formId, fieldKey: "category" },
 					}),
-				...(existingExpense ? { defaultValue: existingExpense.category } : {}),
+				...(sourceForDefaults
+					? { defaultValue: sourceForDefaults.category }
+					: {}),
 			},
 			{
 				key: "amount",
@@ -120,14 +145,14 @@ export function ExpenseForm(): JSX.Element {
 					goTo("/trips/expenses/form/currency", {
 						props: { tripDirPath, formId, fieldKey: "currency" },
 					}),
-				defaultValue: existingExpense?.currency ?? "THB",
+				defaultValue: sourceForDefaults?.currency ?? "THB",
 			},
 			{
 				key: "exchangeRate",
 				label: "Exchange Rate (1 currency = ? THB)",
 				type: "text",
-				...(existingExpense?.exchangeRate !== undefined
-					? { defaultValue: existingExpense.exchangeRate.toString() }
+				...(sourceForDefaults?.exchangeRate !== undefined
+					? { defaultValue: sourceForDefaults.exchangeRate.toString() }
 					: {}),
 			},
 			{
@@ -144,8 +169,8 @@ export function ExpenseForm(): JSX.Element {
 				key: "description",
 				label: "Description",
 				type: "text",
-				...(existingExpense
-					? { defaultValue: existingExpense.description }
+				...(sourceForDefaults
+					? { defaultValue: sourceForDefaults.description }
 					: {}),
 			},
 			{
@@ -159,7 +184,7 @@ export function ExpenseForm(): JSX.Element {
 					}),
 			},
 		];
-	}, [trip, existingExpense, goTo, tripDirPath, formId]);
+	}, [trip, existingExpense, sourceForDefaults, goTo, tripDirPath, formId]);
 
 	if (!trip) {
 		return <Box />;
