@@ -82,9 +82,8 @@ export class MenuStore {
 				this.armed.index === index;
 
 			if (armedMatches) {
-				const currentArmed = this.armed;
-				if (currentArmed === null) return;
-				const newCount = currentArmed.count + 1;
+				// biome-ignore lint/style/noNonNullAssertion: armedMatches proves this.armed !== null
+				const newCount = this.armed!.count + 1;
 				if (newCount >= confirmCount) {
 					action.onConfirm(index);
 					this.armed = null;
