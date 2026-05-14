@@ -63,4 +63,29 @@ describe("MenuStore", () => {
     store.trigger("missing", "menu");
     expect(calls).toEqual([]);
   });
+
+  test("trigger calls onSelect from main focus when option has no mainAction", () => {
+    const store = new MenuStore();
+    const calls: string[] = [];
+    store.setMenu(
+      [{ label: "Add", value: "add", key: "a" }],
+      (value) => calls.push(value),
+    );
+    store.setActiveIndex(2);
+    store.trigger("add", "main");
+    expect(calls).toEqual(["add"]);
+  });
+
+  test("trigger calls onSelect from main focus when activeIndex is null", () => {
+    const store = new MenuStore();
+    const calls: string[] = [];
+    store.setMenu(
+      [{ label: "Delete", value: "delete", key: "x",
+        mainAction: { confirmCount: 2, onConfirm: () => {} } }],
+      (value) => calls.push(value),
+    );
+    // activeIndex stays null (no list rendered)
+    store.trigger("delete", "main");
+    expect(calls).toEqual(["delete"]);
+  });
 });
