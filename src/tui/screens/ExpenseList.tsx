@@ -8,6 +8,7 @@ import { useFocus } from "../states/focus";
 import { useFormBufferAdmin } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
+import { buildExpenseListRows, EXPENSE_LIST_HEADERS } from "./expenseListRow";
 
 export function ExpenseList(): JSX.Element {
 	const { trip } = useData();
@@ -60,22 +61,12 @@ export function ExpenseList(): JSX.Element {
 		return <Text dimColor>Loading...</Text>;
 	}
 
-	const headers = ["Date", "Account", "Payee", "Category", "Amount", "Tags"];
-	const rows = trip.expenses.map((e) => {
-		const account = trip.accounts.find((a) => a.id === e.accountId);
-		return [
-			e.date,
-			account?.name ?? e.accountId,
-			e.payee,
-			e.category,
-			`${e.amount} ${e.currency}`,
-			e.tags.length > 0 ? String(e.tags.length) : "",
-		];
-	});
-
 	if (trip.expenses.length === 0) {
 		return <Text dimColor>No expenses yet.</Text>;
 	}
+
+	const headers = EXPENSE_LIST_HEADERS;
+	const rows = buildExpenseListRows(trip);
 
 	return (
 		<TableSelect
