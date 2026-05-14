@@ -8,7 +8,7 @@ export interface RouteParams {
 	"/trips": { dataDir?: string };
 	"/trips/duplicate": { dataDir?: string };
 	"/trips/delete": { dataDir?: string };
-	"/trips/new": { dataDir?: string };
+	"/trips/new": { dataDir?: string; duplicateFromDirPath?: string };
 	"/trips/duplicate/new": {
 		dataDir?: string;
 		sourceDirPath: string;
