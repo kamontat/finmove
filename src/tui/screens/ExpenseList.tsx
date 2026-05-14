@@ -153,7 +153,7 @@ export function ExpenseList(): JSX.Element {
 							},
 						});
 					}}
-					isActive
+					isActive={focus === "main"}
 				/>
 			</Box>
 		);
