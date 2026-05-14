@@ -1197,4 +1197,59 @@ describe("getTripStatus — byAccount", () => {
 		);
 		expect(s.byAccount).toEqual([]);
 	});
+
+	test("expenseCount matches reality — three expenses on the same account", () => {
+		const s = getTripStatus(
+			makeTrip({
+				accounts: [
+					{ id: "a1", name: "Acc", type: AccountType.Debit, owners: [] },
+				],
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a1",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 100,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e2",
+						accountId: "a1",
+						date: "2026-04-17",
+						payee: "Y",
+						category: "Food",
+						amount: 200,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e3",
+						accountId: "a1",
+						date: "2026-04-18",
+						payee: "Z",
+						category: "Food",
+						amount: 300,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.byAccount).toEqual([
+			{
+				accountId: "a1",
+				name: "Acc",
+				type: AccountType.Debit,
+				totalThb: 600,
+				expenseCount: 3,
+			},
+		]);
+	});
 });
