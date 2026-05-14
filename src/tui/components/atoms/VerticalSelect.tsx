@@ -1,6 +1,6 @@
 import { Box, useInput } from "ink";
 import type { JSX, ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface VerticalSelectProps {
 	rowCount: number;
@@ -20,6 +20,13 @@ export function VerticalSelect({
 	isActive = true,
 }: VerticalSelectProps): JSX.Element {
 	const [cursor, setCursor] = useState(0);
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: fire only on mount
+	useEffect(() => {
+		if (rowCount > 0 && onHighlight) {
+			onHighlight(0);
+		}
+	}, []);
 
 	useInput(
 		(input, key) => {
