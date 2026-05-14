@@ -1,6 +1,6 @@
 import { Box, useInput } from "ink";
 import type { JSX, ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface VerticalSelectProps {
 	rowCount: number;
@@ -24,13 +24,19 @@ export function VerticalSelect({
 	// Clamp cursor if rowCount shrinks below current cursor (e.g., after delete).
 	const safeCursor = cursor >= rowCount ? Math.max(0, rowCount - 1) : cursor;
 
-	// Surface cursor to parents (initial mount + every move). Running in an
-	// effect keeps setState out of render / out of other state updaters.
+	// Surface cursor to parents via a ref so callers don't have to memoize
+	// onHighlight. The ref always points at the latest closure; the effect only
+	// re-runs when cursor or rowCount actually changes.
+	const onHighlightRef = useRef(onHighlight);
 	useEffect(() => {
-		if (rowCount > 0 && onHighlight) {
-			onHighlight(safeCursor);
+		onHighlightRef.current = onHighlight;
+	});
+
+	useEffect(() => {
+		if (rowCount > 0) {
+			onHighlightRef.current?.(safeCursor);
 		}
-	}, [safeCursor, rowCount, onHighlight]);
+	}, [safeCursor, rowCount]);
 
 	useInput(
 		(input, key) => {
