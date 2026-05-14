@@ -2,7 +2,8 @@ import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
-import { listTrips } from "../../core/services/trip";
+import { today } from "../../core/services/date";
+import { listTrips, sortTrips } from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { LIST_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
@@ -22,7 +23,9 @@ export function TripList(): JSX.Element {
 		clearByPrefix("trip-");
 	}, [clearByPrefix]);
 
-	const [trips] = useState<Trip[]>(() => listTrips(dataDir));
+	const [trips] = useState<Trip[]>(() =>
+		sortTrips(listTrips(dataDir), today()),
+	);
 
 	useEffect(() => {
 		setTitleSuffix(null);

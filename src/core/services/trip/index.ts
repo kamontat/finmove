@@ -5,5 +5,6 @@ export type { TripStatus } from "./getTripStatus";
 export { getTripStatus } from "./getTripStatus";
 export { listTrips } from "./listTrips";
 export { loadTrip } from "./loadTrip";
+export { sortTrips } from "./sortTrips";
 export { toDirName } from "./toDirName";
 export { updateSettings } from "./updateSettings";
