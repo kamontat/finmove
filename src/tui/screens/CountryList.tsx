@@ -1,43 +1,32 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
-import { updateSettings } from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
-import { RemoveSelector } from "../components/molecules/RemoveSelector";
-import { LIST_HINTS, SELECT_REMOVE_HINTS } from "../constants/hints";
+import { LIST_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
-import { useNavigation, useRouteProps } from "../states/navigation";
+import { useNavigation } from "../states/navigation";
 
 export function CountryList(): JSX.Element {
-	const { trip, reloadTrip } = useData();
+	const { trip } = useData();
 	const { focus } = useFocus();
 	const { setMenu, setHints, setBorderColor, setTitleSuffix } = useLayout();
-	const { goTo, goBack } = useNavigation();
-
-	const { selectMode } = useRouteProps("/trips/settings/countries");
+	const { goTo } = useNavigation();
 
 	useEffect(() => {
 		setTitleSuffix("Settings > Countries");
+		setBorderColor(null);
 		if (!trip) return;
 
 		const tripDirPath = trip.dirPath;
 		const tripName = trip.settings.name;
 		const hasItems = trip.settings.countries.length > 0;
 
-		if (selectMode === "remove") {
-			setBorderColor("red");
-			setMenu([], () => {});
-			setHints(SELECT_REMOVE_HINTS);
-			return;
-		}
-
-		setBorderColor(null);
 		setMenu(
 			[
 				{ label: "Add", value: "add", key: "a" },
-				...(hasItems ? [{ label: "Delete", value: "delete", key: "d" }] : []),
+				...(hasItems ? [{ label: "Delete", value: "delete", key: "x" }] : []),
 			],
 			(value) => {
 				if (value === "add") {
@@ -45,48 +34,20 @@ export function CountryList(): JSX.Element {
 						props: { tripDirPath, tripName },
 					});
 				} else if (value === "delete" && hasItems) {
-					goTo("/trips/settings/countries", {
-						props: { tripDirPath, tripName, selectMode: "remove" },
+					goTo("/trips/settings/countries/delete", {
+						props: { tripDirPath, tripName },
 					});
 				}
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [
-		trip,
-		selectMode,
-		setMenu,
-		setHints,
-		setBorderColor,
-		setTitleSuffix,
-		goTo,
-	]);
+	}, [trip, setMenu, setHints, setBorderColor, setTitleSuffix, goTo]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
 	}
 
 	const { countries } = trip.settings;
-
-	if (selectMode === "remove") {
-		if (countries.length === 0) {
-			return <Text dimColor>No countries.</Text>;
-		}
-		return (
-			<RemoveSelector
-				header="Select a country to remove:"
-				options={countries.map((c) => ({ label: c, value: c }))}
-				onConfirm={(value) => {
-					const remaining = countries.filter((c) => c !== value);
-					updateSettings(trip.dirPath, { countries: remaining });
-					reloadTrip();
-					if (remaining.length === 0) {
-						goBack();
-					}
-				}}
-			/>
-		);
-	}
 
 	if (countries.length === 0) {
 		return <Text dimColor>No countries yet.</Text>;

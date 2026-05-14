@@ -46,7 +46,10 @@ export interface RouteParams {
 	"/trips/settings/countries": {
 		tripDirPath: string;
 		tripName?: string;
-		selectMode?: "remove";
+	};
+	"/trips/settings/countries/delete": {
+		tripDirPath: string;
+		tripName?: string;
 	};
 	"/trips/settings/countries/new": {
 		tripDirPath: string;

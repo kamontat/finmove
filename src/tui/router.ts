@@ -13,6 +13,7 @@ import { CategoryEdit } from "./screens/CategoryEdit";
 import { CategoryList } from "./screens/CategoryList";
 import { CategorySelect } from "./screens/CategorySelect";
 import { CountryCreate } from "./screens/CountryCreate";
+import { CountryDelete } from "./screens/CountryDelete";
 import { CountryEdit } from "./screens/CountryEdit";
 import { CountryList } from "./screens/CountryList";
 import { CurrencyCreate } from "./screens/CurrencyCreate";
@@ -186,6 +187,11 @@ export const routes: Routes = {
 		component: CountryList as unknown as ComponentType,
 		title: (props) => props.tripName ?? "Countries",
 		defaultFocus: "menu",
+	},
+	"/trips/settings/countries/delete": {
+		component: CountryDelete as unknown as ComponentType,
+		title: (props) => props.tripName ?? "Country",
+		defaultFocus: "main",
 	},
 	"/trips/settings/countries/new": {
 		component: CountryCreate as unknown as ComponentType,
