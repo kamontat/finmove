@@ -29,6 +29,7 @@ import { OwnerList } from "./screens/OwnerList";
 import { OwnerReferences } from "./screens/OwnerReferences";
 import { OwnerSelect } from "./screens/OwnerSelect";
 import { TagCreate } from "./screens/TagCreate";
+import { TagDelete } from "./screens/TagDelete";
 import { TagEdit } from "./screens/TagEdit";
 import { TagList } from "./screens/TagList";
 import { TagSelect } from "./screens/TagSelect";
@@ -220,6 +221,11 @@ export const routes: Routes = {
 		component: TagList as unknown as ComponentType,
 		title: (props) => props.tripName ?? "Tags",
 		defaultFocus: "menu",
+	},
+	"/trips/settings/tags/delete": {
+		component: TagDelete as unknown as ComponentType,
+		title: (props) => props.tripName ?? "Tag",
+		defaultFocus: "main",
 	},
 	"/trips/settings/tags/new": {
 		component: TagCreate as unknown as ComponentType,

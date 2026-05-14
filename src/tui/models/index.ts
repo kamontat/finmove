@@ -79,7 +79,10 @@ export interface RouteParams {
 	"/trips/settings/tags": {
 		tripDirPath: string;
 		tripName?: string;
-		selectMode?: "remove";
+	};
+	"/trips/settings/tags/delete": {
+		tripDirPath: string;
+		tripName?: string;
 	};
 	"/trips/settings/tags/new": {
 		tripDirPath: string;
