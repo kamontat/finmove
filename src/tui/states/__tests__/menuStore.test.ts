@@ -20,11 +20,11 @@ describe("MenuStore", () => {
 		expect(store.getOnSelect()).toBe(onSelect);
 	});
 
-	test("setMenu clears any prior activeIndex", () => {
+	test("setMenu preserves activeIndex (selector mount may set it before parent setMenu)", () => {
 		const store = new MenuStore();
 		store.setActiveIndex(3);
 		store.setMenu([], () => {});
-		expect(store.getActiveIndex()).toBeNull();
+		expect(store.getActiveIndex()).toBe(3);
 	});
 
 	test("setMenu clears any prior armed state", () => {

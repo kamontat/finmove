@@ -52,7 +52,6 @@ export class MenuStore {
 	setMenu(options: MenuOption[], onSelect: (value: string) => void): void {
 		this.options = options;
 		this.onSelect = onSelect;
-		this.activeIndex = null;
 		this.armed = null;
 	}
 

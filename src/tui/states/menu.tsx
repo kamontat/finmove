@@ -81,6 +81,7 @@ export function MenuProvider({ children }: MenuProviderProps): JSX.Element {
 
 	const resetMenu = useCallback(() => {
 		storeRef.current.setMenu([], () => {});
+		storeRef.current.setActiveIndex(null);
 		refresh();
 	}, [refresh]);
 
