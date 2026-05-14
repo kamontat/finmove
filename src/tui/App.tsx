@@ -10,6 +10,7 @@ import { FocusProvider, useFocus } from "./states/focus";
 import { FormBufferProvider } from "./states/formBuffer";
 import { HelpProvider } from "./states/help";
 import { LayoutProvider, useLayout } from "./states/layout";
+import { MenuProvider } from "./states/menu";
 import { NavigationProvider, useNavigation } from "./states/navigation";
 
 function resolveInitialRoute(args: AppArgs): RouteEntry {
@@ -159,11 +160,13 @@ export function App({ args }: AppProps): JSX.Element {
 			<FocusProvider>
 				<HelpProvider>
 					<LayoutProvider>
-						<FormBufferProvider>
-							<NavigationProvider initial={initial}>
-								<Router />
-							</NavigationProvider>
-						</FormBufferProvider>
+						<MenuProvider>
+							<FormBufferProvider>
+								<NavigationProvider initial={initial}>
+									<Router />
+								</NavigationProvider>
+							</FormBufferProvider>
+						</MenuProvider>
 					</LayoutProvider>
 				</HelpProvider>
 			</FocusProvider>
