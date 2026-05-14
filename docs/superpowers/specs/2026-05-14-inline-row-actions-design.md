@@ -33,7 +33,7 @@ Out of scope:
 
 ### When `focus === "main"` and list is non-empty
 
-**`[d]`** (where the screen's menu offers Duplicate): fires the duplicate action for the highlighted row immediately. No confirmation. For trips, navigates to `/trips/duplicate/new` with source props prefilled. For expenses, navigates to `/trips/expenses/form` with `duplicateFromId`. The dedicated picker screen is skipped.
+**`[d]`** (where the screen's menu offers Duplicate): fires the duplicate action for the highlighted row immediately. No confirmation. For trips, navigates to `/trips/new` with `duplicateFromDirPath` (same destination as `TripDuplicateSelect`). For expenses, navigates to `/trips/expenses/form` with `duplicateFromId`. The dedicated picker screen is skipped.
 
 **`[x]`** (where the screen's menu offers Delete):
 
@@ -167,7 +167,8 @@ Each list screen:
 
 1. Imports `useMenu()` (replacing the menu pieces of `useLayout()`).
 2. Declares `mainAction` on duplicate/delete options:
-   - Duplicate: `mainAction: { onConfirm: (i) => goTo(...) }` (no `confirmCount`, no `check`).
+   - Duplicate (trips): `mainAction: { onConfirm: (i) => goTo("/trips/new", { props: { dataDir, duplicateFromDirPath: trips[i].dirPath } }) }`.
+   - Duplicate (expenses): `mainAction: { onConfirm: (i) => goTo("/trips/expenses/form", { props: { tripDirPath, duplicateFromId: trip.expenses[i].id } }) }`.
    - Delete (no refs check): `mainAction: { confirmCount: 2, onConfirm: (i) => { deleteX(...); reload(); } }`.
    - Delete (with refs check — owners, accounts): `mainAction: { confirmCount: 2, check: (i) => { if (hasRefs) { goTo(refsPath); return false; } return true; }, onConfirm: (i) => { remove(...); reload(); } }`.
 3. Provides one `onSelect: (value: string) => void` callback for menu-focus and non-`mainAction` paths — typically unchanged from today, just minus the wrapper around the inline-action keys.
