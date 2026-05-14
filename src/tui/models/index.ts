@@ -232,7 +232,7 @@ export type SelectFormField = FormFieldBase & {
 	type: "select";
 	options: SelectOption[];
 	defaultValue?: string;
-	onEdit: () => void;
+	onEdit?: () => void;
 };
 
 export type DateFormField = FormFieldBase & {
