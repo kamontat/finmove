@@ -21,12 +21,16 @@ export function VerticalSelect({
 }: VerticalSelectProps): JSX.Element {
 	const [cursor, setCursor] = useState(0);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: fire only on mount
+	// Clamp cursor if rowCount shrinks below current cursor (e.g., after delete).
+	const safeCursor = cursor >= rowCount ? Math.max(0, rowCount - 1) : cursor;
+
+	// Surface cursor to parents (initial mount + every move). Running in an
+	// effect keeps setState out of render / out of other state updaters.
 	useEffect(() => {
 		if (rowCount > 0 && onHighlight) {
-			onHighlight(0);
+			onHighlight(safeCursor);
 		}
-	}, []);
+	}, [safeCursor, rowCount, onHighlight]);
 
 	useInput(
 		(input, key) => {
@@ -36,17 +40,9 @@ export function VerticalSelect({
 			}
 
 			if (key.upArrow) {
-				setCursor((c) => {
-					const next = c > 0 ? c - 1 : rowCount - 1;
-					if (onHighlight) onHighlight(next);
-					return next;
-				});
+				setCursor((c) => (c > 0 ? c - 1 : rowCount - 1));
 			} else if (key.downArrow) {
-				setCursor((c) => {
-					const next = c < rowCount - 1 ? c + 1 : 0;
-					if (onHighlight) onHighlight(next);
-					return next;
-				});
+				setCursor((c) => (c < rowCount - 1 ? c + 1 : 0));
 			} else if (key.return) {
 				if (cursor < rowCount) onChange(cursor);
 			} else if ((key.escape || input === "q") && onCancel) {
@@ -55,9 +51,6 @@ export function VerticalSelect({
 		},
 		{ isActive },
 	);
-
-	// Clamp cursor if rowCount shrinks below current cursor (e.g., after delete).
-	const safeCursor = cursor >= rowCount ? Math.max(0, rowCount - 1) : cursor;
 
 	return (
 		<Box flexDirection="column">
