@@ -119,7 +119,9 @@ export interface RouteParams {
 
 	"/trips/new/countries": {
 		dataDir?: string;
-		selectMode?: "remove";
+	};
+	"/trips/new/countries/delete": {
+		dataDir?: string;
 	};
 	"/trips/new/countries/new": {
 		dataDir?: string;
