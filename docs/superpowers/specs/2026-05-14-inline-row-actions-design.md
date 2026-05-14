@@ -144,7 +144,7 @@ else:
 ### Changes to `states/layout.tsx`
 
 - Remove `menuOptions`, `onMenuSelect`, `setMenu` from `LayoutContextValue`.
-- `useLayout()` returns: `hints`, `borderColor`, `titleSuffix`, `setHints`, `setBorderColor`, `setTitleSuffix`, `resetLayout`.
+- `useLayout()` returns: `hints`, `colors`, `titleSuffix`, `setHints`, `setColor`, `setTitleSuffix`, `resetLayout`.
 - `App.tsx` adds `<MenuProvider>` around the rest of the provider tree.
 
 ### Changes to selectors
