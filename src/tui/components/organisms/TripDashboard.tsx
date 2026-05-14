@@ -1,5 +1,6 @@
 import { Box, Text } from "ink";
 import type { JSX } from "react";
+import { AccountType } from "../../../core/models";
 import type { TripStatus } from "../../../core/services/trip";
 
 interface Props {
@@ -179,6 +180,46 @@ function OwnersBlock({ status }: Props): JSX.Element {
 					</Box>
 				);
 			})}
+		</Box>
+	);
+}
+
+function formatAccountName(name: string): string {
+	if (name.length <= 12) return name.padEnd(12);
+	return `${name.slice(0, 11)}…`;
+}
+
+function typeAbbrev(type: AccountType): string {
+	return type === AccountType.Credit ? "Cr" : "Db";
+}
+
+export function AccountsBlock({ status }: Props): JSX.Element {
+	const max = Math.max(1, ...status.byAccount.map((a) => a.totalThb));
+	const barWidth = 6;
+	return (
+		<Box flexDirection="column" width={38}>
+			<SectionHeader label="Accounts" />
+			{status.byAccount.length === 0 ? (
+				<Text dimColor>—</Text>
+			) : (
+				status.byAccount.map((a) => {
+					const cells = Math.max(1, Math.round((a.totalThb / max) * barWidth));
+					const countStr = `×${a.expenseCount}`.padStart(4);
+					return (
+						<Box key={a.accountId}>
+							<Text>{formatAccountName(a.name)}</Text>
+							<Text> </Text>
+							<Text dimColor>({typeAbbrev(a.type)})</Text>
+							<Text> </Text>
+							<Text dimColor>{countStr}</Text>
+							<Text> </Text>
+							<Text bold>{formatThb(a.totalThb).padStart(10)}</Text>
+							<Text> </Text>
+							<Text color="magenta">{"█".repeat(cells)}</Text>
+						</Box>
+					);
+				})
+			)}
 		</Box>
 	);
 }
