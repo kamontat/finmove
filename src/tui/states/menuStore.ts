@@ -82,7 +82,9 @@ export class MenuStore {
 				this.armed.index === index;
 
 			if (armedMatches) {
-				const newCount = this.armed?.count + 1;
+				const currentArmed = this.armed;
+				if (currentArmed === null) return;
+				const newCount = currentArmed.count + 1;
 				if (newCount >= confirmCount) {
 					action.onConfirm(index);
 					this.armed = null;
