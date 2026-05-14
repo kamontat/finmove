@@ -44,4 +44,23 @@ export class MenuStore {
   getArmedHint(): string | null {
     return null;
   }
+
+  setMenu(options: MenuOption[], onSelect: (value: string) => void): void {
+    this.options = options;
+    this.onSelect = onSelect;
+    this.activeIndex = null;
+    this.armed = null;
+  }
+
+  setActiveIndex(index: number | null): void {
+    this.activeIndex = index;
+  }
+
+  reset(): void {
+    this.armed = null;
+  }
+
+  trigger(_value: string, _focus: FocusZone): void {
+    // implemented in later tasks
+  }
 }
