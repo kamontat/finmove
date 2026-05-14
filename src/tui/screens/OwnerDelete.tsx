@@ -34,7 +34,6 @@ export function OwnerDelete(): JSX.Element {
 
 	return (
 		<RemoveSelector
-			header="Select an owner to delete:"
 			options={trip.owners.map((o) => ({
 				label: o.name,
 				value: o.id,

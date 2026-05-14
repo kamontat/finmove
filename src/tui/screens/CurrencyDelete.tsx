@@ -37,7 +37,6 @@ export function CurrencyDelete(): JSX.Element {
 
 	return (
 		<RemoveSelector
-			header="Select a currency to delete:"
 			options={entries.map(([code, config]) => ({
 				label: code,
 				value: code,

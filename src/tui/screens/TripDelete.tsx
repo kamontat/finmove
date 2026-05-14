@@ -32,7 +32,6 @@ export function TripDelete(): JSX.Element {
 
 	return (
 		<RemoveSelector
-			header="Select a trip to delete:"
 			options={trips.map((t) => ({
 				label: t.settings.name,
 				value: t.dirPath,

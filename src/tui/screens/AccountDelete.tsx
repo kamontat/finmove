@@ -37,7 +37,6 @@ export function AccountDelete(): JSX.Element {
 
 	return (
 		<RemoveSelector
-			header="Select an account to delete:"
 			options={trip.accounts.map((a) => ({
 				label: a.name,
 				value: a.id,

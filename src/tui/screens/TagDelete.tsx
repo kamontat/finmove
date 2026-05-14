@@ -36,7 +36,6 @@ export function TagDelete(): JSX.Element {
 
 	return (
 		<RemoveSelector
-			header="Select a tag to delete:"
 			options={tags.map((t) => ({ label: t, value: t }))}
 			onConfirm={(value) => {
 				const remaining = tags.filter((t) => t !== value);

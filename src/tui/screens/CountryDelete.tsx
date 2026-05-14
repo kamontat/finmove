@@ -36,7 +36,6 @@ export function CountryDelete(): JSX.Element {
 
 	return (
 		<RemoveSelector
-			header="Select a country to delete:"
 			options={countries.map((c) => ({ label: c, value: c }))}
 			onConfirm={(value) => {
 				const remaining = countries.filter((c) => c !== value);

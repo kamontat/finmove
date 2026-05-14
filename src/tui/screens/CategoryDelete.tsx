@@ -36,7 +36,6 @@ export function CategoryDelete(): JSX.Element {
 
 	return (
 		<RemoveSelector
-			header="Select a category to delete:"
 			options={categories.map((c) => ({ label: c, value: c }))}
 			onConfirm={(value) => {
 				const remaining = categories.filter((c) => c !== value);

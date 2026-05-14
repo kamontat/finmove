@@ -34,7 +34,6 @@ export function ExpenseDelete(): JSX.Element {
 
 	return (
 		<RemoveSelector
-			header="Select an expense to delete:"
 			options={trip.expenses.map((e) => ({
 				label: e.payee,
 				value: e.id,
