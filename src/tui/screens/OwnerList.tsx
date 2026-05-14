@@ -1,6 +1,7 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
+import { findOwnerReferences, removeOwner } from "../../core/services/owner";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { LIST_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
@@ -10,11 +11,11 @@ import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 
 export function OwnerList(): JSX.Element {
-	const { trip } = useData();
+	const { trip, reloadTrip } = useData();
 	const { focus, setFocus } = useFocus();
 	const { setHints, setColor, setTitleSuffix } = useLayout();
-	const { setMenu } = useMenu();
-	const { goTo } = useNavigation();
+	const { setMenu, armed, setActiveIndex } = useMenu();
+	const { goTo, goBack } = useNavigation();
 
 	useEffect(() => {
 		if (!trip) return;
@@ -32,7 +33,39 @@ export function OwnerList(): JSX.Element {
 		setMenu(
 			[
 				{ label: "Add", value: "add", key: "a" },
-				...(hasOwners ? [{ label: "Delete", value: "delete", key: "x" }] : []),
+				...(hasOwners
+					? [
+							{
+								label: "Delete",
+								value: "delete",
+								key: "x",
+								mainAction: {
+									confirmCount: 2,
+									check: (i: number) => {
+										const owner = trip.owners[i];
+										if (!owner) return false;
+										const refs = findOwnerReferences(trip, owner.id);
+										if (refs.accounts.length > 0 || refs.expenses.length > 0) {
+											goTo("/trips/owners/references", {
+												props: { tripDirPath, ownerId: owner.id },
+											});
+											return false;
+										}
+										return true;
+									},
+									onConfirm: (i: number) => {
+										const owner = trip.owners[i];
+										if (!owner) return;
+										removeOwner(trip, owner.id);
+										reloadTrip();
+										if (trip.owners.length === 0) {
+											goBack();
+										}
+									},
+								},
+							},
+						]
+					: []),
 			],
 			(value) => {
 				if (value === "add") {
@@ -43,7 +76,16 @@ export function OwnerList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [trip, setMenu, setHints, setColor, setTitleSuffix, goTo]);
+	}, [
+		trip,
+		reloadTrip,
+		setMenu,
+		setHints,
+		setColor,
+		setTitleSuffix,
+		goTo,
+		goBack,
+	]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
@@ -65,6 +107,8 @@ export function OwnerList(): JSX.Element {
 					props: { tripDirPath: trip.dirPath, ownerId },
 				});
 			}}
+			onHighlight={(_, i) => setActiveIndex(i)}
+			armedRowIndex={armed?.value === "delete" ? armed.index : null}
 			isActive={focus === "main"}
 		/>
 	);
