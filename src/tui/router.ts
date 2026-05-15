@@ -55,10 +55,7 @@ export const routes: Routes = {
 		component: TripDelete,
 	},
 	"/trips/broken": {
-		component: TripBroken as unknown as ComponentType,
-		title: "Broken Trip",
-		defaultFocus: "menu",
-		borderColor: "red",
+		component: TripBroken,
 	},
 	"/trips/new": {
 		component: TripForm,
