@@ -90,7 +90,7 @@ function SectionHeader({ label }: { label: string }): JSX.Element {
 function SpendBlock({ status }: Props): JSX.Element {
 	const labelWidth = "By currency".length;
 	return (
-		<Box flexDirection="column" width={38}>
+		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Spend" />
 			<Box>
 				<Text dimColor>{"Total".padEnd(labelWidth)}</Text>
@@ -141,7 +141,7 @@ function CategoriesBlock({ status }: Props): JSX.Element {
 	);
 	const barWidth = 8;
 	return (
-		<Box flexDirection="column" width={38}>
+		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Top categories" />
 			{status.topCategories.length === 0 ? (
 				<Text dimColor>—</Text>
@@ -171,7 +171,7 @@ function formatSigned(amount: number): string {
 
 function OwnersBlock({ status }: Props): JSX.Element {
 	return (
-		<Box flexDirection="column" width={38}>
+		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Owners" />
 			{status.ownerBalances.map((o) => {
 				const color =
@@ -202,7 +202,7 @@ function AccountsBlock({ status }: Props): JSX.Element {
 	const max = Math.max(1, ...status.byAccount.map((a) => a.totalThb));
 	const barWidth = 6;
 	return (
-		<Box flexDirection="column" width={38}>
+		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Accounts" />
 			{status.byAccount.map((a) => {
 				const cells = Math.max(1, Math.round((a.totalThb / max) * barWidth));
@@ -227,7 +227,7 @@ function AccountsBlock({ status }: Props): JSX.Element {
 
 function CountsBlock({ status }: Props): JSX.Element {
 	return (
-		<Box flexDirection="column" width={38}>
+		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Counts" />
 			<Box>
 				<Text dimColor>Accounts</Text>
