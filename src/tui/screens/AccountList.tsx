@@ -34,6 +34,10 @@ export function AccountList(): JSX.Element {
 
 	useEffect(() => {
 		setTitle(tripTitle(trip, "Accounts"));
+		return () => clearTitle();
+	}, [setTitle, clearTitle, trip]);
+
+	useEffect(() => {
 		setColor({});
 		if (!trip) return;
 
@@ -86,18 +90,7 @@ export function AccountList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
-		return () => clearTitle();
-	}, [
-		trip,
-		reloadTrip,
-		setMenu,
-		setHints,
-		setColor,
-		setTitle,
-		clearTitle,
-		goTo,
-		goBack,
-	]);
+	}, [trip, reloadTrip, setMenu, setHints, setColor, goTo, goBack]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
