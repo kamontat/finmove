@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { Box } from "ink";
 import type { JSX } from "react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { DEFAULT_TRIP_SETTINGS } from "../../core/constants";
 import type { Settings } from "../../core/models";
 import { addDays, today } from "../../core/services/date";
@@ -28,9 +28,10 @@ export function TripForm(): JSX.Element {
 	const { dataDir = "./data", duplicateFromDirPath } =
 		useRouteProps("/trips/new");
 
-	const duplicateSource = duplicateFromDirPath
-		? loadTrip(duplicateFromDirPath)
-		: null;
+	const duplicateSource = useMemo(
+		() => (duplicateFromDirPath ? loadTrip(duplicateFromDirPath) : null),
+		[duplicateFromDirPath],
+	);
 	const isDuplicate = duplicateSource !== null;
 
 	const formId = duplicateFromDirPath
