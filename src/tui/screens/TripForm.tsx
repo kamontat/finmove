@@ -1,8 +1,8 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
-import { Box, Text } from "ink";
+import { Box } from "ink";
 import type { JSX } from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { DEFAULT_TRIP_SETTINGS } from "../../core/constants";
 import type { Settings } from "../../core/models";
 import { addDays, today } from "../../core/services/date";
@@ -19,6 +19,7 @@ import { type FormFieldConfig, getString, getStringArray } from "../models";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { useNotification } from "../states/notification";
 
 export function TripForm(): JSX.Element {
 	const { goTo } = useNavigation();
@@ -37,7 +38,7 @@ export function TripForm(): JSX.Element {
 		: "trip-new";
 	const buffer = useFormBuffer(formId);
 
-	const [error, setError] = useState<string | null>(null);
+	const { notify, dismiss } = useNotification();
 
 	useEffect(() => {
 		if (isDuplicate && duplicateSource) {
@@ -102,11 +103,6 @@ export function TripForm(): JSX.Element {
 
 	return (
 		<Box flexDirection="column">
-			{error && (
-				<Text color="red" bold>
-					{error}
-				</Text>
-			)}
 			<Form
 				formId={formId}
 				fields={fields}
@@ -123,18 +119,22 @@ export function TripForm(): JSX.Element {
 					const countries = getStringArray(values, "countries");
 
 					if (!isValidSlug(dirName)) {
-						setError(
+						notify(
 							`Directory name "${dirName}" is invalid. Use lowercase letters, digits, and hyphens.`,
+							"error",
+							{ persistent: true },
 						);
 						return;
 					}
 
 					const tripPath = join(dataDir, dirName);
 					if (existsSync(tripPath)) {
-						setError(`Trip directory "${dirName}" already exists`);
+						notify(`Trip directory "${dirName}" already exists`, "error", {
+							persistent: true,
+						});
 						return;
 					}
-					setError(null);
+					dismiss();
 
 					if (duplicateSource) {
 						duplicateTrip(dataDir, duplicateSource.dirPath, dirName, {
