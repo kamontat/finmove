@@ -3,7 +3,12 @@ import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
 import { today } from "../../core/services/date";
-import { deleteTrip, listTrips, sortTrips } from "../../core/services/trip";
+import {
+	deleteTrip,
+	listTrips,
+	sortTrips,
+	type TripEntry,
+} from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { LIST_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
@@ -25,8 +30,12 @@ export function TripList(): JSX.Element {
 		clearByPrefix("trip-");
 	}, [clearByPrefix]);
 
+	// Interim: unwrap ok entries to Trip[]. Task 22 rewrites this screen to
+	// render TripEntry[] directly with broken-row affordances.
 	const [trips, setTrips] = useState<Trip[]>(() =>
-		sortTrips(listTrips(dataDir), today()),
+		sortTrips(listTrips(dataDir), today())
+			.filter((e): e is Extract<TripEntry, { kind: "ok" }> => e.kind === "ok")
+			.map((e) => e.trip),
 	);
 
 	useEffect(() => {
@@ -60,7 +69,12 @@ export function TripList(): JSX.Element {
 							const t = trips[i];
 							if (!t) return;
 							deleteTrip(t.dirPath);
-							const next = sortTrips(listTrips(dataDir), today());
+							const next = sortTrips(listTrips(dataDir), today())
+								.filter(
+									(e): e is Extract<TripEntry, { kind: "ok" }> =>
+										e.kind === "ok",
+								)
+								.map((e) => e.trip);
 							setTrips(next);
 							if (next.length === 0) {
 								goBack();

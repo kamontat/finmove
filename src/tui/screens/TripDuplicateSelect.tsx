@@ -2,7 +2,7 @@ import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { Trip } from "../../core/models";
-import { listTrips } from "../../core/services/trip";
+import { listTrips, type TripEntry } from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
@@ -14,7 +14,12 @@ export function TripDuplicateSelect(): JSX.Element {
 	const { goTo } = useNavigation();
 	const { dataDir = "./data" } = useRouteProps("/trips/duplicate");
 
-	const [trips] = useState<Trip[]>(() => listTrips(dataDir));
+	// Only healthy trips can be duplicated — can't copy what we can't read.
+	const [trips] = useState<Trip[]>(() =>
+		listTrips(dataDir)
+			.filter((e): e is Extract<TripEntry, { kind: "ok" }> => e.kind === "ok")
+			.map((e) => e.trip),
+	);
 
 	useEffect(() => {
 		setColor({ border: "yellow", title: "yellow" });

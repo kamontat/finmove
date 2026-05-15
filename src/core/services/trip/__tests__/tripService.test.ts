@@ -2,10 +2,11 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { stringify } from "yaml";
+import { ConfigParseError, ConfigValidateError } from "../../../configs";
 import type { Settings } from "../../../models";
 import { createTrip } from "../createTrip";
 import { duplicateTrip } from "../duplicateTrip";
-import { listTrips } from "../listTrips";
+import { listTrips, type TripEntry } from "../listTrips";
 import { loadTrip } from "../loadTrip";
 import { toDirName } from "../toDirName";
 
@@ -53,9 +54,50 @@ describe("listTrips", () => {
 		writeFileSync(join(tripDir, "accounts.yaml"), stringify({ accounts: [] }));
 		writeFileSync(join(tripDir, "expenses.yaml"), stringify({ expenses: [] }));
 
-		const trips = listTrips(TEST_DIR);
-		expect(trips).toHaveLength(1);
-		expect(trips[0].settings.name).toBe("Test Trip");
+		const entries = listTrips(TEST_DIR);
+		expect(entries).toHaveLength(1);
+		const first = entries[0];
+		expect(first?.kind).toBe("ok");
+		if (first?.kind === "ok") {
+			expect(first.trip.settings.name).toBe("Test Trip");
+		}
+	});
+
+	test("surfaces malformed YAML as a kind:'broken' entry", () => {
+		const dir = join(TEST_DIR, "broken-yaml");
+		mkdirSync(dir, { recursive: true });
+		writeFileSync(join(dir, "settings.yaml"), ": : invalid yaml [[[");
+		writeFileSync(join(dir, "owners.yaml"), stringify({ owners: [] }));
+		writeFileSync(join(dir, "accounts.yaml"), stringify({ accounts: [] }));
+		writeFileSync(join(dir, "expenses.yaml"), stringify({ expenses: [] }));
+
+		const entries = listTrips(TEST_DIR);
+		const broken = entries.find(
+			(e): e is Extract<TripEntry, { kind: "broken" }> =>
+				e.kind === "broken" && e.dirName === "broken-yaml",
+		);
+		expect(broken).toBeDefined();
+		expect(broken?.error).toBeInstanceOf(ConfigParseError);
+	});
+
+	test("surfaces schema-violating settings as a kind:'broken' entry", () => {
+		const dir = join(TEST_DIR, "invalid-shape");
+		mkdirSync(dir, { recursive: true });
+		writeFileSync(
+			join(dir, "settings.yaml"),
+			stringify({ version: 1, name: "", baseCurrency: "USD" }),
+		);
+		writeFileSync(join(dir, "owners.yaml"), stringify({ owners: [] }));
+		writeFileSync(join(dir, "accounts.yaml"), stringify({ accounts: [] }));
+		writeFileSync(join(dir, "expenses.yaml"), stringify({ expenses: [] }));
+
+		const entries = listTrips(TEST_DIR);
+		const broken = entries.find(
+			(e): e is Extract<TripEntry, { kind: "broken" }> =>
+				e.kind === "broken" && e.dirName === "invalid-shape",
+		);
+		expect(broken).toBeDefined();
+		expect(broken?.error).toBeInstanceOf(ConfigValidateError);
 	});
 });
 
