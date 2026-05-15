@@ -196,6 +196,7 @@ export type RouteEntry = {
 
 export interface RouteConfig {
 	component: ComponentType;
+	defaultFocus?: FocusZone;
 }
 
 export type Routes = { [P in RoutePath]: RouteConfig };

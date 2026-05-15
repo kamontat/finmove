@@ -62,6 +62,7 @@ export const routes: Routes = {
 	},
 	"/trips/new/countries": {
 		component: TripCreateCountryList,
+		defaultFocus: "menu",
 	},
 	"/trips/new/countries/new": {
 		component: TripCreateCountryAdd,
@@ -74,6 +75,7 @@ export const routes: Routes = {
 	},
 	"/trips/overview": {
 		component: TripOverview,
+		defaultFocus: "menu",
 	},
 	"/trips/owners": {
 		component: OwnerList,
@@ -149,6 +151,7 @@ export const routes: Routes = {
 	},
 	"/trips/settings/countries": {
 		component: CountryList,
+		defaultFocus: "menu",
 	},
 	"/trips/settings/countries/delete": {
 		component: CountryDelete,
@@ -161,6 +164,7 @@ export const routes: Routes = {
 	},
 	"/trips/settings/categories": {
 		component: CategoryList,
+		defaultFocus: "menu",
 	},
 	"/trips/settings/categories/delete": {
 		component: CategoryDelete,
@@ -173,6 +177,7 @@ export const routes: Routes = {
 	},
 	"/trips/settings/tags": {
 		component: TagList,
+		defaultFocus: "menu",
 	},
 	"/trips/settings/tags/delete": {
 		component: TagDelete,
@@ -185,6 +190,7 @@ export const routes: Routes = {
 	},
 	"/trips/settings/currencies": {
 		component: CurrencyList,
+		defaultFocus: "menu",
 	},
 	"/trips/settings/currencies/delete": {
 		component: CurrencyDelete,
@@ -197,5 +203,6 @@ export const routes: Routes = {
 	},
 	"/trips/settings/export": {
 		component: ExportScreen,
+		defaultFocus: "menu",
 	},
 };

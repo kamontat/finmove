@@ -165,7 +165,7 @@ export function App({ args }: AppProps): JSX.Element {
 					<LayoutProvider>
 						<MenuProvider>
 							<FormBufferProvider>
-								<NavigationProvider initial={initial}>
+								<NavigationProvider initial={initial} routes={routes}>
 									<Router />
 								</NavigationProvider>
 							</FormBufferProvider>

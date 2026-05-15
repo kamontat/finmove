@@ -9,7 +9,7 @@ import {
 	useRef,
 	useState,
 } from "react";
-import type { RouteEntry, RouteParams, RoutePath } from "../models";
+import type { RouteEntry, RouteParams, RoutePath, Routes } from "../models";
 import { useData } from "./data";
 import { useFocus } from "./focus";
 import { useLayout } from "./layout";
@@ -32,11 +32,13 @@ const NavigationContext = createContext<NavigationContextValue | null>(null);
 
 interface NavigationProviderProps {
 	initial: RouteEntry;
+	routes: Routes;
 	children: ReactNode;
 }
 
 export function NavigationProvider({
 	initial,
+	routes,
 	children,
 }: NavigationProviderProps): JSX.Element {
 	const { exit } = useApp();
@@ -65,12 +67,12 @@ export function NavigationProvider({
 		(entry: RouteEntry) => {
 			resetLayout();
 			resetMenu();
-			setFocus("main");
+			setFocus(routes[entry.path].defaultFocus ?? "main");
 			setMenuAvailable(false);
 			syncTripData(entry);
 			setCurrentRoute(entry);
 		},
-		[resetLayout, resetMenu, setFocus, setMenuAvailable, syncTripData],
+		[resetLayout, resetMenu, setFocus, setMenuAvailable, syncTripData, routes],
 	);
 
 	const goTo = useCallback(
