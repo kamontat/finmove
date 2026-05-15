@@ -4,6 +4,16 @@ export type FocusZone = "main" | "menu" | "input";
 
 export type FieldValue = string | string[];
 
+export type NotificationSeverity = "info" | "warn" | "error";
+
+export interface Notification {
+	id: string;
+	text: string;
+	severity: NotificationSeverity;
+	route: string;
+	firedAt: Date;
+}
+
 export interface RouteParams {
 	"/trips": { dataDir?: string };
 	"/trips/duplicate": { dataDir?: string };
