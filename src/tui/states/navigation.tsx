@@ -10,7 +10,6 @@ import {
 	useState,
 } from "react";
 import type { RouteEntry, RouteParams, RoutePath } from "../models";
-import { routes } from "../router";
 import { useData } from "./data";
 import { useFocus } from "./focus";
 import { useLayout } from "./layout";
@@ -64,10 +63,9 @@ export function NavigationProvider({
 
 	const applyRoute = useCallback(
 		(entry: RouteEntry) => {
-			const config = routes[entry.path];
 			resetLayout();
 			resetMenu();
-			setFocus(config.defaultFocus);
+			setFocus("main");
 			setMenuAvailable(false);
 			syncTripData(entry);
 			setCurrentRoute(entry);

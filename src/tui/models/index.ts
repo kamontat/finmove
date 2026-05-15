@@ -191,7 +191,6 @@ export type RouteEntry = {
 export interface RouteConfig<P extends RoutePath = RoutePath> {
 	component: ComponentType;
 	title: string | ((props: RouteParams[P]) => string);
-	defaultFocus: FocusZone;
 	borderColor?: string;
 }
 

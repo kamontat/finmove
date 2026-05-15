@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { today } from "../../core/services/date";
 import { getTripStatus } from "../../core/services/trip";
 import { TripDashboard } from "../components/organisms/TripDashboard";
+import { useDefaultFocus } from "../hooks/useDefaultFocus";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
@@ -11,6 +12,7 @@ import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 
 export function TripOverview(): JSX.Element {
+	useDefaultFocus("menu");
 	const { trip } = useData();
 	const { goTo } = useNavigation();
 	const { setHints } = useLayout();

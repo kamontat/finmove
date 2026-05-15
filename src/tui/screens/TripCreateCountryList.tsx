@@ -3,6 +3,7 @@ import type { JSX } from "react";
 import { useEffect } from "react";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { LIST_HINTS } from "../constants/hints";
+import { useDefaultFocus } from "../hooks/useDefaultFocus";
 import { useFocus } from "../states/focus";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
@@ -10,6 +11,7 @@ import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripCreateCountryList(): JSX.Element {
+	useDefaultFocus("menu");
 	const { focus } = useFocus();
 	const { goTo, goBack } = useNavigation();
 	const { setHints, setColor, setTitleSuffix } = useLayout();

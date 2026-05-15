@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { updateSettings } from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { LIST_HINTS } from "../constants/hints";
+import { useDefaultFocus } from "../hooks/useDefaultFocus";
 import { useData } from "../states/data";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
@@ -11,6 +12,7 @@ import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 
 export function CountryList(): JSX.Element {
+	useDefaultFocus("menu");
 	const { trip, reloadTrip } = useData();
 	const { focus } = useFocus();
 	const { setHints, setColor, setTitleSuffix } = useLayout();
