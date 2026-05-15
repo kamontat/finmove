@@ -28,8 +28,8 @@ Travel expense management tool. Bun runtime, TypeScript, React+Ink TUI.
 - **tui/layouts/** — Layout components. `Default.tsx` renders the standard Title/Main/Menu/Hint structure, reading from context providers.
 - **tui/models/** — Shared TUI types (SelectOption, HelpHint, FocusZone, RoutePath, etc.). Uses `index.ts` barrel re-export.
 - **tui/states/** — React Context providers and hooks for global state: `useNavigation()`, `useFocus()`, `useHelp()`, `useLayout()`, `useData()`.
-- **tui/hooks/** — Custom hooks. `useGlobalKeys` handles global keyboard shortcuts. `useDefaultFocus(zone)` lets a screen opt into a non-default focus zone on mount (default focus is `"main"`, set by `applyRoute` in `navigation.tsx`).
-- **tui/router.ts** — Route map: path string → component.
+- **tui/hooks/** — Custom hooks. `useGlobalKeys` handles global keyboard shortcuts.
+- **tui/router.ts** — Route map: path string → `RouteConfig` (`component`, optional `defaultFocus`). `applyRoute` in `navigation.tsx` reads `defaultFocus` (falling back to `"main"`) when entering a route.
 - **tui/App.tsx** — Thin shell: wraps context providers and renders the Router, which looks up the current route and renders the Default layout with the screen component.
 
 ### File Naming
