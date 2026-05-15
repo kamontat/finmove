@@ -23,13 +23,10 @@ export function ScrollableMain({
 		const c = measureElement(contentRef.current).height;
 		setViewportHeight(v);
 		setContentHeight(c);
+		setOffset((o) => Math.min(o, Math.max(0, c - v)));
 	});
 
 	const maxOffset = Math.max(0, contentHeight - viewportHeight);
-	const clampedOffset = Math.min(offset, maxOffset);
-	if (clampedOffset !== offset) {
-		setOffset(clampedOffset);
-	}
 
 	useInput(
 		(_, key) => {
@@ -45,8 +42,8 @@ export function ScrollableMain({
 	const overflows = contentHeight > viewportHeight;
 	let glyph: string | null = null;
 	if (overflows) {
-		if (clampedOffset === 0) glyph = "↓";
-		else if (clampedOffset >= maxOffset) glyph = "↑";
+		if (offset === 0) glyph = "↓";
+		else if (offset >= maxOffset) glyph = "↑";
 		else glyph = "↕";
 	}
 
@@ -56,7 +53,7 @@ export function ScrollableMain({
 				ref={contentRef}
 				flexDirection="column"
 				flexShrink={0}
-				marginTop={-clampedOffset}
+				marginTop={-offset}
 			>
 				{children}
 			</Box>
