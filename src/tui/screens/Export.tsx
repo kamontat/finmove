@@ -10,11 +10,12 @@ import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 import { useNotification } from "../states/notification";
+import { settingsTitle } from "../utils/titles";
 
 export function ExportScreen(): JSX.Element {
 	const { trip } = useData();
 	const { goBack } = useNavigation();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { notify } = useNotification();
 
@@ -38,14 +39,15 @@ export function ExportScreen(): JSX.Element {
 	}, [trip, notify, goBack]);
 
 	useEffect(() => {
-		setTitleSuffix("Settings > Export CSV");
+		setTitle(settingsTitle(trip, "Export CSV"));
 		setMenu([{ label: "Back", value: "back", key: "b" }], () => goBack());
 		setHints([
 			{ key: "Enter", label: "Back" },
 			{ key: "q/esc", label: "Back" },
 			{ key: "e", label: "Exit" },
 		]);
-	}, [setMenu, setHints, setTitleSuffix, goBack]);
+		return () => clearTitle();
+	}, [setMenu, setHints, setTitle, clearTitle, trip, goBack]);
 
 	if (!trip || !exportedPath) {
 		return <Box />;

@@ -9,16 +9,21 @@ import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
+import { settingsTitle } from "../utils/titles";
 
 export function CurrencyList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { focus } = useFocus();
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu, armed, setActiveIndex } = useMenu();
 	const { goTo, goBack } = useNavigation();
 
 	useEffect(() => {
-		setTitleSuffix("Settings > Currencies");
+		setTitle(settingsTitle(trip, "Currencies"));
+		return () => clearTitle();
+	}, [setTitle, clearTitle, trip]);
+
+	useEffect(() => {
 		setColor({});
 		if (!trip) return;
 
@@ -68,16 +73,7 @@ export function CurrencyList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [
-		trip,
-		reloadTrip,
-		setMenu,
-		setHints,
-		setColor,
-		setTitleSuffix,
-		goTo,
-		goBack,
-	]);
+	}, [trip, reloadTrip, setMenu, setHints, setColor, goTo, goBack]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

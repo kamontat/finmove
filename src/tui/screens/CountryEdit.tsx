@@ -8,10 +8,11 @@ import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { settingsTitle } from "../utils/titles";
 
 export function CountryEdit(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 	const { goBack } = useNavigation();
 
 	const { value: originalValue } = useRouteProps(
@@ -19,9 +20,10 @@ export function CountryEdit(): JSX.Element {
 	);
 
 	useEffect(() => {
-		setTitleSuffix(`Settings > Countries > ${originalValue}`);
+		setTitle(settingsTitle(trip, "Countries", originalValue));
 		setHints(FORM_HINTS);
-	}, [setHints, setTitleSuffix, originalValue]);
+		return () => clearTitle();
+	}, [setHints, setTitle, clearTitle, trip, originalValue]);
 
 	if (!trip) return <Text dimColor>Loading...</Text>;
 

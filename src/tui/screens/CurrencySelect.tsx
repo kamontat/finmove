@@ -18,18 +18,19 @@ const HINTS: HelpHint[] = [
 export function CurrencySelect(): JSX.Element {
 	const { trip } = useData();
 	const { goBack } = useNavigation();
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 
 	const { formId, fieldKey } = useRouteProps("/trips/expenses/form/currency");
 	const buffer = useFormBuffer(formId);
 
 	useEffect(() => {
-		setTitleSuffix("Select Currency");
+		setTitle(["Select Currency"]);
 		setColor({});
 		setMenu([], () => {});
 		setHints(HINTS);
-	}, [setHints, setMenu, setColor, setTitleSuffix]);
+		return () => clearTitle();
+	}, [setHints, setMenu, setColor, setTitle, clearTitle]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

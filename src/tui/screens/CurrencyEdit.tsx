@@ -10,10 +10,11 @@ import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { settingsTitle } from "../utils/titles";
 
 export function CurrencyEdit(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 	const { goBack } = useNavigation();
 
 	const { currencyCode: code } = useRouteProps(
@@ -21,9 +22,10 @@ export function CurrencyEdit(): JSX.Element {
 	);
 
 	useEffect(() => {
-		setTitleSuffix(`Settings > Currencies > ${code}`);
+		setTitle(settingsTitle(trip, "Currencies", code));
 		setHints(FORM_HINTS);
-	}, [setHints, setTitleSuffix, code]);
+		return () => clearTitle();
+	}, [setHints, setTitle, clearTitle, trip, code]);
 
 	if (!trip) return <Text dimColor>Loading...</Text>;
 

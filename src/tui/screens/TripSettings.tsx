@@ -8,16 +8,20 @@ import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
+import { settingsTitle } from "../utils/titles";
 
 export function TripSettings(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { goTo, goBack } = useNavigation();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 
 	useEffect(() => {
-		setTitleSuffix("Settings");
+		setTitle(settingsTitle(trip));
+		return () => clearTitle();
+	}, [setTitle, clearTitle, trip]);
 
+	useEffect(() => {
 		if (!trip) return;
 
 		const tripDirPath = trip.dirPath;
@@ -63,7 +67,7 @@ export function TripSettings(): JSX.Element {
 			{ key: "q/esc", label: "Back" },
 			{ key: "e", label: "Exit" },
 		]);
-	}, [trip, setMenu, setHints, setTitleSuffix, goTo]);
+	}, [trip, setMenu, setHints, goTo]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
