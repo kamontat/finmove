@@ -12,6 +12,7 @@ import { toDirName } from "../toDirName";
 const TEST_DIR = join(import.meta.dir, "__fixtures__");
 
 const sampleSettings: Settings = {
+	version: 1,
 	name: "Test Trip",
 	startDate: "2026-05-01",
 	endDate: "2026-05-07",
@@ -120,6 +121,7 @@ describe("duplicateTrip", () => {
 	beforeEach(() => {
 		mkdirSync(sourcePath, { recursive: true });
 		const sourceSettings: Settings = {
+			version: 1,
 			name: "Source Trip",
 			startDate: "2026-01-01",
 			endDate: "2026-01-07",

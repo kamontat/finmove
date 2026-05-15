@@ -6,6 +6,7 @@ import { validateOwners } from "../validateOwners";
 import { validateSettings } from "../validateSettings";
 
 const validSettings: Settings = {
+	version: 1,
 	name: "Test",
 	startDate: "2026-01-01",
 	endDate: "2026-01-07",

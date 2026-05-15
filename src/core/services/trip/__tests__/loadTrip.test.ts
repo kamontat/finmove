@@ -15,6 +15,7 @@ function writeTrip(tripDir: string, settings: unknown): void {
 }
 
 const baseSettings = {
+	version: 1 as const,
 	name: "Test Trip",
 	startDate: "2026-05-01",
 	endDate: "2026-05-07",

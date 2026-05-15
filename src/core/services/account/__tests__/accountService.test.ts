@@ -14,6 +14,7 @@ import { updateAccount } from "../updateAccount";
 const TEST_DIR = join(import.meta.dir, "__fixtures__");
 
 const sampleSettings: Settings = {
+	version: 1,
 	name: "Test",
 	startDate: "2026-01-01",
 	endDate: "2026-01-07",

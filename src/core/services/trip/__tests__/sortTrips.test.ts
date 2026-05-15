@@ -4,6 +4,7 @@ import { sortTrips } from "../sortTrips";
 
 function makeTrip(name: string, endDate: string): Trip {
 	const settings: Settings = {
+		version: 1,
 		name,
 		startDate: "2026-01-01",
 		endDate,
