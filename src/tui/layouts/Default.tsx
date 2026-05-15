@@ -3,9 +3,11 @@ import type { JSX, ReactNode } from "react";
 import { SelectInput } from "../components/atoms/SelectInput";
 import { HelpBar } from "../components/molecules/HelpBar";
 import { SEVERITY_COLORS } from "../constants/severity";
+import type { HelpHint } from "../models";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
+import { useNavigation } from "../states/navigation";
 import { useNotification } from "../states/notification";
 
 interface DefaultLayoutProps {
@@ -23,7 +25,8 @@ export function Default({ title, children }: DefaultLayoutProps): JSX.Element {
 		trigger,
 	} = useMenu();
 	const { stdout } = useStdout();
-	const { current } = useNotification();
+	const { current, history } = useNotification();
+	const { currentRoute } = useNavigation();
 
 	const terminalRows = stdout?.rows ?? 24;
 	const hasMenu = menuOptions.length > 0 && onMenuSelect !== null;
@@ -40,6 +43,15 @@ export function Default({ title, children }: DefaultLayoutProps): JSX.Element {
 		focus === "main" || focus === "input" ? activeBorderColor : "gray";
 	const menuBorderColor = focus === "menu" ? activeBorderColor : "gray";
 	const titleColor = colors.title ?? "cyan";
+
+	const globalHints: HelpHint[] = [];
+	if (current !== null) {
+		globalHints.push({ key: "m", label: "Dismiss" });
+	}
+	if (history.length > 0 && currentRoute.path !== "/notifications") {
+		globalHints.push({ key: "n", label: "Notifications" });
+	}
+	const allHints = [...hints, ...globalHints];
 
 	return (
 		<Box flexDirection="column" width="100%">
@@ -74,7 +86,7 @@ export function Default({ title, children }: DefaultLayoutProps): JSX.Element {
 			)}
 
 			<Box paddingX={1}>
-				<HelpBar hints={hints} />
+				<HelpBar hints={allHints} />
 			</Box>
 		</Box>
 	);
