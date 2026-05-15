@@ -37,6 +37,7 @@ import { TagDelete } from "./screens/TagDelete";
 import { TagEdit } from "./screens/TagEdit";
 import { TagList } from "./screens/TagList";
 import { TagSelect } from "./screens/TagSelect";
+import { TripBroken } from "./screens/TripBroken";
 import { TripCreateCountryAdd } from "./screens/TripCreateCountryAdd";
 import { TripCreateCountryDelete } from "./screens/TripCreateCountryDelete";
 import { TripCreateCountryList } from "./screens/TripCreateCountryList";
@@ -57,6 +58,12 @@ export const routes: Routes = {
 		component: TripDelete as unknown as ComponentType,
 		title: "Delete Trip",
 		defaultFocus: "main",
+	},
+	"/trips/broken": {
+		component: TripBroken as unknown as ComponentType,
+		title: "Broken Trip",
+		defaultFocus: "menu",
+		borderColor: "red",
 	},
 	"/trips/new": {
 		component: TripForm as unknown as ComponentType,

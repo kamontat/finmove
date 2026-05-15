@@ -8,6 +8,12 @@ export interface RouteParams {
 	"/trips": { dataDir?: string };
 	"/trips/duplicate": { dataDir?: string };
 	"/trips/delete": { dataDir?: string };
+	"/trips/broken": {
+		dirName: string;
+		dirPath: string;
+		error: import("../../core/configs").ConfigError;
+		dataDir?: string;
+	};
 	"/trips/new": { dataDir?: string; duplicateFromDirPath?: string };
 	"/trips/overview": {
 		tripDirPath: string;
