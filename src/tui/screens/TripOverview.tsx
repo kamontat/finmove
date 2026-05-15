@@ -5,6 +5,7 @@ import { today } from "../../core/services/date";
 import { getTripStatus } from "../../core/services/trip";
 import { TripDashboard } from "../components/organisms/TripDashboard";
 import { useData } from "../states/data";
+import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
@@ -14,6 +15,7 @@ export function TripOverview(): JSX.Element {
 	const { goTo } = useNavigation();
 	const { setHints } = useLayout();
 	const { setMenu } = useMenu();
+	const { focus } = useFocus();
 	useEffect(() => {
 		if (!trip) return;
 
@@ -40,6 +42,7 @@ export function TripOverview(): JSX.Element {
 			},
 		);
 		setHints([
+			{ key: "↑↓", label: "Scroll" },
 			{ key: "tab", label: "Switch focus" },
 			{ key: "←→", label: "Navigate menu" },
 			{ key: "Enter", label: "Confirm" },
@@ -52,5 +55,10 @@ export function TripOverview(): JSX.Element {
 		return <Text dimColor>Loading...</Text>;
 	}
 
-	return <TripDashboard status={getTripStatus(trip, today())} />;
+	return (
+		<TripDashboard
+			status={getTripStatus(trip, today())}
+			isActive={focus === "main"}
+		/>
+	);
 }

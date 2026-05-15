@@ -1,9 +1,15 @@
 import { Box, Text } from "ink";
 import type { JSX } from "react";
+import { AccountType } from "../../../core/models";
 import type { TripStatus } from "../../../core/services/trip";
+import { ScrollableMain } from "../molecules/ScrollableMain";
 
 interface Props {
 	status: TripStatus;
+}
+
+interface DashboardProps extends Props {
+	isActive: boolean;
 }
 
 const PHASE_COLOR: Record<TripStatus["phase"], string> = {
@@ -84,7 +90,7 @@ function SectionHeader({ label }: { label: string }): JSX.Element {
 function SpendBlock({ status }: Props): JSX.Element {
 	const labelWidth = "By currency".length;
 	return (
-		<Box flexDirection="column" width={38}>
+		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Spend" />
 			<Box>
 				<Text dimColor>{"Total".padEnd(labelWidth)}</Text>
@@ -135,7 +141,7 @@ function CategoriesBlock({ status }: Props): JSX.Element {
 	);
 	const barWidth = 8;
 	return (
-		<Box flexDirection="column">
+		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Top categories" />
 			{status.topCategories.length === 0 ? (
 				<Text dimColor>—</Text>
@@ -165,7 +171,7 @@ function formatSigned(amount: number): string {
 
 function OwnersBlock({ status }: Props): JSX.Element {
 	return (
-		<Box flexDirection="column" width={38}>
+		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Owners" />
 			{status.ownerBalances.map((o) => {
 				const color =
@@ -183,9 +189,45 @@ function OwnersBlock({ status }: Props): JSX.Element {
 	);
 }
 
+function formatAccountName(name: string): string {
+	if (name.length <= 12) return name.padEnd(12);
+	return `${name.slice(0, 11)}…`;
+}
+
+function typeAbbrev(type: AccountType): string {
+	return type === AccountType.Credit ? "Cr" : "Db";
+}
+
+function AccountsBlock({ status }: Props): JSX.Element {
+	const max = Math.max(1, ...status.byAccount.map((a) => a.totalThb));
+	const barWidth = 6;
+	return (
+		<Box flexDirection="column" width={40}>
+			<SectionHeader label="Accounts" />
+			{status.byAccount.map((a) => {
+				const cells = Math.max(1, Math.round((a.totalThb / max) * barWidth));
+				const countStr = `×${a.expenseCount}`.padStart(4);
+				return (
+					<Box key={a.accountId}>
+						<Text>{formatAccountName(a.name)}</Text>
+						<Text> </Text>
+						<Text dimColor>({typeAbbrev(a.type)})</Text>
+						<Text> </Text>
+						<Text dimColor>{countStr}</Text>
+						<Text> </Text>
+						<Text bold>{formatThb(a.totalThb).padStart(10)}</Text>
+						<Text> </Text>
+						<Text color="magenta">{"█".repeat(cells)}</Text>
+					</Box>
+				);
+			})}
+		</Box>
+	);
+}
+
 function CountsBlock({ status }: Props): JSX.Element {
 	return (
-		<Box flexDirection="column">
+		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Counts" />
 			<Box>
 				<Text dimColor>Accounts</Text>
@@ -222,24 +264,28 @@ function WarningList({ status }: Props): JSX.Element {
 	);
 }
 
-export function TripDashboard({ status }: Props): JSX.Element {
+export function TripDashboard({
+	status,
+	isActive,
+}: DashboardProps): JSX.Element {
 	const hasOwners = status.ownerBalances.length > 0;
+	const hasAccountSpend = status.byAccount.length > 0;
 	return (
-		<Box flexDirection="column" gap={1}>
-			<StatusHeader status={status} />
-			<ProgressBar status={status} />
+		<ScrollableMain isActive={isActive}>
+			<Box flexDirection="column" gap={1}>
+				<StatusHeader status={status} />
+				<ProgressBar status={status} />
 
-			<Box flexDirection="row" gap={2}>
-				<SpendBlock status={status} />
-				<CategoriesBlock status={status} />
+				<Box flexDirection="row" flexWrap="wrap" gap={2}>
+					<SpendBlock status={status} />
+					{hasOwners && <OwnersBlock status={status} />}
+					<CategoriesBlock status={status} />
+					{hasAccountSpend && <AccountsBlock status={status} />}
+					<CountsBlock status={status} />
+				</Box>
+
+				{status.warnings.length > 0 && <WarningList status={status} />}
 			</Box>
-
-			<Box flexDirection="row" gap={2}>
-				{hasOwners && <OwnersBlock status={status} />}
-				<CountsBlock status={status} />
-			</Box>
-
-			{status.warnings.length > 0 && <WarningList status={status} />}
-		</Box>
+		</ScrollableMain>
 	);
 }

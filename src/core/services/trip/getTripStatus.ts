@@ -1,4 +1,4 @@
-import type { Expense, Settings, Trip } from "../../models";
+import type { AccountType, Expense, Settings, Trip } from "../../models";
 import { convertToTHB } from "../currency";
 import { daysBetween } from "../date";
 import { calculateSplits } from "../expense";
@@ -23,6 +23,13 @@ export interface TripStatus {
 
 	ownerBalances: { ownerId: string; name: string; balanceThb: number }[];
 	accountCount: number;
+	byAccount: {
+		accountId: string;
+		name: string;
+		type: AccountType;
+		totalThb: number;
+		expenseCount: number;
+	}[];
 
 	warnings: string[];
 }
@@ -78,6 +85,10 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 	const orphanAccounts = new Map<string, string>();
 	const knownOwnerIds = new Set(trip.owners.map((o) => o.id));
 	const unknownOwnerIds = new Set<string>();
+	const accountAggregates = new Map<
+		string,
+		{ name: string; type: AccountType; totalThb: number; expenseCount: number }
+	>();
 
 	for (const expense of trip.expenses) {
 		currencyTotals.set(
@@ -101,6 +112,18 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 
 			const account = trip.accounts.find((a) => a.id === expense.accountId);
 			if (account) {
+				const existing = accountAggregates.get(account.id);
+				if (existing) {
+					existing.totalThb += thb;
+					existing.expenseCount += 1;
+				} else {
+					accountAggregates.set(account.id, {
+						name: account.name,
+						type: account.type,
+						totalThb: thb,
+						expenseCount: 1,
+					});
+				}
 				if (account.owners.length === 0) {
 					orphanAccounts.set(account.id, account.name);
 				} else {
@@ -173,6 +196,19 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 		balanceThb: round2((paid.get(o.id) ?? 0) - (share.get(o.id) ?? 0)),
 	}));
 
+	const byAccount = [...accountAggregates.entries()]
+		.map(([accountId, agg]) => ({
+			accountId,
+			name: agg.name,
+			type: agg.type,
+			totalThb: round2(agg.totalThb),
+			expenseCount: agg.expenseCount,
+		}))
+		.sort((a, b) => {
+			if (b.totalThb !== a.totalThb) return b.totalThb - a.totalThb;
+			return a.name.localeCompare(b.name);
+		});
+
 	for (const name of orphanAccounts.values()) {
 		warnings.push(`Account '${name}' has no owners — expenses not attributed`);
 	}
@@ -208,6 +244,7 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 		tagCount: { used: usedTags.size, total: settings.tags.length },
 		ownerBalances,
 		accountCount: trip.accounts.length,
+		byAccount,
 		warnings,
 	};
 }

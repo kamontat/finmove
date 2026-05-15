@@ -962,3 +962,296 @@ describe("getTripStatus — owner balances", () => {
 		expect(orphanWarnings).toHaveLength(2);
 	});
 });
+
+describe("getTripStatus — byAccount", () => {
+	test("sums totalThb and expenseCount per account, sorted desc by totalThb", () => {
+		const s = getTripStatus(
+			makeTrip({
+				accounts: [
+					{
+						id: "acc-hsbc",
+						name: "HSBC Credit",
+						type: AccountType.Credit,
+						owners: [],
+					},
+					{
+						id: "acc-bkk",
+						name: "Bangkok Bank",
+						type: AccountType.Debit,
+						owners: [],
+					},
+				],
+				expenses: [
+					{
+						id: "e1",
+						accountId: "acc-bkk",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 200,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e2",
+						accountId: "acc-hsbc",
+						date: "2026-04-16",
+						payee: "Y",
+						category: "Food",
+						amount: 500,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e3",
+						accountId: "acc-hsbc",
+						date: "2026-04-17",
+						payee: "Z",
+						category: "Food",
+						amount: 300,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.byAccount).toEqual([
+			{
+				accountId: "acc-hsbc",
+				name: "HSBC Credit",
+				type: AccountType.Credit,
+				totalThb: 800,
+				expenseCount: 2,
+			},
+			{
+				accountId: "acc-bkk",
+				name: "Bangkok Bank",
+				type: AccountType.Debit,
+				totalThb: 200,
+				expenseCount: 1,
+			},
+		]);
+	});
+
+	test("breaks ties by name ascending", () => {
+		const s = getTripStatus(
+			makeTrip({
+				accounts: [
+					{ id: "a1", name: "Zeta", type: AccountType.Debit, owners: [] },
+					{ id: "a2", name: "Alpha", type: AccountType.Debit, owners: [] },
+				],
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a1",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 100,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e2",
+						accountId: "a2",
+						date: "2026-04-16",
+						payee: "Y",
+						category: "Food",
+						amount: 100,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.byAccount.map((a) => a.name)).toEqual(["Alpha", "Zeta"]);
+	});
+
+	test("excludes configured accounts with zero spend", () => {
+		const s = getTripStatus(
+			makeTrip({
+				accounts: [
+					{ id: "a1", name: "Used", type: AccountType.Debit, owners: [] },
+					{ id: "a2", name: "Unused", type: AccountType.Debit, owners: [] },
+				],
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a1",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 100,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.byAccount.map((a) => a.accountId)).toEqual(["a1"]);
+	});
+
+	test("excludes expenses referencing an unknown accountId", () => {
+		const s = getTripStatus(
+			makeTrip({
+				accounts: [
+					{ id: "a1", name: "Known", type: AccountType.Debit, owners: [] },
+				],
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a1",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 100,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e2",
+						accountId: "ghost",
+						date: "2026-04-16",
+						payee: "Y",
+						category: "Food",
+						amount: 999,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.byAccount).toEqual([
+			{
+				accountId: "a1",
+				name: "Known",
+				type: AccountType.Debit,
+				totalThb: 100,
+				expenseCount: 1,
+			},
+		]);
+	});
+
+	test("excludes expenses missing a usable THB rate", () => {
+		const s = getTripStatus(
+			makeTrip({
+				accounts: [
+					{ id: "a1", name: "Acc", type: AccountType.Debit, owners: [] },
+				],
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a1",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 100,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e2",
+						accountId: "a1",
+						date: "2026-04-16",
+						payee: "Y",
+						category: "Food",
+						amount: 1000,
+						currency: "JPY",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.byAccount).toEqual([
+			{
+				accountId: "a1",
+				name: "Acc",
+				type: AccountType.Debit,
+				totalThb: 100,
+				expenseCount: 1,
+			},
+		]);
+	});
+
+	test("byAccount is empty when there are no qualifying expenses", () => {
+		const s = getTripStatus(
+			makeTrip({
+				accounts: [
+					{ id: "a1", name: "Acc", type: AccountType.Debit, owners: [] },
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.byAccount).toEqual([]);
+	});
+
+	test("expenseCount matches reality — three expenses on the same account", () => {
+		const s = getTripStatus(
+			makeTrip({
+				accounts: [
+					{ id: "a1", name: "Acc", type: AccountType.Debit, owners: [] },
+				],
+				expenses: [
+					{
+						id: "e1",
+						accountId: "a1",
+						date: "2026-04-16",
+						payee: "X",
+						category: "Food",
+						amount: 100,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e2",
+						accountId: "a1",
+						date: "2026-04-17",
+						payee: "Y",
+						category: "Food",
+						amount: 200,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+					{
+						id: "e3",
+						accountId: "a1",
+						date: "2026-04-18",
+						payee: "Z",
+						category: "Food",
+						amount: 300,
+						currency: "THB",
+						description: "",
+						tags: [],
+					},
+				],
+			}),
+			"2026-04-20",
+		);
+		expect(s.byAccount).toEqual([
+			{
+				accountId: "a1",
+				name: "Acc",
+				type: AccountType.Debit,
+				totalThb: 600,
+				expenseCount: 3,
+			},
+		]);
+	});
+});
