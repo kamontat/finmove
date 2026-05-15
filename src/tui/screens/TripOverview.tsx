@@ -9,13 +9,20 @@ import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 
 export function TripOverview(): JSX.Element {
 	const { trip } = useData();
 	const { goTo } = useNavigation();
-	const { setHints } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { focus } = useFocus();
+
+	useEffect(() => {
+		setTitle(tripTitle(trip));
+		return () => clearTitle();
+	}, [setTitle, clearTitle, trip]);
+
 	useEffect(() => {
 		if (!trip) return;
 

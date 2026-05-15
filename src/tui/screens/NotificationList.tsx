@@ -15,14 +15,16 @@ function formatTime(date: Date): string {
 
 export function NotificationList(): JSX.Element {
 	const { history } = useNotification();
-	const { setHints } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 
 	useEffect(() => {
+		setTitle(["Notifications"]);
 		setHints([
 			{ key: "q/esc", label: "Back" },
 			{ key: "e", label: "Exit" },
 		]);
-	}, [setHints]);
+		return () => clearTitle();
+	}, [setHints, setTitle, clearTitle]);
 
 	if (history.length === 0) {
 		return (

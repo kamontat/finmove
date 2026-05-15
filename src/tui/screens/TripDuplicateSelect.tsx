@@ -9,7 +9,7 @@ import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripDuplicateSelect(): JSX.Element {
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { goTo } = useNavigation();
 	const { dataDir = "./data" } = useRouteProps("/trips/duplicate");
@@ -30,12 +30,12 @@ export function TripDuplicateSelect(): JSX.Element {
 			{ key: "q/esc", label: "Back to list" },
 			{ key: "e", label: "Exit" },
 		]);
-		setTitleSuffix(null);
+		setTitle(["Trips", "Duplicate"]);
 		return () => {
 			setColor({});
-			setTitleSuffix(null);
+			clearTitle();
 		};
-	}, [setColor, setMenu, setHints, setTitleSuffix]);
+	}, [setColor, setMenu, setHints, setTitle, clearTitle]);
 
 	if (trips.length === 0) {
 		return <Text dimColor>No trips.</Text>;

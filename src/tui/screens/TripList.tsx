@@ -21,7 +21,7 @@ const BROKEN_PREFIX = "__broken__:";
 export function TripList(): JSX.Element {
 	const { goTo, goBack } = useNavigation();
 	const { focus } = useFocus();
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu, armed, setActiveIndex } = useMenu();
 
 	const { dataDir = "./data" } = useRouteProps("/trips");
@@ -38,7 +38,7 @@ export function TripList(): JSX.Element {
 	const hasOk = entries.some((e) => e.kind === "ok");
 
 	useEffect(() => {
-		setTitleSuffix(null);
+		setTitle(["Trips"]);
 		setColor({});
 
 		setMenu(
@@ -93,6 +93,7 @@ export function TripList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
+		return () => clearTitle();
 	}, [
 		dataDir,
 		entries,
@@ -100,7 +101,8 @@ export function TripList(): JSX.Element {
 		setMenu,
 		setHints,
 		setColor,
-		setTitleSuffix,
+		setTitle,
+		clearTitle,
 		goTo,
 		goBack,
 	]);

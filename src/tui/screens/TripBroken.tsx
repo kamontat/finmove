@@ -9,15 +9,23 @@ import {
 	ConfigValidateError,
 } from "../../core/configs";
 import { deleteTrip } from "../../core/services/trip";
+import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 
 export function TripBroken(): JSX.Element {
 	const { goBack } = useNavigation();
-	const { setHints, setColor } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
+	const { trip } = useData();
 	const { dirName, dirPath, error } = useRouteProps("/trips/broken");
+
+	useEffect(() => {
+		setTitle(tripTitle(trip));
+		return () => clearTitle();
+	}, [setTitle, clearTitle, trip]);
 
 	useEffect(() => {
 		setColor({ border: "red", title: "red" });

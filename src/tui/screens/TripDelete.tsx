@@ -27,7 +27,7 @@ function entryDetail(entry: TripEntry): string {
 }
 
 export function TripDelete(): JSX.Element {
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { goBack } = useNavigation();
 	const { dataDir = "./data" } = useRouteProps("/trips/delete");
@@ -38,12 +38,12 @@ export function TripDelete(): JSX.Element {
 		setColor({ border: "red", title: "red" });
 		setMenu([], () => {});
 		setHints(SELECT_REMOVE_HINTS);
-		setTitleSuffix(null);
+		setTitle(["Trips", "Delete"]);
 		return () => {
 			setColor({});
-			setTitleSuffix(null);
+			clearTitle();
 		};
-	}, [setColor, setMenu, setHints, setTitleSuffix]);
+	}, [setColor, setMenu, setHints, setTitle, clearTitle]);
 
 	if (entries.length === 0) {
 		return <Text dimColor>No trips.</Text>;

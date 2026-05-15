@@ -23,7 +23,7 @@ import { useNotification } from "../states/notification";
 
 export function TripForm(): JSX.Element {
 	const { goTo } = useNavigation();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 
 	const { dataDir = "./data", duplicateFromDirPath } =
 		useRouteProps("/trips/new");
@@ -42,13 +42,13 @@ export function TripForm(): JSX.Element {
 
 	useEffect(() => {
 		if (isDuplicate && duplicateSource) {
-			setTitleSuffix(duplicateSource.settings.name);
+			setTitle(["Trips", "Duplicate", duplicateSource.settings.name]);
 		} else {
-			setTitleSuffix(null);
+			setTitle(["Trips", "New"]);
 		}
 		setHints(FORM_HINTS);
-		return () => setTitleSuffix(null);
-	}, [isDuplicate, duplicateSource, setHints, setTitleSuffix]);
+		return () => clearTitle();
+	}, [isDuplicate, duplicateSource, setHints, setTitle, clearTitle]);
 
 	useEffect(() => {
 		if (!duplicateSource) return;

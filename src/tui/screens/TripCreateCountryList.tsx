@@ -12,7 +12,7 @@ import { useNavigation, useRouteProps } from "../states/navigation";
 export function TripCreateCountryList(): JSX.Element {
 	const { focus } = useFocus();
 	const { goTo, goBack } = useNavigation();
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu, armed, setActiveIndex } = useMenu();
 
 	const { dataDir = "./data", formId = "trip-new" } = useRouteProps(
@@ -25,7 +25,7 @@ export function TripCreateCountryList(): JSX.Element {
 	const countries = Array.isArray(raw) ? raw : [];
 
 	useEffect(() => {
-		setTitleSuffix("Countries");
+		setTitle(["Trips", "Countries"]);
 		setColor({});
 		const hasItems = countries.length > 0;
 
@@ -63,6 +63,7 @@ export function TripCreateCountryList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
+		return () => clearTitle();
 	}, [
 		dataDir,
 		formId,
@@ -71,7 +72,8 @@ export function TripCreateCountryList(): JSX.Element {
 		setMenu,
 		setHints,
 		setColor,
-		setTitleSuffix,
+		setTitle,
+		clearTitle,
 		goTo,
 		goBack,
 	]);

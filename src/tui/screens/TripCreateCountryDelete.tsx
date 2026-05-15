@@ -9,7 +9,7 @@ import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
 export function TripCreateCountryDelete(): JSX.Element {
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { goBack } = useNavigation();
 	const { formId = "trip-new" } = useRouteProps("/trips/new/countries/delete");
@@ -22,12 +22,12 @@ export function TripCreateCountryDelete(): JSX.Element {
 		setColor({ border: "red", title: "red" });
 		setMenu([], () => {});
 		setHints(SELECT_REMOVE_HINTS);
-		setTitleSuffix("Countries > Delete");
+		setTitle(["Trips", "Countries", "Delete"]);
 		return () => {
 			setColor({});
-			setTitleSuffix(null);
+			clearTitle();
 		};
-	}, [setColor, setMenu, setHints, setTitleSuffix]);
+	}, [setColor, setMenu, setHints, setTitle, clearTitle]);
 
 	if (countries.length === 0) {
 		return <Text dimColor>No countries.</Text>;

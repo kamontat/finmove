@@ -21,7 +21,7 @@ const FIELDS: FormFieldConfig[] = [
 
 export function TripCreateCountryAdd(): JSX.Element {
 	const { goBack } = useNavigation();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 	const { formId = "trip-new" } = useRouteProps("/trips/new/countries/new");
 	const { notify } = useNotification();
 
@@ -30,9 +30,10 @@ export function TripCreateCountryAdd(): JSX.Element {
 	const current = Array.isArray(raw) ? raw : [];
 
 	useEffect(() => {
-		setTitleSuffix("Countries > New");
+		setTitle(["Trips", "Countries", "New"]);
 		setHints(FORM_HINTS);
-	}, [setHints, setTitleSuffix]);
+		return () => clearTitle();
+	}, [setHints, setTitle, clearTitle]);
 
 	return (
 		<Box flexDirection="column">
