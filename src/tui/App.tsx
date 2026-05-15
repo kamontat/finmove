@@ -1,6 +1,7 @@
 import type { JSX } from "react";
 import { useEffect } from "react";
 import type { AppArgs } from "../core/parseArgs";
+import { buildBreadcrumb } from "./buildBreadcrumb";
 import { useGlobalKeys } from "./hooks/useGlobalKeys";
 import { Default } from "./layouts/Default";
 import type { RouteEntry } from "./models";
@@ -12,6 +13,7 @@ import { HelpProvider } from "./states/help";
 import { LayoutProvider, useLayout } from "./states/layout";
 import { MenuProvider, useMenu } from "./states/menu";
 import { NavigationProvider, useNavigation } from "./states/navigation";
+import { NotificationProvider } from "./states/notification";
 
 function resolveInitialRoute(args: AppArgs): RouteEntry {
 	if (args.trip) {
@@ -50,7 +52,6 @@ function Router(): JSX.Element {
 
 	useGlobalKeys();
 
-	// Sync menu availability to focus context
 	const hasMenu = menuOptions.length > 0;
 	useEffect(() => {
 		setMenuAvailable(hasMenu);
@@ -59,90 +60,8 @@ function Router(): JSX.Element {
 	const routeConfig = routes[currentRoute.path];
 	const Component = routeConfig.component;
 
-	// Build breadcrumb title from route hierarchy
-	const breadcrumbs: string[] = [];
-
-	switch (currentRoute.path) {
-		case "/trips":
-			breadcrumbs.push("Trips");
-			break;
-		case "/trips/new":
-			breadcrumbs.push(
-				"Trips",
-				currentRoute.props.duplicateFromDirPath ? "Duplicate" : "New",
-			);
-			break;
-		case "/trips/delete":
-			breadcrumbs.push("Trips", "Delete");
-			break;
-		case "/trips/duplicate":
-			breadcrumbs.push("Trips", "Duplicate");
-			break;
-		default: {
-			breadcrumbs.push("Trips");
-			if (trip) {
-				breadcrumbs.push(trip.settings.name);
-			}
-			switch (currentRoute.path) {
-				case "/trips/owners":
-					breadcrumbs.push("Owners");
-					break;
-				case "/trips/owners/new":
-					breadcrumbs.push("Owners", "New");
-					break;
-				case "/trips/owners/edit":
-					breadcrumbs.push("Owners", "Edit");
-					break;
-				case "/trips/owners/delete":
-					breadcrumbs.push("Owners", "Delete");
-					break;
-				case "/trips/owners/references":
-					breadcrumbs.push("Owners", "References");
-					break;
-				case "/trips/accounts":
-					breadcrumbs.push("Accounts");
-					break;
-				case "/trips/accounts/new":
-					breadcrumbs.push("Accounts", "New");
-					break;
-				case "/trips/accounts/edit":
-					breadcrumbs.push("Accounts", "Edit");
-					break;
-				case "/trips/accounts/delete":
-					breadcrumbs.push("Accounts", "Delete");
-					break;
-				case "/trips/accounts/references":
-					breadcrumbs.push("Accounts", "References");
-					break;
-				case "/trips/expenses":
-					breadcrumbs.push("Expenses");
-					break;
-				case "/trips/expenses/delete":
-					breadcrumbs.push("Expenses", "Delete");
-					break;
-				case "/trips/expenses/duplicate":
-					breadcrumbs.push("Expenses", "Duplicate");
-					break;
-				case "/trips/expenses/form":
-					breadcrumbs.push(
-						"Expenses",
-						currentRoute.props.expenseId
-							? "Edit"
-							: currentRoute.props.duplicateFromId
-								? "Duplicate"
-								: "New",
-					);
-					break;
-			}
-			break;
-		}
-	}
-
-	if (titleSuffix) {
-		breadcrumbs.push(titleSuffix);
-	}
-
-	const title = breadcrumbs.join(" > ");
+	const breadcrumb = buildBreadcrumb(currentRoute, trip);
+	const title = titleSuffix ? `${breadcrumb} > ${titleSuffix}` : breadcrumb;
 
 	return (
 		<Default title={title}>
@@ -166,7 +85,9 @@ export function App({ args }: AppProps): JSX.Element {
 						<MenuProvider>
 							<FormBufferProvider>
 								<NavigationProvider initial={initial} routes={routes}>
-									<Router />
+									<NotificationProvider>
+										<Router />
+									</NotificationProvider>
 								</NavigationProvider>
 							</FormBufferProvider>
 						</MenuProvider>

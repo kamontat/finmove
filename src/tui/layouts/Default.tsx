@@ -2,14 +2,22 @@ import { Box, Text, useStdout } from "ink";
 import type { JSX, ReactNode } from "react";
 import { SelectInput } from "../components/atoms/SelectInput";
 import { HelpBar } from "../components/molecules/HelpBar";
+import type { NotificationSeverity } from "../models";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
+import { useNotification } from "../states/notification";
 
 interface DefaultLayoutProps {
 	title: string;
 	children: ReactNode;
 }
+
+const SEVERITY_COLORS: Record<NotificationSeverity, string> = {
+	info: "cyan",
+	warn: "yellow",
+	error: "red",
+};
 
 export function Default({ title, children }: DefaultLayoutProps): JSX.Element {
 	const { focus } = useFocus();
@@ -21,6 +29,7 @@ export function Default({ title, children }: DefaultLayoutProps): JSX.Element {
 		trigger,
 	} = useMenu();
 	const { stdout } = useStdout();
+	const { current } = useNotification();
 
 	const terminalRows = stdout?.rows ?? 24;
 	const hasMenu = menuOptions.length > 0 && onMenuSelect !== null;
@@ -40,10 +49,14 @@ export function Default({ title, children }: DefaultLayoutProps): JSX.Element {
 
 	return (
 		<Box flexDirection="column" width="100%">
-			<Text bold color={titleColor}>
-				{" "}
-				{title}
-			</Text>
+			<Box justifyContent="space-between" paddingX={1}>
+				<Text bold color={titleColor}>
+					{title}
+				</Text>
+				{current !== null && (
+					<Text color={SEVERITY_COLORS[current.severity]}>{current.text}</Text>
+				)}
+			</Box>
 
 			<Box
 				borderStyle="round"
