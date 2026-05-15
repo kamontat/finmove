@@ -8,8 +8,7 @@ interface Props {
 	status: TripStatus;
 }
 
-interface DashboardProps {
-	status: TripStatus;
+interface DashboardProps extends Props {
 	isActive: boolean;
 }
 
