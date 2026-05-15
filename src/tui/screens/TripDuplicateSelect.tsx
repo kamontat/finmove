@@ -52,6 +52,7 @@ export function TripDuplicateSelect(): JSX.Element {
 				const trip = trips.find((t) => t.dirPath === dirPath);
 				if (!trip) return;
 				goTo("/trips/new", {
+					replace: true,
 					props: { dataDir, duplicateFromDirPath: trip.dirPath },
 				});
 			}}

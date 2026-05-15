@@ -22,7 +22,7 @@ import { useNavigation, useRouteProps } from "../states/navigation";
 import { useNotification } from "../states/notification";
 
 export function TripForm(): JSX.Element {
-	const { goTo } = useNavigation();
+	const { goTo, goBack } = useNavigation();
 	const { setHints, setTitle, clearTitle } = useLayout();
 
 	const { dataDir = "./data", duplicateFromDirPath } =
@@ -145,7 +145,7 @@ export function TripForm(): JSX.Element {
 							countries,
 						});
 						buffer.clear();
-						goTo("/trips", { replace: true, props: { dataDir } });
+						goBack();
 						return;
 					}
 
