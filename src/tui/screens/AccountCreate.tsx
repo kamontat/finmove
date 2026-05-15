@@ -10,19 +10,21 @@ import { useData } from "../states/data";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 
 const FORM_ID = "account-new";
 
 export function AccountCreate(): JSX.Element | null {
 	const { trip, reloadTrip } = useData();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 	const { goTo, goBack } = useNavigation();
 	const buffer = useFormBuffer(FORM_ID);
 
 	useEffect(() => {
-		setTitleSuffix(null);
+		setTitle(tripTitle(trip, "Accounts", "New"));
 		setHints(FORM_HINTS);
-	}, [setHints, setTitleSuffix]);
+		return () => clearTitle();
+	}, [setHints, setTitle, clearTitle, trip]);
 
 	if (!trip) return null;
 

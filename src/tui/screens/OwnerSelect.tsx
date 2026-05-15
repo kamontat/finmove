@@ -19,7 +19,7 @@ const HINTS: HelpHint[] = [
 export function OwnerSelect(): JSX.Element {
 	const { trip } = useData();
 	const { goBack } = useNavigation();
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 
 	const props = useRouteProps([
@@ -33,11 +33,12 @@ export function OwnerSelect(): JSX.Element {
 	const buffer = useFormBuffer(formId);
 
 	useEffect(() => {
-		setTitleSuffix("Select Owners");
+		setTitle(["Select Owners"]);
 		setColor({});
 		setMenu([], () => {});
 		setHints(HINTS);
-	}, [setHints, setMenu, setColor, setTitleSuffix]);
+		return () => clearTitle();
+	}, [setHints, setMenu, setColor, setTitle, clearTitle]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

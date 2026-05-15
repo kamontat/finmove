@@ -11,10 +11,11 @@ import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 
 export function AccountDelete(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { goTo, goBack } = useNavigation();
 
@@ -22,12 +23,12 @@ export function AccountDelete(): JSX.Element {
 		setColor({ border: "red", title: "red" });
 		setMenu([], () => {});
 		setHints(SELECT_REMOVE_HINTS);
-		setTitleSuffix(null);
+		setTitle(tripTitle(trip, "Accounts", "Delete"));
 		return () => {
 			setColor({});
-			setTitleSuffix(null);
+			clearTitle();
 		};
-	}, [setColor, setMenu, setHints, setTitleSuffix]);
+	}, [setColor, setMenu, setHints, setTitle, clearTitle, trip]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

@@ -11,11 +11,12 @@ import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 
 export function AccountReferences(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { focus } = useFocus();
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { goTo, goBack } = useNavigation();
 
@@ -52,12 +53,23 @@ export function AccountReferences(): JSX.Element {
 			{ key: "q/esc", label: "Back" },
 			{ key: "e", label: "Exit" },
 		]);
-		setTitleSuffix(account?.name ?? accountId);
+		setTitle(
+			tripTitle(trip, "Accounts", "References", account?.name ?? accountId),
+		);
 		return () => {
 			setColor({});
-			setTitleSuffix(null);
+			clearTitle();
 		};
-	}, [setColor, setMenu, setHints, setTitleSuffix, account, accountId]);
+	}, [
+		setColor,
+		setMenu,
+		setHints,
+		setTitle,
+		clearTitle,
+		trip,
+		account,
+		accountId,
+	]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;

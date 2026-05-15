@@ -10,10 +10,11 @@ import { useData } from "../states/data";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 
 export function AccountEdit(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 	const { goTo, goBack } = useNavigation();
 
 	const { accountId } = useRouteProps("/trips/accounts/edit");
@@ -23,9 +24,10 @@ export function AccountEdit(): JSX.Element {
 	const buffer = useFormBuffer(formId);
 
 	useEffect(() => {
-		setTitleSuffix(account?.name ?? accountId);
+		setTitle(tripTitle(trip, "Accounts", "Edit", account?.name ?? accountId));
 		setHints(FORM_HINTS);
-	}, [setHints, setTitleSuffix, account, accountId]);
+		return () => clearTitle();
+	}, [setHints, setTitle, clearTitle, trip, account, accountId]);
 
 	// Seed the buffer with the account's current owners on first mount, so the
 	// OwnerSelect sub-page opens with the correct initial selection.

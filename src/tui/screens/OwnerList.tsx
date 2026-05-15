@@ -9,11 +9,12 @@ import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 
 export function OwnerList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { focus, setFocus } = useFocus();
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu, armed, setActiveIndex } = useMenu();
 	const { goTo, goBack } = useNavigation();
 
@@ -23,7 +24,7 @@ export function OwnerList(): JSX.Element {
 	}, [trip, setFocus]);
 
 	useEffect(() => {
-		setTitleSuffix(null);
+		setTitle(tripTitle(trip, "Owners"));
 		setColor({});
 		if (!trip) return;
 
@@ -76,13 +77,15 @@ export function OwnerList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
+		return () => clearTitle();
 	}, [
 		trip,
 		reloadTrip,
 		setMenu,
 		setHints,
 		setColor,
-		setTitleSuffix,
+		setTitle,
+		clearTitle,
 		goTo,
 		goBack,
 	]);

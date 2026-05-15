@@ -20,7 +20,7 @@ const OPTIONS: SelectOption[] = [
 
 export function AccountTypeSelect(): JSX.Element {
 	const { goBack } = useNavigation();
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 
 	const props = useRouteProps([
@@ -33,11 +33,12 @@ export function AccountTypeSelect(): JSX.Element {
 	const buffer = useFormBuffer(formId);
 
 	useEffect(() => {
-		setTitleSuffix("Select Account Type");
+		setTitle(["Select Account Type"]);
 		setColor({});
 		setMenu([], () => {});
 		setHints(HINTS);
-	}, [setHints, setMenu, setColor, setTitleSuffix]);
+		return () => clearTitle();
+	}, [setHints, setMenu, setColor, setTitle, clearTitle]);
 
 	const initialRaw = buffer.values[fieldKey];
 	const initialValue = typeof initialRaw === "string" ? initialRaw : undefined;

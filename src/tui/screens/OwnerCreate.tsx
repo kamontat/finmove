@@ -8,16 +8,18 @@ import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 
 export function OwnerCreate(): JSX.Element | null {
 	const { trip, reloadTrip } = useData();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 	const { goBack } = useNavigation();
 
 	useEffect(() => {
-		setTitleSuffix(null);
+		setTitle(tripTitle(trip, "Owners", "New"));
 		setHints(FORM_HINTS);
-	}, [setHints, setTitleSuffix]);
+		return () => clearTitle();
+	}, [setHints, setTitle, clearTitle, trip]);
 
 	if (!trip) return null;
 

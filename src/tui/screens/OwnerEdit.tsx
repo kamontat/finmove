@@ -8,19 +8,21 @@ import { type FormFieldConfig, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 
 export function OwnerEdit(): JSX.Element {
 	const { trip, reloadTrip } = useData();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 	const { goBack } = useNavigation();
 
 	const { ownerId } = useRouteProps("/trips/owners/edit");
 	const owner = trip?.owners.find((o) => o.id === ownerId);
 
 	useEffect(() => {
-		setTitleSuffix(owner?.name ?? ownerId);
+		setTitle(tripTitle(trip, "Owners", "Edit", owner?.name ?? ownerId));
 		setHints(FORM_HINTS);
-	}, [setHints, setTitleSuffix, owner, ownerId]);
+		return () => clearTitle();
+	}, [setHints, setTitle, clearTitle, trip, owner, ownerId]);
 
 	if (!trip) return <Text dimColor>Loading...</Text>;
 	if (!owner) return <Text dimColor>Owner "{ownerId}" not found.</Text>;
