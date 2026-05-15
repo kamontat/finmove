@@ -20,6 +20,9 @@ export function buildBreadcrumb(route: RouteEntry, trip: Trip | null): string {
 		case "/trips/duplicate":
 			parts.push("Trips", "Duplicate");
 			break;
+		case "/notifications":
+			parts.push("Notifications");
+			break;
 		default: {
 			parts.push("Trips");
 			if (trip) {

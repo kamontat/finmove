@@ -18,6 +18,7 @@ export interface RouteParams {
 	"/trips": { dataDir?: string };
 	"/trips/duplicate": { dataDir?: string };
 	"/trips/delete": { dataDir?: string };
+	"/notifications": Record<string, never>;
 	"/trips/broken": {
 		dirName: string;
 		dirPath: string;

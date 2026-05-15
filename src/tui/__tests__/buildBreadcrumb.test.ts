@@ -113,6 +113,12 @@ describe("buildBreadcrumb", () => {
 		).toBe("Trips > Japan 2026 > Expenses > New");
 	});
 
+	test("/notifications → 'Notifications'", () => {
+		expect(buildBreadcrumb(route("/notifications", {}), null)).toBe(
+			"Notifications",
+		);
+	});
+
 	test("trip-scoped route without trip loaded omits the trip name", () => {
 		expect(
 			buildBreadcrumb(

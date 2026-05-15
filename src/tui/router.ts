@@ -25,6 +25,7 @@ import { ExpenseDuplicateSelect } from "./screens/ExpenseDuplicateSelect";
 import { ExpenseForm } from "./screens/ExpenseForm";
 import { ExpenseList } from "./screens/ExpenseList";
 import { ExportScreen } from "./screens/Export";
+import { NotificationList } from "./screens/NotificationList";
 import { OwnerCreate } from "./screens/OwnerCreate";
 import { OwnerDelete } from "./screens/OwnerDelete";
 import { OwnerEdit } from "./screens/OwnerEdit";
@@ -72,6 +73,9 @@ export const routes: Routes = {
 	},
 	"/trips/duplicate": {
 		component: TripDuplicateSelect,
+	},
+	"/notifications": {
+		component: NotificationList,
 	},
 	"/trips/overview": {
 		component: TripOverview,
