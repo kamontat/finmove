@@ -87,6 +87,25 @@ describe("NotificationStore", () => {
 		expect(store.getHistory().length).toBe(1);
 	});
 
+	test("auto-dismiss callback notifies subscribers", () => {
+		const scheduled: Array<{ fn: () => void }> = [];
+		const store = new NotificationStore({
+			schedule: (fn) => {
+				scheduled.push({ fn });
+				return scheduled.length;
+			},
+			cancel: () => {},
+		});
+		let calls = 0;
+		store.subscribe(() => {
+			calls += 1;
+		});
+		store.notify("hello", "info", "A");
+		scheduled[0]?.fn();
+		expect(calls).toBe(2);
+		expect(store.getCurrent()).toBeNull();
+	});
+
 	test("persistent: true skips auto-dismiss scheduling", () => {
 		const scheduled: Array<unknown> = [];
 		const store = new NotificationStore({

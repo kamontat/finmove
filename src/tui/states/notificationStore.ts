@@ -77,8 +77,8 @@ export class NotificationStore {
 	}
 
 	dismiss(): void {
-		this.cancelTimer();
 		if (this.current === null) return;
+		this.cancelTimer();
 		this.current = null;
 		this.emit();
 	}
