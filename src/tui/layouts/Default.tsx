@@ -8,15 +8,10 @@ import { useMenu } from "../states/menu";
 
 interface DefaultLayoutProps {
 	title: string;
-	defaultBorderColor?: string;
 	children: ReactNode;
 }
 
-export function Default({
-	title,
-	defaultBorderColor,
-	children,
-}: DefaultLayoutProps): JSX.Element {
+export function Default({ title, children }: DefaultLayoutProps): JSX.Element {
 	const { focus } = useFocus();
 	const { hints, colors } = useLayout();
 	const {
@@ -37,7 +32,7 @@ export function Default({
 	const reserved = titleHeight + mainBorderHeight + menuHeight + helpHeight;
 	const mainHeight = Math.max(3, terminalRows - reserved);
 
-	const activeBorderColor = colors.border ?? defaultBorderColor ?? "cyan";
+	const activeBorderColor = colors.border ?? "cyan";
 	const mainBorderColor =
 		focus === "main" || focus === "input" ? activeBorderColor : "gray";
 	const menuBorderColor = focus === "menu" ? activeBorderColor : "gray";

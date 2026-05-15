@@ -188,13 +188,11 @@ export type RouteEntry = {
 	[P in RoutePath]: { path: P; props: RouteParams[P] };
 }[RoutePath];
 
-export interface RouteConfig<P extends RoutePath = RoutePath> {
+export interface RouteConfig {
 	component: ComponentType;
-	title: string | ((props: RouteParams[P]) => string);
-	borderColor?: string;
 }
 
-export type Routes = { [P in RoutePath]: RouteConfig<P> };
+export type Routes = { [P in RoutePath]: RouteConfig };
 
 export interface SelectOption {
 	label: string;

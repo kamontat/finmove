@@ -145,12 +145,7 @@ function Router(): JSX.Element {
 	const title = breadcrumbs.join(" > ");
 
 	return (
-		<Default
-			title={title}
-			{...(routeConfig.borderColor !== undefined
-				? { defaultBorderColor: routeConfig.borderColor }
-				: {})}
-		>
+		<Default title={title}>
 			<Component />
 		</Default>
 	);
