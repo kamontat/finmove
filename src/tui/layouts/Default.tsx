@@ -2,7 +2,7 @@ import { Box, Text, useStdout } from "ink";
 import type { JSX, ReactNode } from "react";
 import { SelectInput } from "../components/atoms/SelectInput";
 import { HelpBar } from "../components/molecules/HelpBar";
-import type { NotificationSeverity } from "../models";
+import { SEVERITY_COLORS } from "../constants/severity";
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
@@ -12,12 +12,6 @@ interface DefaultLayoutProps {
 	title: string;
 	children: ReactNode;
 }
-
-const SEVERITY_COLORS: Record<NotificationSeverity, string> = {
-	info: "cyan",
-	warn: "yellow",
-	error: "red",
-};
 
 export function Default({ title, children }: DefaultLayoutProps): JSX.Element {
 	const { focus } = useFocus();

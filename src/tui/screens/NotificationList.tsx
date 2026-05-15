@@ -1,21 +1,10 @@
 import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
-import type { Notification, NotificationSeverity } from "../models";
+import { SEVERITY_COLORS, SEVERITY_LABELS } from "../constants/severity";
+import type { Notification } from "../models";
 import { useLayout } from "../states/layout";
 import { useNotification } from "../states/notification";
-
-const SEVERITY_COLORS: Record<NotificationSeverity, string> = {
-	info: "cyan",
-	warn: "yellow",
-	error: "red",
-};
-
-const SEVERITY_LABELS: Record<NotificationSeverity, string> = {
-	info: "INFO",
-	warn: "WARN",
-	error: "ERROR",
-};
 
 function formatTime(date: Date): string {
 	const hh = String(date.getHours()).padStart(2, "0");
@@ -54,7 +43,7 @@ export function NotificationList(): JSX.Element {
 				<Box width={8}>
 					<Text bold>Level</Text>
 				</Box>
-				<Box width={40}>
+				<Box width="40%">
 					<Text bold>Screen</Text>
 				</Box>
 				<Box flexGrow={1}>
@@ -71,7 +60,7 @@ export function NotificationList(): JSX.Element {
 							{SEVERITY_LABELS[n.severity]}
 						</Text>
 					</Box>
-					<Box width={40}>
+					<Box width="40%">
 						<Text>{n.route}</Text>
 					</Box>
 					<Box flexGrow={1}>
