@@ -2,9 +2,15 @@ import { Box, Text } from "ink";
 import type { JSX } from "react";
 import { AccountType } from "../../../core/models";
 import type { TripStatus } from "../../../core/services/trip";
+import { ScrollableMain } from "../molecules/ScrollableMain";
 
 interface Props {
 	status: TripStatus;
+}
+
+interface DashboardProps {
+	status: TripStatus;
+	isActive: boolean;
 }
 
 const PHASE_COLOR: Record<TripStatus["phase"], string> = {
@@ -259,23 +265,28 @@ function WarningList({ status }: Props): JSX.Element {
 	);
 }
 
-export function TripDashboard({ status }: Props): JSX.Element {
+export function TripDashboard({
+	status,
+	isActive,
+}: DashboardProps): JSX.Element {
 	const hasOwners = status.ownerBalances.length > 0;
 	const hasAccountSpend = status.byAccount.length > 0;
 	return (
-		<Box flexDirection="column" gap={1}>
-			<StatusHeader status={status} />
-			<ProgressBar status={status} />
+		<ScrollableMain isActive={isActive}>
+			<Box flexDirection="column" gap={1}>
+				<StatusHeader status={status} />
+				<ProgressBar status={status} />
 
-			<Box flexDirection="row" flexWrap="wrap" gap={2}>
-				<SpendBlock status={status} />
-				{hasOwners && <OwnersBlock status={status} />}
-				<CategoriesBlock status={status} />
-				{hasAccountSpend && <AccountsBlock status={status} />}
-				<CountsBlock status={status} />
+				<Box flexDirection="row" flexWrap="wrap" gap={2}>
+					<SpendBlock status={status} />
+					{hasOwners && <OwnersBlock status={status} />}
+					<CategoriesBlock status={status} />
+					{hasAccountSpend && <AccountsBlock status={status} />}
+					<CountsBlock status={status} />
+				</Box>
+
+				{status.warnings.length > 0 && <WarningList status={status} />}
 			</Box>
-
-			{status.warnings.length > 0 && <WarningList status={status} />}
-		</Box>
+		</ScrollableMain>
 	);
 }
