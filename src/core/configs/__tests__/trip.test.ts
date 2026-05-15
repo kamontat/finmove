@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { stringify } from "yaml";
+import { parse, stringify } from "yaml";
 import { ConfigFileMissingError, ConfigParseError } from "../errors";
+import { loadConfig } from "../kernel";
+import { tripConfig } from "../trip";
 import {
 	readTripConfig,
 	readTripConfigVersion,
@@ -171,5 +173,69 @@ describe("readTripConfig — errors", () => {
 		writeFileSync(join(dir, "expenses.yaml"), stringify({ expenses: [] }));
 
 		expect(() => readTripConfig(dir)).toThrow(ConfigParseError);
+	});
+});
+
+describe("loadConfig with tripConfig — end-to-end", () => {
+	test("loads a v1 trip without migration", () => {
+		const dir = join(TEST_DIR, "v1-trip");
+		writeTripFiles(dir, {
+			settings: {
+				...baseV0Settings,
+				version: 1,
+				tags: [{ value: "biz", default: false }],
+			},
+			owners: [],
+			accounts: [],
+			expenses: [],
+		});
+
+		const result = loadConfig(tripConfig, dir);
+
+		expect(result.migrated).toBe(false);
+		expect(result.data.settings.version).toBe(1);
+		expect(result.data.settings.tags).toEqual([
+			{ value: "biz", default: false },
+		]);
+	});
+
+	test("migrates a v0 trip with string tags to v1 and rewrites settings.yaml", () => {
+		const dir = join(TEST_DIR, "v0-trip");
+		writeTripFiles(dir, {
+			settings: { ...baseV0Settings, tags: ["work", "fun"] },
+			owners: [],
+			accounts: [],
+			expenses: [],
+		});
+
+		const result = loadConfig(tripConfig, dir);
+
+		expect(result.migrated).toBe(true);
+		expect(result.fromVersion).toBe(0);
+		expect(result.toVersion).toBe(1);
+		expect(result.data.settings.version).toBe(1);
+
+		const reparsed = parse(readFileSync(join(dir, "settings.yaml"), "utf-8"));
+		expect(reparsed.version).toBe(1);
+		expect(reparsed.tags).toEqual([
+			{ value: "work", default: false },
+			{ value: "fun", default: false },
+		]);
+	});
+
+	test("leaves a v1 settings.yaml byte-identical on load", () => {
+		const dir = join(TEST_DIR, "v1-untouched");
+		writeTripFiles(dir, {
+			settings: { ...baseV0Settings, version: 1, tags: [] },
+			owners: [],
+			accounts: [],
+			expenses: [],
+		});
+
+		const before = readFileSync(join(dir, "settings.yaml"), "utf-8");
+		loadConfig(tripConfig, dir);
+		const after = readFileSync(join(dir, "settings.yaml"), "utf-8");
+
+		expect(after).toBe(before);
 	});
 });
