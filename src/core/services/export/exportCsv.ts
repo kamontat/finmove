@@ -29,12 +29,20 @@ export function exportCSV(trip: Trip): string {
 		if (!account) continue;
 
 		const tripRate = trip.settings.currencies[expense.currency]?.exchangeRate;
-		const thbTotal = convertToTHB(
-			expense.amount,
-			expense.currency,
-			expense.exchangeRate,
-			tripRate,
-		);
+		let thbTotal: number;
+		try {
+			thbTotal = convertToTHB(
+				expense.amount,
+				expense.currency,
+				expense.exchangeRate,
+				tripRate,
+			);
+		} catch (e) {
+			const message = e instanceof Error ? e.message : String(e);
+			throw new Error(
+				`${message} (expense "${expense.payee}" on ${expense.date}, id: ${expense.id})`,
+			);
+		}
 
 		const splits = calculateSplits(thbTotal, expense.owners, trip.owners);
 

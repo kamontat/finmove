@@ -9,25 +9,33 @@ import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
+import { useNotification } from "../states/notification";
 
 export function ExportScreen(): JSX.Element {
 	const { trip } = useData();
 	const { goBack } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
 	const { setMenu } = useMenu();
+	const { notify } = useNotification();
 
 	const [exportedPath, setExportedPath] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (!trip) return;
-		const exportPath = trip.settings.exportPath ?? "./expenses.csv";
-		const csv = exportCSV(trip);
-		const fullPath = isAbsolute(exportPath)
-			? exportPath
-			: join(trip.dirPath, exportPath);
-		writeFileSync(fullPath, csv);
-		setExportedPath(exportPath);
-	}, [trip]);
+		try {
+			const exportPath = trip.settings.exportPath ?? "./expenses.csv";
+			const csv = exportCSV(trip);
+			const fullPath = isAbsolute(exportPath)
+				? exportPath
+				: join(trip.dirPath, exportPath);
+			writeFileSync(fullPath, csv);
+			setExportedPath(exportPath);
+		} catch (e) {
+			const message = e instanceof Error ? e.message : String(e);
+			notify(`Export failed: ${message}`, "error", { persistent: true });
+			goBack();
+		}
+	}, [trip, notify, goBack]);
 
 	useEffect(() => {
 		setTitleSuffix("Settings > Export CSV");
