@@ -5,14 +5,12 @@ import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { exportCSV } from "../../core/services/export";
 import { TextLabel } from "../components/atoms/TextLabel";
-import { useDefaultFocus } from "../hooks/useDefaultFocus";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 
 export function ExportScreen(): JSX.Element {
-	useDefaultFocus("menu");
 	const { trip } = useData();
 	const { goBack } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
