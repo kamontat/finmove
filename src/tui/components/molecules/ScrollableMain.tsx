@@ -1,4 +1,11 @@
-import { Box, type DOMElement, measureElement, Text, useInput } from "ink";
+import {
+	Box,
+	type DOMElement,
+	measureElement,
+	Text,
+	useInput,
+	useStdout,
+} from "ink";
 import type { JSX, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -11,12 +18,17 @@ export function ScrollableMain({
 	isActive,
 	children,
 }: ScrollableMainProps): JSX.Element {
+	const { stdout } = useStdout();
+	const rows = stdout?.rows ?? 0;
+	const cols = stdout?.columns ?? 0;
+
 	const outerRef = useRef<DOMElement>(null);
 	const contentRef = useRef<DOMElement>(null);
 	const [offset, setOffset] = useState(0);
 	const [viewportHeight, setViewportHeight] = useState(0);
 	const [contentHeight, setContentHeight] = useState(0);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: rows/cols deps re-trigger measurement on terminal resize
 	useEffect(() => {
 		if (!outerRef.current || !contentRef.current) return;
 		const v = measureElement(outerRef.current).height;
@@ -24,7 +36,7 @@ export function ScrollableMain({
 		setViewportHeight(v);
 		setContentHeight(c);
 		setOffset((o) => Math.min(o, Math.max(0, c - v)));
-	});
+	}, [rows, cols]);
 
 	const maxOffset = Math.max(0, contentHeight - viewportHeight);
 
