@@ -1,12 +1,13 @@
-import { Box, Text } from "ink";
+import { Box } from "ink";
 import type { JSX } from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
 import { type FormFieldConfig, getString } from "../models";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { useNotification } from "../states/notification";
 
 const FIELDS: FormFieldConfig[] = [
 	{
@@ -22,12 +23,11 @@ export function TripCreateCountryAdd(): JSX.Element {
 	const { goBack } = useNavigation();
 	const { setHints, setTitleSuffix } = useLayout();
 	const { formId = "trip-new" } = useRouteProps("/trips/new/countries/new");
+	const { notify } = useNotification();
 
 	const buffer = useFormBuffer(formId);
 	const raw = buffer.values["countries"];
 	const current = Array.isArray(raw) ? raw : [];
-
-	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
 		setTitleSuffix("Countries > New");
@@ -36,21 +36,20 @@ export function TripCreateCountryAdd(): JSX.Element {
 
 	return (
 		<Box flexDirection="column">
-			{error && (
-				<Text color="red" bold>
-					{error}
-				</Text>
-			)}
 			<Form
 				fields={FIELDS}
 				onSubmit={(values) => {
 					const value = getString(values, "value").trim();
 					if (value === "") {
-						setError("Country name cannot be empty.");
+						notify("Country name cannot be empty.", "error", {
+							persistent: true,
+						});
 						return;
 					}
 					if (current.includes(value)) {
-						setError(`"${value}" is already in the list.`);
+						notify(`"${value}" is already in the list.`, "error", {
+							persistent: true,
+						});
 						return;
 					}
 					buffer.setField("countries", [...current, value]);
