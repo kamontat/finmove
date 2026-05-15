@@ -1,9 +1,13 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import type { Trip } from "../../core/models";
 import { today } from "../../core/services/date";
-import { deleteTrip, listTrips, sortTrips } from "../../core/services/trip";
+import {
+	deleteTrip,
+	listTrips,
+	sortTrips,
+	type TripEntry,
+} from "../../core/services/trip";
 import { ListSelect } from "../components/molecules/ListSelect";
 import { LIST_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
@@ -11,6 +15,8 @@ import { useFormBufferAdmin } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
+
+const BROKEN_PREFIX = "__broken__:";
 
 export function TripList(): JSX.Element {
 	const { goTo, goBack } = useNavigation();
@@ -25,9 +31,11 @@ export function TripList(): JSX.Element {
 		clearByPrefix("trip-");
 	}, [clearByPrefix]);
 
-	const [trips, setTrips] = useState<Trip[]>(() =>
+	const [entries, setEntries] = useState<TripEntry[]>(() =>
 		sortTrips(listTrips(dataDir), today()),
 	);
+
+	const hasOk = entries.some((e) => e.kind === "ok");
 
 	useEffect(() => {
 		setTitleSuffix(null);
@@ -41,11 +49,15 @@ export function TripList(): JSX.Element {
 					value: "duplicate",
 					key: "d",
 					mainAction: {
+						check: (i) => entries[i]?.kind === "ok",
 						onConfirm: (i) => {
-							const t = trips[i];
-							if (!t) return;
+							const e = entries[i];
+							if (!e || e.kind !== "ok") return;
 							goTo("/trips/new", {
-								props: { dataDir, duplicateFromDirPath: t.dirPath },
+								props: {
+									dataDir,
+									duplicateFromDirPath: e.trip.dirPath,
+								},
 							});
 						},
 					},
@@ -57,11 +69,12 @@ export function TripList(): JSX.Element {
 					mainAction: {
 						confirmCount: 2,
 						onConfirm: (i) => {
-							const t = trips[i];
-							if (!t) return;
-							deleteTrip(t.dirPath);
+							const e = entries[i];
+							if (!e) return;
+							const path = e.kind === "ok" ? e.trip.dirPath : e.dirPath;
+							deleteTrip(path);
 							const next = sortTrips(listTrips(dataDir), today());
-							setTrips(next);
+							setEntries(next);
 							if (next.length === 0) {
 								goBack();
 							}
@@ -72,9 +85,9 @@ export function TripList(): JSX.Element {
 			(value) => {
 				if (value === "create") {
 					goTo("/trips/new", { props: { dataDir } });
-				} else if (value === "duplicate" && trips.length > 0) {
+				} else if (value === "duplicate" && hasOk) {
 					goTo("/trips/duplicate", { props: { dataDir } });
-				} else if (value === "delete" && trips.length > 0) {
+				} else if (value === "delete" && entries.length > 0) {
 					goTo("/trips/delete", { props: { dataDir } });
 				}
 			},
@@ -82,7 +95,8 @@ export function TripList(): JSX.Element {
 		setHints(LIST_HINTS);
 	}, [
 		dataDir,
-		trips,
+		entries,
+		hasOk,
 		setMenu,
 		setHints,
 		setColor,
@@ -91,24 +105,52 @@ export function TripList(): JSX.Element {
 		goBack,
 	]);
 
-	if (trips.length === 0) {
+	if (entries.length === 0) {
 		return <Text dimColor>No trips yet. Press [c] to create one.</Text>;
 	}
 
 	return (
 		<ListSelect
-			options={trips.map((t) => ({
-				label: t.settings.name,
-				value: t.dirPath,
-				detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
-			}))}
+			options={entries.map((e) =>
+				e.kind === "ok"
+					? {
+							label: e.trip.settings.name,
+							value: e.trip.dirPath,
+							detail: `(${e.trip.settings.startDate} — ${e.trip.settings.endDate})`,
+						}
+					: {
+							label: `⚠ ${e.dirName} — ${e.error.name}`,
+							value: `${BROKEN_PREFIX}${e.dirPath}`,
+							detail: "(broken — press Enter for details)",
+						},
+			)}
 			onChange={(value) => {
-				const trip = trips.find((t) => t.dirPath === value);
-				if (trip) {
+				if (value.startsWith(BROKEN_PREFIX)) {
+					const dirPath = value.slice(BROKEN_PREFIX.length);
+					const entry = entries.find(
+						(e): e is Extract<TripEntry, { kind: "broken" }> =>
+							e.kind === "broken" && e.dirPath === dirPath,
+					);
+					if (!entry) return;
+					goTo("/trips/broken", {
+						props: {
+							dirName: entry.dirName,
+							dirPath: entry.dirPath,
+							error: entry.error,
+							dataDir,
+						},
+					});
+					return;
+				}
+				const entry = entries.find(
+					(e): e is Extract<TripEntry, { kind: "ok" }> =>
+						e.kind === "ok" && e.trip.dirPath === value,
+				);
+				if (entry) {
 					goTo("/trips/overview", {
 						props: {
-							tripDirPath: trip.dirPath,
-							tripName: trip.settings.name,
+							tripDirPath: entry.trip.dirPath,
+							tripName: entry.trip.settings.name,
 							dataDir,
 						},
 					});

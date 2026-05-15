@@ -1,6 +1,6 @@
-import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { stringify } from "yaml";
+import { saveConfig } from "../../configs";
+import { tripConfig } from "../../configs/trip";
 import type { Settings, Trip } from "../../models";
 
 export function createTrip(
@@ -9,18 +9,7 @@ export function createTrip(
 	settings: Settings,
 ): Trip {
 	const tripPath = join(dataDir, dirName);
-	mkdirSync(tripPath, { recursive: true });
-
-	writeFileSync(join(tripPath, "settings.yaml"), stringify(settings));
-	writeFileSync(join(tripPath, "owners.yaml"), stringify({ owners: [] }));
-	writeFileSync(join(tripPath, "accounts.yaml"), stringify({ accounts: [] }));
-	writeFileSync(join(tripPath, "expenses.yaml"), stringify({ expenses: [] }));
-
-	return {
-		dirPath: tripPath,
-		settings,
-		owners: [],
-		accounts: [],
-		expenses: [],
-	};
+	const data = { settings, owners: [], accounts: [], expenses: [] };
+	saveConfig(tripConfig, tripPath, data);
+	return { dirPath: tripPath, ...data };
 }

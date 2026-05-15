@@ -4,6 +4,7 @@ export type { DuplicateTripOverrides } from "./duplicateTrip";
 export { duplicateTrip } from "./duplicateTrip";
 export type { TripStatus } from "./getTripStatus";
 export { getTripStatus } from "./getTripStatus";
+export type { TripEntry } from "./listTrips";
 export { listTrips } from "./listTrips";
 export { loadTrip } from "./loadTrip";
 export { sortTrips } from "./sortTrips";

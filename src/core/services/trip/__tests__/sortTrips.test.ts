@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import type { Settings, Trip } from "../../../models";
+import type { Settings } from "../../../models";
+import type { TripEntry } from "../listTrips";
 import { sortTrips } from "../sortTrips";
 
-function makeTrip(name: string, endDate: string): Trip {
+function makeTrip(name: string, endDate: string): TripEntry {
 	const settings: Settings = {
+		version: 1,
 		name,
 		startDate: "2026-01-01",
 		endDate,
@@ -15,12 +17,21 @@ function makeTrip(name: string, endDate: string): Trip {
 		exportPath: "./out.csv",
 	};
 	return {
-		dirPath: `/data/${name}`,
-		settings,
-		owners: [],
-		accounts: [],
-		expenses: [],
+		kind: "ok",
+		trip: {
+			dirPath: `/data/${name}`,
+			settings,
+			owners: [],
+			accounts: [],
+			expenses: [],
+		},
 	};
+}
+
+function names(entries: TripEntry[]): string[] {
+	return entries.map((e) =>
+		e.kind === "ok" ? e.trip.settings.name : e.dirName,
+	);
 }
 
 describe("sortTrips", () => {
@@ -36,11 +47,7 @@ describe("sortTrips", () => {
 
 		const sorted = sortTrips([a, b, c], today);
 
-		expect(sorted.map((t) => t.settings.name)).toEqual([
-			"Bravo",
-			"Charlie",
-			"Alpha",
-		]);
+		expect(names(sorted)).toEqual(["Bravo", "Charlie", "Alpha"]);
 	});
 
 	test("sorts ended trips by endDate descending (most recently ended first)", () => {
@@ -51,11 +58,7 @@ describe("sortTrips", () => {
 
 		const sorted = sortTrips([a, b, c], today);
 
-		expect(sorted.map((t) => t.settings.name)).toEqual([
-			"Bravo",
-			"Charlie",
-			"Alpha",
-		]);
+		expect(names(sorted)).toEqual(["Bravo", "Charlie", "Alpha"]);
 	});
 
 	test("places active trips before ended trips", () => {
@@ -70,7 +73,7 @@ describe("sortTrips", () => {
 			today,
 		);
 
-		expect(sorted.map((t) => t.settings.name)).toEqual([
+		expect(names(sorted)).toEqual([
 			"ActiveSoon",
 			"ActiveLater",
 			"EndedRecent",
@@ -86,11 +89,7 @@ describe("sortTrips", () => {
 
 		const sorted = sortTrips([charlie, alpha, bravo], today);
 
-		expect(sorted.map((t) => t.settings.name)).toEqual([
-			"Alpha",
-			"bravo",
-			"charlie",
-		]);
+		expect(names(sorted)).toEqual(["Alpha", "bravo", "charlie"]);
 	});
 
 	test("treats today equal to endDate as active (still ongoing)", () => {
@@ -100,10 +99,7 @@ describe("sortTrips", () => {
 
 		const sorted = sortTrips([endedYesterday, endsToday], today);
 
-		expect(sorted.map((t) => t.settings.name)).toEqual([
-			"EndsToday",
-			"EndedYesterday",
-		]);
+		expect(names(sorted)).toEqual(["EndsToday", "EndedYesterday"]);
 	});
 
 	test("breaks ties alphabetically within ended group as well", () => {
@@ -113,6 +109,6 @@ describe("sortTrips", () => {
 
 		const sorted = sortTrips([zeta, apple], today);
 
-		expect(sorted.map((t) => t.settings.name)).toEqual(["Apple", "Zeta"]);
+		expect(names(sorted)).toEqual(["Apple", "Zeta"]);
 	});
 });

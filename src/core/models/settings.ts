@@ -5,6 +5,7 @@ export interface CurrencyConfig {
 }
 
 export interface Settings {
+	version: 1;
 	name: string;
 	startDate: string;
 	endDate: string;

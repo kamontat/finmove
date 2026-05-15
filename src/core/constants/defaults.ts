@@ -18,6 +18,7 @@ export const DEFAULT_TRIP_SETTINGS: Omit<
 	Settings,
 	"name" | "startDate" | "endDate"
 > = {
+	version: 1,
 	countries: [],
 	baseCurrency: DEFAULT_BASE_CURRENCY,
 	currencies: {},
