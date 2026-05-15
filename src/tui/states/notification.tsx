@@ -8,10 +8,8 @@ import {
 	useRef,
 	useSyncExternalStore,
 } from "react";
-import { buildBreadcrumb } from "../buildBreadcrumb";
 import type { Notification, NotificationSeverity } from "../models";
-import { useData } from "./data";
-import { useNavigation } from "./navigation";
+import { useLayout } from "./layout";
 import { NotificationStore } from "./notificationStore";
 
 interface NotificationContextValue {
@@ -36,8 +34,7 @@ interface NotificationProviderProps {
 export function NotificationProvider({
 	children,
 }: NotificationProviderProps): JSX.Element {
-	const { currentRoute } = useNavigation();
-	const { trip } = useData();
+	const { title } = useLayout();
 
 	const storeRef = useRef<NotificationStore | null>(null);
 	if (storeRef.current === null) {
@@ -45,10 +42,8 @@ export function NotificationProvider({
 	}
 	const store = storeRef.current;
 
-	const routeRef = useRef(currentRoute);
-	routeRef.current = currentRoute;
-	const tripRef = useRef(trip);
-	tripRef.current = trip;
+	const titleRef = useRef(title);
+	titleRef.current = title;
 
 	const subscribe = useCallback(
 		(listener: () => void) => store.subscribe(listener),
@@ -67,8 +62,7 @@ export function NotificationProvider({
 
 	const notify = useCallback<NotificationContextValue["notify"]>(
 		(text, severity, opts) => {
-			const route = buildBreadcrumb(routeRef.current, tripRef.current);
-			store.notify(text, severity, route, opts);
+			store.notify(text, severity, titleRef.current, opts);
 		},
 		[store],
 	);

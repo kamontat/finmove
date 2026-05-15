@@ -17,12 +17,10 @@ export interface LayoutColors {
 interface LayoutContextValue {
 	hints: HelpHint[];
 	colors: LayoutColors;
-	titleSuffix: string | null;
 	titles: string[];
 	title: string;
 	setHints: (hints: HelpHint[]) => void;
 	setColor: (colors: LayoutColors) => void;
-	setTitleSuffix: (suffix: string | null) => void;
 	setTitle: (segments: TitleSegment[]) => void;
 	clearTitle: () => void;
 	resetLayout: () => void;
@@ -47,7 +45,6 @@ function filterSegments(segments: TitleSegment[]): string[] {
 export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 	const [hints, setHintsState] = useState<HelpHint[]>([]);
 	const [colors, setColorsState] = useState<LayoutColors>({});
-	const [titleSuffix, setTitleSuffixState] = useState<string | null>(null);
 	const [titles, setTitlesState] = useState<string[]>([]);
 
 	const setHints = useCallback((newHints: HelpHint[]) => {
@@ -56,10 +53,6 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 
 	const setColor = useCallback((next: LayoutColors) => {
 		setColorsState(next);
-	}, []);
-
-	const setTitleSuffix = useCallback((suffix: string | null) => {
-		setTitleSuffixState(suffix);
 	}, []);
 
 	const setTitle = useCallback((segments: TitleSegment[]) => {
@@ -73,7 +66,6 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 	const resetLayout = useCallback(() => {
 		setHintsState([]);
 		setColorsState({});
-		setTitleSuffixState(null);
 		setTitlesState([]);
 	}, []);
 
@@ -83,12 +75,10 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 		() => ({
 			hints,
 			colors,
-			titleSuffix,
 			titles,
 			title,
 			setHints,
 			setColor,
-			setTitleSuffix,
 			setTitle,
 			clearTitle,
 			resetLayout,
@@ -96,12 +86,10 @@ export function LayoutProvider({ children }: LayoutProviderProps): JSX.Element {
 		[
 			hints,
 			colors,
-			titleSuffix,
 			titles,
 			title,
 			setHints,
 			setColor,
-			setTitleSuffix,
 			setTitle,
 			clearTitle,
 			resetLayout,

@@ -1,12 +1,11 @@
 import type { JSX } from "react";
 import { useEffect } from "react";
 import type { AppArgs } from "../core/parseArgs";
-import { buildBreadcrumb } from "./buildBreadcrumb";
 import { useGlobalKeys } from "./hooks/useGlobalKeys";
 import { Default } from "./layouts/Default";
 import type { RouteEntry } from "./models";
 import { routes } from "./router";
-import { DataProvider, useData } from "./states/data";
+import { DataProvider } from "./states/data";
 import { FocusProvider, useFocus } from "./states/focus";
 import { FormBufferProvider } from "./states/formBuffer";
 import { HelpProvider } from "./states/help";
@@ -46,9 +45,8 @@ function resolveInitialRoute(args: AppArgs): RouteEntry {
 function Router(): JSX.Element {
 	const { currentRoute } = useNavigation();
 	const { setMenuAvailable } = useFocus();
-	const { title: layoutTitle, titleSuffix } = useLayout();
+	const { title } = useLayout();
 	const { options: menuOptions } = useMenu();
-	const { trip } = useData();
 
 	useGlobalKeys();
 
@@ -59,12 +57,6 @@ function Router(): JSX.Element {
 
 	const routeConfig = routes[currentRoute.path];
 	const Component = routeConfig.component;
-
-	const breadcrumb = buildBreadcrumb(currentRoute, trip);
-	const fallbackTitle = titleSuffix
-		? `${breadcrumb} > ${titleSuffix}`
-		: breadcrumb;
-	const title = layoutTitle || fallbackTitle;
 
 	return (
 		<Default title={title}>
