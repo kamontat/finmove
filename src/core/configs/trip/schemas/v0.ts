@@ -22,6 +22,11 @@ const settingsSchemaV0 = z
 	})
 	.passthrough();
 
+// Hand-written interface that mirrors `tripV0Schema`. Kept in sync manually
+// because `tripV0Schema` is typed as `z.ZodTypeAny` (see definition.ts for the
+// rationale), so `z.infer<typeof tripV0Schema>` resolves to `any` and can't be
+// used as the migration's input type. When the v0 schema changes, update this
+// interface in lockstep — the compiler will not catch drift on its own.
 export interface TripV0 {
 	settings: {
 		name: string;

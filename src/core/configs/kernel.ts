@@ -93,7 +93,20 @@ export function loadConfig<
 
 	const migrated = initialV < def.latestVersion;
 	if (migrated) {
-		saveConfig(def, location, current as z.infer<S[L]>);
+		// `current` was just safeParse-validated against the latest schema in the
+		// final loop iteration, so saveConfig's redundant parse cannot fail. Wrap
+		// defensively anyway: the kernel contract says only ConfigError leaks.
+		try {
+			saveConfig(def, location, current as z.infer<S[L]>);
+		} catch (cause) {
+			throw new ConfigMigrateError(
+				def.name,
+				location,
+				initialV,
+				def.latestVersion,
+				cause,
+			);
+		}
 	}
 
 	return {

@@ -8,6 +8,7 @@ import {
 	ConfigUnknownVersionError,
 	ConfigValidateError,
 } from "../../core/configs";
+import { deleteTrip } from "../../core/services/trip";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
@@ -20,11 +21,31 @@ export function TripBroken(): JSX.Element {
 
 	useEffect(() => {
 		setColor({ border: "red", title: "red" });
-		setMenu([{ label: "Back", value: "back", key: "q" }], (value) => {
-			if (value === "back") goBack();
-		});
-		setHints([{ key: "q", label: "Back to trip list" }]);
-	}, [setColor, setMenu, setHints, goBack]);
+		setMenu(
+			[
+				{ label: "Back", value: "back", key: "q" },
+				{
+					label: "Delete",
+					value: "delete",
+					key: "x",
+					mainAction: {
+						confirmCount: 2,
+						onConfirm: () => {
+							deleteTrip(dirPath);
+							goBack();
+						},
+					},
+				},
+			],
+			(value) => {
+				if (value === "back") goBack();
+			},
+		);
+		setHints([
+			{ key: "q", label: "Back to trip list" },
+			{ key: "x x", label: "Delete trip (press twice)" },
+		]);
+	}, [setColor, setMenu, setHints, goBack, dirPath]);
 
 	return (
 		<Box flexDirection="column" gap={1}>
