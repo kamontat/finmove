@@ -15,12 +15,13 @@ import { useFocus } from "../states/focus";
 import { useFormBuffer } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 
 export function ExpenseForm(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { goTo, goBack } = useNavigation();
 	const { setFocus } = useFocus();
-	const { setHints, setTitleSuffix } = useLayout();
+	const { setHints, setTitle, clearTitle } = useLayout();
 
 	const { expenseId, tripDirPath, duplicateFromId } = useRouteProps(
 		"/trips/expenses/form",
@@ -49,13 +50,22 @@ export function ExpenseForm(): JSX.Element {
 	}, [setHints]);
 
 	useEffect(() => {
-		if (isDuplicate && duplicateSource) {
-			setTitleSuffix(duplicateSource.payee);
+		if (existingExpense) {
+			setTitle(tripTitle(trip, "Expenses", "Edit"));
+		} else if (isDuplicate && duplicateSource) {
+			setTitle(tripTitle(trip, "Expenses", "Duplicate", duplicateSource.payee));
 		} else {
-			setTitleSuffix(null);
+			setTitle(tripTitle(trip, "Expenses", "New"));
 		}
-		return () => setTitleSuffix(null);
-	}, [isDuplicate, duplicateSource, setTitleSuffix]);
+		return () => clearTitle();
+	}, [
+		setTitle,
+		clearTitle,
+		trip,
+		existingExpense,
+		isDuplicate,
+		duplicateSource,
+	]);
 
 	useEffect(() => {
 		const source = existingExpense ?? duplicateSource;

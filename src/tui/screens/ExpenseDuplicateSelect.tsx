@@ -8,12 +8,13 @@ import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
+import { tripTitle } from "../utils/titles";
 import { buildExpenseListRows, EXPENSE_LIST_HEADERS } from "./expenseListRow";
 
 export function ExpenseDuplicateSelect(): JSX.Element {
 	const { trip } = useData();
 	const { focus } = useFocus();
-	const { setHints, setColor, setTitleSuffix } = useLayout();
+	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { goTo } = useNavigation();
 
@@ -21,12 +22,12 @@ export function ExpenseDuplicateSelect(): JSX.Element {
 		setColor({ border: "yellow", title: "yellow" });
 		setMenu([], () => {});
 		setHints(SELECT_DUPLICATE_HINTS);
-		setTitleSuffix(null);
+		setTitle(tripTitle(trip, "Expenses", "Duplicate"));
 		return () => {
 			setColor({});
-			setTitleSuffix(null);
+			clearTitle();
 		};
-	}, [setColor, setMenu, setHints, setTitleSuffix]);
+	}, [setColor, setMenu, setHints, setTitle, clearTitle, trip]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
