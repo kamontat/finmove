@@ -1,4 +1,3 @@
-import type { ComponentType } from "react";
 import type { Routes } from "./models";
 import { AccountCreate } from "./screens/AccountCreate";
 import { AccountDelete } from "./screens/AccountDelete";
@@ -49,150 +48,150 @@ import { TripSettings } from "./screens/TripSettings";
 
 export const routes: Routes = {
 	"/trips": {
-		component: TripList as unknown as ComponentType,
+		component: TripList,
 	},
 	"/trips/delete": {
-		component: TripDelete as unknown as ComponentType,
+		component: TripDelete,
 	},
 	"/trips/new": {
-		component: TripForm as unknown as ComponentType,
+		component: TripForm,
 	},
 	"/trips/new/countries": {
-		component: TripCreateCountryList as unknown as ComponentType,
+		component: TripCreateCountryList,
 	},
 	"/trips/new/countries/new": {
-		component: TripCreateCountryAdd as unknown as ComponentType,
+		component: TripCreateCountryAdd,
 	},
 	"/trips/new/countries/delete": {
-		component: TripCreateCountryDelete as unknown as ComponentType,
+		component: TripCreateCountryDelete,
 	},
 	"/trips/duplicate": {
-		component: TripDuplicateSelect as unknown as ComponentType,
+		component: TripDuplicateSelect,
 	},
 	"/trips/overview": {
-		component: TripOverview as unknown as ComponentType,
+		component: TripOverview,
 	},
 	"/trips/owners": {
-		component: OwnerList as unknown as ComponentType,
+		component: OwnerList,
 	},
 	"/trips/owners/new": {
-		component: OwnerCreate as unknown as ComponentType,
+		component: OwnerCreate,
 	},
 	"/trips/owners/edit": {
-		component: OwnerEdit as unknown as ComponentType,
+		component: OwnerEdit,
 	},
 	"/trips/owners/delete": {
-		component: OwnerDelete as unknown as ComponentType,
+		component: OwnerDelete,
 	},
 	"/trips/owners/references": {
-		component: OwnerReferences as unknown as ComponentType,
+		component: OwnerReferences,
 	},
 	"/trips/accounts": {
-		component: AccountList as unknown as ComponentType,
+		component: AccountList,
 	},
 	"/trips/accounts/new": {
-		component: AccountCreate as unknown as ComponentType,
+		component: AccountCreate,
 	},
 	"/trips/accounts/edit": {
-		component: AccountEdit as unknown as ComponentType,
+		component: AccountEdit,
 	},
 	"/trips/accounts/delete": {
-		component: AccountDelete as unknown as ComponentType,
+		component: AccountDelete,
 	},
 	"/trips/accounts/references": {
-		component: AccountReferences as unknown as ComponentType,
+		component: AccountReferences,
 	},
 	"/trips/accounts/new/owners": {
-		component: OwnerSelect as unknown as ComponentType,
+		component: OwnerSelect,
 	},
 	"/trips/accounts/edit/owners": {
-		component: OwnerSelect as unknown as ComponentType,
+		component: OwnerSelect,
 	},
 	"/trips/accounts/new/type": {
-		component: AccountTypeSelect as unknown as ComponentType,
+		component: AccountTypeSelect,
 	},
 	"/trips/accounts/edit/type": {
-		component: AccountTypeSelect as unknown as ComponentType,
+		component: AccountTypeSelect,
 	},
 	"/trips/expenses": {
-		component: ExpenseList as unknown as ComponentType,
+		component: ExpenseList,
 	},
 	"/trips/expenses/delete": {
-		component: ExpenseDelete as unknown as ComponentType,
+		component: ExpenseDelete,
 	},
 	"/trips/expenses/duplicate": {
-		component: ExpenseDuplicateSelect as unknown as ComponentType,
+		component: ExpenseDuplicateSelect,
 	},
 	"/trips/expenses/form": {
-		component: ExpenseForm as unknown as ComponentType,
+		component: ExpenseForm,
 	},
 	"/trips/expenses/form/owners": {
-		component: OwnerSelect as unknown as ComponentType,
+		component: OwnerSelect,
 	},
 	"/trips/expenses/form/tags": {
-		component: TagSelect as unknown as ComponentType,
+		component: TagSelect,
 	},
 	"/trips/expenses/form/account": {
-		component: AccountSelect as unknown as ComponentType,
+		component: AccountSelect,
 	},
 	"/trips/expenses/form/category": {
-		component: CategorySelect as unknown as ComponentType,
+		component: CategorySelect,
 	},
 	"/trips/expenses/form/currency": {
-		component: CurrencySelect as unknown as ComponentType,
+		component: CurrencySelect,
 	},
 	"/trips/settings": {
-		component: TripSettings as unknown as ComponentType,
+		component: TripSettings,
 	},
 	"/trips/settings/countries": {
-		component: CountryList as unknown as ComponentType,
+		component: CountryList,
 	},
 	"/trips/settings/countries/delete": {
-		component: CountryDelete as unknown as ComponentType,
+		component: CountryDelete,
 	},
 	"/trips/settings/countries/new": {
-		component: CountryCreate as unknown as ComponentType,
+		component: CountryCreate,
 	},
 	"/trips/settings/countries/edit": {
-		component: CountryEdit as unknown as ComponentType,
+		component: CountryEdit,
 	},
 	"/trips/settings/categories": {
-		component: CategoryList as unknown as ComponentType,
+		component: CategoryList,
 	},
 	"/trips/settings/categories/delete": {
-		component: CategoryDelete as unknown as ComponentType,
+		component: CategoryDelete,
 	},
 	"/trips/settings/categories/new": {
-		component: CategoryCreate as unknown as ComponentType,
+		component: CategoryCreate,
 	},
 	"/trips/settings/categories/edit": {
-		component: CategoryEdit as unknown as ComponentType,
+		component: CategoryEdit,
 	},
 	"/trips/settings/tags": {
-		component: TagList as unknown as ComponentType,
+		component: TagList,
 	},
 	"/trips/settings/tags/delete": {
-		component: TagDelete as unknown as ComponentType,
+		component: TagDelete,
 	},
 	"/trips/settings/tags/new": {
-		component: TagCreate as unknown as ComponentType,
+		component: TagCreate,
 	},
 	"/trips/settings/tags/edit": {
-		component: TagEdit as unknown as ComponentType,
+		component: TagEdit,
 	},
 	"/trips/settings/currencies": {
-		component: CurrencyList as unknown as ComponentType,
+		component: CurrencyList,
 	},
 	"/trips/settings/currencies/delete": {
-		component: CurrencyDelete as unknown as ComponentType,
+		component: CurrencyDelete,
 	},
 	"/trips/settings/currencies/new": {
-		component: CurrencyCreate as unknown as ComponentType,
+		component: CurrencyCreate,
 	},
 	"/trips/settings/currencies/edit": {
-		component: CurrencyEdit as unknown as ComponentType,
+		component: CurrencyEdit,
 	},
 	"/trips/settings/export": {
-		component: ExportScreen as unknown as ComponentType,
+		component: ExportScreen,
 	},
 };
