@@ -223,6 +223,8 @@ export interface HelpHint {
 	label: string;
 }
 
+export type TitleSegment = string | null | undefined | false;
+
 export interface VerticalOption {
 	label: string;
 	value: string;

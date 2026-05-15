@@ -46,7 +46,7 @@ function resolveInitialRoute(args: AppArgs): RouteEntry {
 function Router(): JSX.Element {
 	const { currentRoute } = useNavigation();
 	const { setMenuAvailable } = useFocus();
-	const { titleSuffix } = useLayout();
+	const { title: layoutTitle, titleSuffix } = useLayout();
 	const { options: menuOptions } = useMenu();
 	const { trip } = useData();
 
@@ -61,7 +61,10 @@ function Router(): JSX.Element {
 	const Component = routeConfig.component;
 
 	const breadcrumb = buildBreadcrumb(currentRoute, trip);
-	const title = titleSuffix ? `${breadcrumb} > ${titleSuffix}` : breadcrumb;
+	const fallbackTitle = titleSuffix
+		? `${breadcrumb} > ${titleSuffix}`
+		: breadcrumb;
+	const title = layoutTitle || fallbackTitle;
 
 	return (
 		<Default title={title}>
