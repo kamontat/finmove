@@ -4,7 +4,7 @@ import { updateSettings } from "../../core/services/trip";
 import { validateTag } from "../../core/validators";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import { type FormFieldConfig, getString } from "../models";
+import { type FormFieldConfig, getBoolean, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
@@ -21,13 +21,9 @@ const FIELDS: FormFieldConfig[] = [
 	{
 		key: "default",
 		label: "Default",
-		type: "select",
+		type: "boolean",
 		required: true,
-		options: [
-			{ label: "No", value: "false" },
-			{ label: "Yes", value: "true" },
-		],
-		defaultValue: "false",
+		defaultValue: false,
 	},
 ];
 
@@ -53,7 +49,7 @@ export function TagCreate(): JSX.Element | null {
 				if (errors.length > 0) {
 					throw new Error(errors[0]);
 				}
-				const isDefault = getString(values, "default") === "true";
+				const isDefault = getBoolean(values, "default");
 				updateSettings(trip.dirPath, {
 					tags: [...trip.settings.tags, { value, default: isDefault }],
 				});

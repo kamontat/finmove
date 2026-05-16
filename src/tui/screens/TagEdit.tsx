@@ -5,7 +5,7 @@ import { updateSettings } from "../../core/services/trip";
 import { validateTag } from "../../core/validators";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import { type FormFieldConfig, getString } from "../models";
+import { type FormFieldConfig, getBoolean, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation, useRouteProps } from "../states/navigation";
@@ -40,13 +40,9 @@ export function TagEdit(): JSX.Element {
 		{
 			key: "default",
 			label: "Default",
-			type: "select",
+			type: "boolean",
 			required: true,
-			options: [
-				{ label: "No", value: "false" },
-				{ label: "Yes", value: "true" },
-			],
-			defaultValue: originalTag.default ? "true" : "false",
+			defaultValue: originalTag.default,
 		},
 	];
 
@@ -59,7 +55,7 @@ export function TagEdit(): JSX.Element {
 				if (errors.length > 0) {
 					throw new Error(errors[0]);
 				}
-				const isDefault = getString(values, "default") === "true";
+				const isDefault = getBoolean(values, "default");
 				updateSettings(trip.dirPath, {
 					tags: trip.settings.tags.map((t) =>
 						t.value === originalValue ? { value: next, default: isDefault } : t,
