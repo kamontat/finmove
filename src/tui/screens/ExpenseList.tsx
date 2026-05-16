@@ -103,7 +103,7 @@ export function buildExpenseListRows(trip: Trip): TableCell[][] {
 		if (e.currency === "THB") {
 			rateCell = { text: "" };
 		} else if (data.rate !== null) {
-			rateCell = { text: data.rate.toFixed(2) };
+			rateCell = { text: data.rate.toFixed(3) };
 		} else {
 			rateCell = { text: "?", color: "red" };
 		}
