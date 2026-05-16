@@ -1,8 +1,35 @@
 import type { JSX } from "react";
-import type { FormFieldStrategy, SelectFormField } from "../../models";
+import type {
+	FormFieldStrategy,
+	FormFieldStrategyEditorProps,
+	SelectFormField,
+} from "../../models";
 import { SelectInput } from "../atoms/SelectInput";
 
-export const FormFieldSelect: FormFieldStrategy<SelectFormField> = {
+export const FormFieldSelect = ({
+	field,
+	value,
+	onSubmit,
+	onCancel,
+}: FormFieldStrategyEditorProps<SelectFormField>): JSX.Element => {
+	const target =
+		typeof value === "string" && value !== "" ? value : field.defaultValue;
+	const initialIndex = Math.max(
+		0,
+		field.options.findIndex((o) => o.value === target),
+	);
+	return (
+		<SelectInput
+			options={field.options}
+			isActive={true}
+			initialIndex={initialIndex}
+			onChange={onSubmit}
+			onCancel={onCancel}
+		/>
+	);
+};
+
+export const formFieldSelectStrategy: FormFieldStrategy<SelectFormField> = {
 	emptyValue: "",
 
 	hasUserValue(value) {
@@ -36,21 +63,5 @@ export const FormFieldSelect: FormFieldStrategy<SelectFormField> = {
 		return field.onEdit ?? "edit";
 	},
 
-	Editor({ field, value, onSubmit, onCancel }): JSX.Element {
-		const target =
-			typeof value === "string" && value !== "" ? value : field.defaultValue;
-		const initialIndex = Math.max(
-			0,
-			field.options.findIndex((o) => o.value === target),
-		);
-		return (
-			<SelectInput
-				options={field.options}
-				isActive={true}
-				initialIndex={initialIndex}
-				onChange={onSubmit}
-				onCancel={onCancel}
-			/>
-		);
-	},
+	Editor: FormFieldSelect,
 };

@@ -2,6 +2,7 @@ import type { JSX } from "react";
 import type {
 	FieldValue,
 	FormFieldStrategy,
+	FormFieldStrategyEditorProps,
 	TextFormField,
 } from "../../models";
 import { TextInput } from "../atoms/TextInput";
@@ -26,7 +27,28 @@ function resolvePlaceholder(
 		: field.placeholder;
 }
 
-export const FormFieldText: FormFieldStrategy<TextFormField> = {
+export const FormFieldText = ({
+	field,
+	value,
+	allValues,
+	onSubmit,
+	onCancel,
+}: FormFieldStrategyEditorProps<TextFormField>): JSX.Element => {
+	const placeholder = resolvePlaceholder(field, allValues);
+	const currentString = typeof value === "string" ? value : "";
+	const defaultValue =
+		currentString !== "" ? currentString : field.defaultValue;
+	return (
+		<TextInput
+			{...(placeholder !== undefined ? { placeholder } : {})}
+			{...(defaultValue !== undefined ? { defaultValue } : {})}
+			onSubmit={onSubmit}
+			onCancel={onCancel}
+		/>
+	);
+};
+
+export const formFieldTextStrategy: FormFieldStrategy<TextFormField> = {
 	emptyValue: "",
 
 	hasUserValue(value) {
@@ -57,18 +79,5 @@ export const FormFieldText: FormFieldStrategy<TextFormField> = {
 		return "edit";
 	},
 
-	Editor({ field, value, allValues, onSubmit, onCancel }): JSX.Element {
-		const placeholder = resolvePlaceholder(field, allValues);
-		const currentString = typeof value === "string" ? value : "";
-		const defaultValue =
-			currentString !== "" ? currentString : field.defaultValue;
-		return (
-			<TextInput
-				{...(placeholder !== undefined ? { placeholder } : {})}
-				{...(defaultValue !== undefined ? { defaultValue } : {})}
-				onSubmit={onSubmit}
-				onCancel={onCancel}
-			/>
-		);
-	},
+	Editor: FormFieldText,
 };

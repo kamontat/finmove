@@ -1,12 +1,37 @@
 import type { JSX } from "react";
-import type { BooleanFormField, FormFieldStrategy } from "../../models";
+import type {
+	BooleanFormField,
+	FormFieldStrategy,
+	FormFieldStrategyEditorProps,
+} from "../../models";
 import { CheckboxInput } from "../atoms/CheckboxInput";
 
 function labelFor(field: BooleanFormField, value: boolean): string {
 	return value ? (field.trueLabel ?? "Yes") : (field.falseLabel ?? "No");
 }
 
-export const FormFieldBoolean: FormFieldStrategy<BooleanFormField> = {
+export const FormFieldBoolean = ({
+	field,
+	value,
+	onSubmit,
+	onCancel,
+}: FormFieldStrategyEditorProps<BooleanFormField>): JSX.Element => {
+	const defaultValue =
+		typeof value === "boolean" ? value : (field.defaultValue ?? false);
+	return (
+		<CheckboxInput
+			defaultValue={defaultValue}
+			{...(field.trueLabel !== undefined ? { trueLabel: field.trueLabel } : {})}
+			{...(field.falseLabel !== undefined
+				? { falseLabel: field.falseLabel }
+				: {})}
+			onSubmit={onSubmit}
+			onCancel={onCancel}
+		/>
+	);
+};
+
+export const formFieldBooleanStrategy: FormFieldStrategy<BooleanFormField> = {
 	emptyValue: "",
 
 	hasUserValue(value) {
@@ -38,21 +63,5 @@ export const FormFieldBoolean: FormFieldStrategy<BooleanFormField> = {
 		return "edit";
 	},
 
-	Editor({ field, value, onSubmit, onCancel }): JSX.Element {
-		const defaultValue =
-			typeof value === "boolean" ? value : (field.defaultValue ?? false);
-		return (
-			<CheckboxInput
-				defaultValue={defaultValue}
-				{...(field.trueLabel !== undefined
-					? { trueLabel: field.trueLabel }
-					: {})}
-				{...(field.falseLabel !== undefined
-					? { falseLabel: field.falseLabel }
-					: {})}
-				onSubmit={onSubmit}
-				onCancel={onCancel}
-			/>
-		);
-	},
+	Editor: FormFieldBoolean,
 };

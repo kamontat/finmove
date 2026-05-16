@@ -7,11 +7,11 @@ import type {
 } from "../../models";
 import { useFocus } from "../../states/focus";
 import { useFormBuffer } from "../../states/formBuffer";
-import { FormFieldBoolean } from "../molecules/FormFieldBoolean";
-import { FormFieldDate } from "../molecules/FormFieldDate";
-import { FormFieldMultiselect } from "../molecules/FormFieldMultiselect";
-import { FormFieldSelect } from "../molecules/FormFieldSelect";
-import { FormFieldText } from "../molecules/FormFieldText";
+import { formFieldBooleanStrategy } from "../molecules/FormFieldBoolean";
+import { formFieldDateStrategy } from "../molecules/FormFieldDate";
+import { formFieldMultiselectStrategy } from "../molecules/FormFieldMultiselect";
+import { formFieldSelectStrategy } from "../molecules/FormFieldSelect";
+import { formFieldTextStrategy } from "../molecules/FormFieldText";
 
 interface FormProps {
 	fields: FormFieldConfig[];
@@ -22,11 +22,11 @@ interface FormProps {
 }
 
 const STRATEGIES = {
-	text: FormFieldText,
-	select: FormFieldSelect,
-	boolean: FormFieldBoolean,
-	date: FormFieldDate,
-	multiselect: FormFieldMultiselect,
+	text: formFieldTextStrategy,
+	select: formFieldSelectStrategy,
+	boolean: formFieldBooleanStrategy,
+	date: formFieldDateStrategy,
+	multiselect: formFieldMultiselectStrategy,
 } as const;
 
 function getStrategy(field: FormFieldConfig): FormFieldStrategy {
