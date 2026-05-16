@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { today } from "../../core/services/date";
 import { listTrips, sortTrips, type TripEntry } from "../../core/services/trip";
 import { TableSelect } from "../components/molecules/TableSelect";
+import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
@@ -11,6 +12,7 @@ import { buildTripListRows, TRIP_LIST_HEADERS } from "./TripList";
 
 export function TripDuplicateSelect(): JSX.Element {
 	const { setHints, setColor, setTitle, clearTitle } = useLayout();
+	const { focus } = useFocus();
 	const { setMenu } = useMenu();
 	const { goTo } = useNavigation();
 	const { dataDir = "./data" } = useRouteProps("/trips/duplicate");
@@ -52,7 +54,7 @@ export function TripDuplicateSelect(): JSX.Element {
 					props: { dataDir, duplicateFromDirPath: entry.trip.dirPath },
 				});
 			}}
-			isActive
+			isActive={focus === "main"}
 		/>
 	);
 }
