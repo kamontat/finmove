@@ -35,6 +35,7 @@ export function Form({
 		() => {
 			const initial: Record<string, FieldValue> = {};
 			for (const field of fields) {
+				if (field.type === "display") continue;
 				initial[field.key] = field.type === "multiselect" ? [] : "";
 			}
 			return initial;
@@ -55,12 +56,18 @@ export function Form({
 		[usingBuffer, buffer],
 	);
 
-	const [cursor, setCursor] = useState(0);
+	const initialCursor = useMemo(() => {
+		const idx = fields.findIndex((f) => f.type !== "display");
+		return idx === -1 ? fields.length : idx;
+	}, [fields]);
+
+	const [cursor, setCursor] = useState(initialCursor);
 	const [editing, setEditing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const isFilled = useCallback(
 		(field: FormFieldConfig): boolean => {
+			if (field.type === "display") return true;
 			const v = values[field.key];
 			if (field.type === "multiselect") {
 				return Array.isArray(v) && v.length > 0;
@@ -73,10 +80,12 @@ export function Form({
 
 	const canSubmit = useMemo(() => {
 		const allRequiredFilled = fields.every((field) => {
+			if (field.type === "display") return true;
 			if (!field.required) return true;
 			return isFilled(field);
 		});
 		const hasAnyChange = fields.some((field) => {
+			if (field.type === "display") return false;
 			const v = values[field.key];
 			if (field.type === "multiselect") {
 				return Array.isArray(v) && v.length > 0;
@@ -96,6 +105,7 @@ export function Form({
 		if (!canSubmit) return;
 		const result: Record<string, FieldValue> = {};
 		for (const field of fields) {
+			if (field.type === "display") continue;
 			const v = values[field.key];
 			if (field.type === "multiselect") {
 				result[field.key] = Array.isArray(v) ? v : [];
@@ -138,18 +148,46 @@ export function Form({
 		exitEdit();
 	}, [exitEdit]);
 
+	const isStop = useCallback(
+		(index: number): boolean => {
+			if (index === fields.length) return true; // submit row
+			const field = fields[index];
+			return !!field && field.type !== "display";
+		},
+		[fields],
+	);
+
+	const moveCursor = useCallback(
+		(from: number, direction: 1 | -1): number => {
+			let next = from;
+			for (let i = 0; i < totalItems; i++) {
+				next =
+					direction === 1
+						? next < totalItems - 1
+							? next + 1
+							: 0
+						: next > 0
+							? next - 1
+							: totalItems - 1;
+				if (isStop(next)) return next;
+			}
+			return from;
+		},
+		[isStop, totalItems],
+	);
+
 	useInput(
 		(input, key) => {
 			if (key.upArrow) {
-				setCursor((c) => (c > 0 ? c - 1 : totalItems - 1));
+				setCursor((c) => moveCursor(c, -1));
 			} else if (key.downArrow) {
-				setCursor((c) => (c < totalItems - 1 ? c + 1 : 0));
+				setCursor((c) => moveCursor(c, 1));
 			} else if (key.return) {
 				if (cursor === fields.length) {
 					handleSubmit();
 				} else {
 					const field = fields[cursor];
-					if (!field) return;
+					if (!field || field.type === "display") return;
 					if (field.type === "multiselect") {
 						field.onEdit();
 					} else if (field.type === "select") {
@@ -172,6 +210,17 @@ export function Form({
 	return (
 		<Box flexDirection="column">
 			{fields.map((field, index) => {
+				if (field.type === "display") {
+					return (
+						<Box key={field.key} flexDirection="column">
+							<Text dimColor>
+								{"  "}
+								{field.label}: {field.value}
+							</Text>
+						</Box>
+					);
+				}
+
 				const isCursor = cursor === index;
 				const currentValue = values[field.key];
 				const isEditing = editing && isCursor;
