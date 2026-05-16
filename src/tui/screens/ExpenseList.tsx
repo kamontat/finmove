@@ -3,12 +3,18 @@ import type { JSX } from "react";
 import { useEffect } from "react";
 import type { Expense, Trip } from "../../core/models";
 import { convertToTHB } from "../../core/services/currency";
-import { removeExpense } from "../../core/services/expense";
+import {
+	removeExpense,
+	type SortKey,
+	type SortLevel,
+	sortExpenses,
+} from "../../core/services/expense";
 import { computeInitials } from "../../core/services/owner";
 import type { TableCell } from "../components/molecules/TableSelect";
 import { TableSelect } from "../components/molecules/TableSelect";
 import { LIST_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
+import { activeSlots, useExpenseListSort } from "../states/expenseListSort";
 import { useFocus } from "../states/focus";
 import { useFormBufferAdmin } from "../states/formBuffer";
 import { useLayout } from "../states/layout";
@@ -129,12 +135,37 @@ export function buildExpenseListRows(
 	});
 }
 
+const SORT_KEY_TO_HEADER: Record<SortKey, string> = {
+	date: "Date",
+	thb: "THB",
+	account: "Account",
+	owner: "Owner",
+	category: "Category",
+};
+
+const PRIORITY_SUBSCRIPTS = ["₁", "₂", "₃", "₄", "₅"] as const;
+
+export function buildSortedHeaders(
+	headers: string[],
+	levels: SortLevel[],
+): string[] {
+	if (levels.length === 0) return headers;
+	return headers.map((h) => {
+		const idx = levels.findIndex((l) => SORT_KEY_TO_HEADER[l.key] === h);
+		if (idx === -1) return h;
+		const arrow = levels[idx]?.dir === "desc" ? "↓" : "↑";
+		const subscript = levels.length > 1 ? (PRIORITY_SUBSCRIPTS[idx] ?? "") : "";
+		return `${h}${arrow}${subscript}`;
+	});
+}
+
 export function ExpenseList(): JSX.Element {
 	const { trip, reloadTrip } = useData();
 	const { focus, setFocus } = useFocus();
 	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu, armed, setActiveIndex } = useMenu();
 	const { goTo, goBack } = useNavigation();
+	const { slots } = useExpenseListSort();
 
 	const { clearByPrefix } = useFormBufferAdmin();
 	useEffect(() => {
@@ -157,6 +188,8 @@ export function ExpenseList(): JSX.Element {
 
 		const tripDirPath = trip.dirPath;
 		const hasExpenses = trip.expenses.length > 0;
+		const levels = activeSlots(slots);
+		const sortedExpenses = sortExpenses(trip.expenses, trip, levels);
 
 		setMenu(
 			[
@@ -169,7 +202,7 @@ export function ExpenseList(): JSX.Element {
 								key: "d",
 								mainAction: {
 									onConfirm: (i: number) => {
-										const e = trip.expenses[i];
+										const e = sortedExpenses[i];
 										if (!e) return;
 										goTo("/trips/expenses/form", {
 											props: { tripDirPath, duplicateFromId: e.id },
@@ -184,7 +217,7 @@ export function ExpenseList(): JSX.Element {
 								mainAction: {
 									confirmCount: 2,
 									onConfirm: (i: number) => {
-										const e = trip.expenses[i];
+										const e = sortedExpenses[i];
 										if (!e) return;
 										removeExpense(trip, e.id);
 										reloadTrip();
@@ -208,7 +241,7 @@ export function ExpenseList(): JSX.Element {
 			},
 		);
 		setHints(LIST_HINTS);
-	}, [trip, reloadTrip, setMenu, setHints, setColor, goTo, goBack]);
+	}, [trip, reloadTrip, setMenu, setHints, setColor, goTo, goBack, slots]);
 
 	if (!trip) {
 		return <Text dimColor>Loading...</Text>;
@@ -218,15 +251,17 @@ export function ExpenseList(): JSX.Element {
 		return <Text dimColor>No expenses yet.</Text>;
 	}
 
-	const headers = EXPENSE_LIST_HEADERS;
-	const rows = buildExpenseListRows(trip, trip.expenses);
+	const levels = activeSlots(slots);
+	const sortedExpenses = sortExpenses(trip.expenses, trip, levels);
+	const headers = buildSortedHeaders(EXPENSE_LIST_HEADERS, levels);
+	const rows = buildExpenseListRows(trip, sortedExpenses);
 
 	return (
 		<TableSelect
 			headers={headers}
 			rows={rows}
 			onChange={(rowIndex) => {
-				const expense = trip.expenses[rowIndex];
+				const expense = sortedExpenses[rowIndex];
 				if (!expense) return;
 				goTo("/trips/expenses/form", {
 					props: { tripDirPath: trip.dirPath, expenseId: expense.id },
