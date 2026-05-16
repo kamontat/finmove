@@ -74,6 +74,7 @@ export interface FormFieldStrategyEditorProps<F extends FormFieldConfig> {
 }
 
 export interface FormFieldStrategy<F extends FormFieldConfig = FormFieldConfig> {
+  emptyValue: FieldValue;
   hasUserValue(value: FieldValue): boolean;
   isFilled(field: F, value: FieldValue): boolean;
   normalizeForSubmit(field: F, value: FieldValue): FieldValue;
@@ -86,7 +87,10 @@ export interface FormFieldStrategy<F extends FormFieldConfig = FormFieldConfig> 
     field: F,
     allValues: Record<string, FieldValue>,
   ): string | undefined;
-  enterAction(field: F): "edit" | "external";
+  // Returns "edit" to enter inline edit mode, or a function to invoke externally
+  // (used by select with onEdit, and multiselect). This eliminates the need for
+  // any field.type branching in Form.tsx.
+  onEnterPress(field: F): "edit" | (() => void);
   Editor: (props: FormFieldStrategyEditorProps<F>) => JSX.Element;
 }
 ```
@@ -113,66 +117,73 @@ This is the only place that maps field type → strategy. Cast is needed because
 
 ## Form.tsx Responsibilities (Post-Refactor)
 
-1. **State management** — `localValues`, optional `useFormBuffer` integration, `cursor`, `editing`, `error`. Unchanged.
+1. **State management** — `localValues` (initialized using `strategy.emptyValue` per field), optional `useFormBuffer` integration, `cursor`, `editing`, `error`. Unchanged otherwise.
 2. **Strategy lookup** — `getStrategy(field)` only. No `field.type` switches anywhere else.
 3. **Derive `canSubmit`** — uses `strategy.isFilled(field, value)` per required field, plus a generic "any user value" check via `strategy.hasUserValue`.
 4. **Submit** — iterates fields, calls `strategy.normalizeForSubmit(field, value)`, builds result object, calls `onSubmit`. Catches errors → `setError`.
-5. **Keyboard** — `useInput` for `↑↓`, `Enter`, `submitKey`. On Enter for a field row, dispatches via `strategy.enterAction(field)`:
-   - `"external"` → calls `field.onEdit()` (multiselect always; select when `onEdit` set)
-   - `"edit"` → enters edit mode, focus = `"input"`
-6. **Row rendering** — maps fields, for each calls `strategy.getDisplay` / `strategy.getPreview`, renders label line. When `editing && isCursor && strategy.enterAction === "edit"`, renders `<strategy.Editor ... />` with bound `onSubmit` / `onCancel` callbacks.
+5. **Keyboard** — `useInput` for `↑↓`, `Enter`, `submitKey`. On Enter for a field row, dispatches via `strategy.onEnterPress(field)`:
+   - returns `"edit"` → enters edit mode, focus = `"input"`
+   - returns a function → invokes it (select with `onEdit`, multiselect)
+6. **Row rendering** — maps fields, for each calls `strategy.getDisplay` / `strategy.getPreview`, renders label line. When `editing && isCursor && strategy.onEnterPress(field) === "edit"`, renders `<strategy.Editor ... />` with bound `onSubmit` / `onCancel` callbacks.
 
 Expected size: ~120-150 lines (down from ~405).
 
 ## Per-Strategy Behavior
 
+All strategies define `emptyValue` — used by Form for `useState` initialization. Text/select/boolean/date use `""`; multiselect uses `[]`.
+
 ### `FormFieldText` (`molecules/FormFieldText.tsx`)
 
+- `emptyValue` — `""`
 - `hasUserValue(v)` — `typeof v === "string" && v !== ""`
 - `isFilled(field, v)` — user value OR `field.defaultValue !== undefined`
 - `normalizeForSubmit(field, v)` — user value, else default, else `""`
 - `getDisplay(field, v)` — the string value if set
 - `getPreview(field, allValues)` — `defaultValue` if set, else `field.placeholder` (resolving function form with string-only values via local helper)
-- `enterAction()` — always `"edit"`
+- `onEnterPress()` — always returns `"edit"`
 - `Editor` — wraps `TextInput` with conditional `placeholder` / `defaultValue` spread for `exactOptionalPropertyTypes`
 - Owns `stringValuesOnly` helper (moved out of Form.tsx)
 
 ### `FormFieldSelect` (`molecules/FormFieldSelect.tsx`)
 
+- `emptyValue` — `""`
 - `hasUserValue(v)` — `typeof v === "string" && v !== ""`
 - `isFilled` / `normalizeForSubmit` — same shape as text
 - `getDisplay(field, v)` — resolves `v` → option label via `field.options.find`
 - `getPreview(field)` — if `defaultValue` set, resolves to option label; falls back to raw value string
-- `enterAction(field)` — `"external"` if `field.onEdit` is set, else `"edit"`
+- `onEnterPress(field)` — `field.onEdit` if set, else `"edit"`
 - `Editor` — wraps `SelectInput` with `initialIndex` computed from current value or default
 
 ### `FormFieldBoolean` (`molecules/FormFieldBoolean.tsx`)
 
+- `emptyValue` — `""` (stays empty string until user toggles, matching current Form initialization)
 - `hasUserValue(v)` — `typeof v === "boolean"`
 - `isFilled(field, v)` — `typeof v === "boolean"` OR `field.defaultValue !== undefined` (preserves current behavior)
 - `normalizeForSubmit(field, v)` — boolean if set, else `defaultValue ?? false`
 - `getDisplay(field, v)` — if boolean, returns `trueLabel ?? "Yes"` or `falseLabel ?? "No"`
 - `getPreview(field)` — if `defaultValue` set, returns matching label
-- `enterAction()` — always `"edit"`
+- `onEnterPress()` — always returns `"edit"`
 - `Editor` — wraps `CheckboxInput`, conditionally spreads `trueLabel` / `falseLabel`
 
 ### `FormFieldDate` (`molecules/FormFieldDate.tsx`)
 
+- `emptyValue` — `""`
 - `hasUserValue` / `isFilled` / `normalizeForSubmit` — same shape as text
 - `getDisplay(field, v)` — string value
 - `getPreview(field)` — `defaultValue` if set
-- `enterAction()` — always `"edit"`
+- `onEnterPress()` — always returns `"edit"`
 - `Editor` — wraps `DateInput` with `"2026-01-01"` fallback (preserves current behavior)
 
 ### `FormFieldMultiselect` (`molecules/FormFieldMultiselect.tsx`)
 
+- `emptyValue` — `[]`
 - `hasUserValue(v)` — `Array.isArray(v) && v.length > 0`
 - `isFilled(field, v)` — `Array.isArray(v) && v.length > 0`
 - `normalizeForSubmit(_, v)` — `Array.isArray(v) ? v : []`
 - `getDisplay(field, v)` — uses `field.display(arr)` if provided, else joins with `", "`, else `"(none)"`
 - `getPreview` — always `undefined`
-- `enterAction()` — always `"external"`
-- `Editor` — placeholder/unused; Form skips editor render block when `enterAction === "external"`
+- `onEnterPress(field)` — always returns `field.onEdit`
+- `Editor` — placeholder/unused; Form skips editor render block when `onEnterPress` returns a function
 
 ## Data Flow
 
@@ -182,12 +193,12 @@ Expected size: ~120-150 lines (down from ~405).
 useInput catches Enter
   → cursor === fields.length? → handleSubmit()
   → cursor is field row → strategy = getStrategy(field)
-     → strategy.enterAction(field)
-        → "external" → field.onEdit() (no edit-mode transition)
-        → "edit"     → enterEdit() → focus = "input", editing = true
-                       → row renders strategy.Editor
-                       → user confirms → onSubmit(newValue) → setValue + exitEdit
-                       → user cancels  → onCancel() → exitEdit
+     → action = strategy.onEnterPress(field)
+        → action is a function → action() (no edit-mode transition)
+        → action === "edit"    → enterEdit() → focus = "input", editing = true
+                                → row renders strategy.Editor
+                                → user confirms → onSubmit(newValue) → setValue + exitEdit
+                                → user cancels  → onCancel() → exitEdit
 ```
 
 ### Submit
