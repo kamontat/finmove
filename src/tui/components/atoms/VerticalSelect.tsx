@@ -57,7 +57,7 @@ export function VerticalSelect({
 			} else if (key.downArrow) {
 				setCursor((c) => (c < rowCount - 1 ? c + 1 : 0));
 			} else if (key.return) {
-				if (cursor < rowCount) onChange(cursor);
+				onChange(safeCursor);
 			} else if ((key.escape || input === "q") && onCancel) {
 				onCancel();
 			}
