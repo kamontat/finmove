@@ -9,7 +9,7 @@ import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation } from "../states/navigation";
 import { tripTitle } from "../utils/titles";
-import { buildExpenseListRows, EXPENSE_LIST_HEADERS } from "./expenseListRow";
+import { buildExpenseListRows, EXPENSE_LIST_HEADERS } from "./ExpenseList";
 
 export function ExpenseDuplicateSelect(): JSX.Element {
 	const { trip } = useData();
