@@ -1,4 +1,4 @@
-import { Box, Text } from "ink";
+import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -11,6 +11,7 @@ import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { useNotification } from "../states/notification";
 import { tripTitle } from "../utils/titles";
 
 export function AccountReferences(): JSX.Element {
@@ -19,6 +20,7 @@ export function AccountReferences(): JSX.Element {
 	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { goTo, goBack } = useNavigation();
+	const { notify } = useNotification();
 
 	const { tripDirPath, accountId } = useRouteProps(
 		"/trips/accounts/references",
@@ -43,6 +45,18 @@ export function AccountReferences(): JSX.Element {
 	}, [trip, accountId, isEmpty, reloadTrip, goBack]);
 
 	const account = trip?.accounts.find((a) => a.id === accountId);
+
+	const notifiedRef = useRef(false);
+	useEffect(() => {
+		if (!trip) return;
+		if (isEmpty) return;
+		if (notifiedRef.current) return;
+		notifiedRef.current = true;
+		notify(
+			`Cannot delete account "${account?.name ?? accountId}" — clear the expenses below first`,
+			"error",
+		);
+	}, [trip, isEmpty, notify, account, accountId]);
 
 	useEffect(() => {
 		setColor({ border: "red", title: "red" });
@@ -80,23 +94,18 @@ export function AccountReferences(): JSX.Element {
 	}
 
 	return (
-		<Box flexDirection="column">
-			<Text color="red" bold>
-				Cannot delete account — clear the expenses below first:
-			</Text>
-			<ListSelect
-				options={refs.expenses.map((e) => ({
-					label: `${e.date} ${e.payee}`,
-					value: e.id,
-					detail: `(${e.amount} ${e.currency})`,
-				}))}
-				onChange={(expenseId) => {
-					goTo("/trips/expenses/form", {
-						props: { tripDirPath, expenseId },
-					});
-				}}
-				isActive={focus === "main"}
-			/>
-		</Box>
+		<ListSelect
+			options={refs.expenses.map((e) => ({
+				label: `${e.date} ${e.payee}`,
+				value: e.id,
+				detail: `(${e.amount} ${e.currency})`,
+			}))}
+			onChange={(expenseId) => {
+				goTo("/trips/expenses/form", {
+					props: { tripDirPath, expenseId },
+				});
+			}}
+			isActive={focus === "main"}
+		/>
 	);
 }

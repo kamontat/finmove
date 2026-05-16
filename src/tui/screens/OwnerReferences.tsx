@@ -8,6 +8,7 @@ import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { useNotification } from "../states/notification";
 import { tripTitle } from "../utils/titles";
 
 export function OwnerReferences(): JSX.Element {
@@ -16,6 +17,7 @@ export function OwnerReferences(): JSX.Element {
 	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { goTo, goBack } = useNavigation();
+	const { notify } = useNotification();
 
 	const { tripDirPath, ownerId } = useRouteProps("/trips/owners/references");
 
@@ -52,6 +54,18 @@ export function OwnerReferences(): JSX.Element {
 	}, [trip, ownerId, isEmpty, reloadTrip, goBack]);
 
 	const owner = trip?.owners.find((o) => o.id === ownerId);
+
+	const notifiedRef = useRef(false);
+	useEffect(() => {
+		if (!trip) return;
+		if (isEmpty) return;
+		if (notifiedRef.current) return;
+		notifiedRef.current = true;
+		notify(
+			`Cannot delete owner "${owner?.name ?? ownerId}" — clear the references below first`,
+			"error",
+		);
+	}, [trip, isEmpty, notify, owner, ownerId]);
 
 	useEffect(() => {
 		setColor({ border: "red", title: "red" });
@@ -102,32 +116,32 @@ export function OwnerReferences(): JSX.Element {
 
 	const tabsLine =
 		hasAccounts && hasExpenses ? (
-			<Box>
-				<Text
-					bold={activeTab === "accounts"}
-					inverse={activeTab === "accounts"}
-				>
-					{" [1] Accounts ("}
-					{refs.accounts.length}
-					{") "}
-				</Text>
-				<Text> </Text>
-				<Text
-					bold={activeTab === "expenses"}
-					inverse={activeTab === "expenses"}
-				>
-					{" [2] Expenses ("}
-					{refs.expenses.length}
-					{") "}
-				</Text>
+			<Box flexDirection="column">
+				<Box>
+					<Text
+						bold={activeTab === "accounts"}
+						inverse={activeTab === "accounts"}
+					>
+						{" [1] Accounts ("}
+						{refs.accounts.length}
+						{") "}
+					</Text>
+					<Text dimColor> | </Text>
+					<Text
+						bold={activeTab === "expenses"}
+						inverse={activeTab === "expenses"}
+					>
+						{" [2] Expenses ("}
+						{refs.expenses.length}
+						{") "}
+					</Text>
+				</Box>
+				<Text dimColor>{"─".repeat(40)}</Text>
 			</Box>
 		) : null;
 
 	return (
 		<Box flexDirection="column">
-			<Text color="red" bold>
-				Cannot delete owner — clear the references below first:
-			</Text>
 			{tabsLine}
 			{activeTab === "accounts" && hasAccounts ? (
 				<ListSelect
