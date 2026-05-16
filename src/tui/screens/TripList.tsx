@@ -17,7 +17,13 @@ import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
-export const TRIP_LIST_HEADERS: string[] = ["Name", "Start", "End", "Days", "Status"];
+export const TRIP_LIST_HEADERS: string[] = [
+	"Name",
+	"Start",
+	"End",
+	"Days",
+	"Status",
+];
 
 function getPhase(
 	startDate: string,
