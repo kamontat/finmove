@@ -2,7 +2,6 @@ import { Box, Text, useInput } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import type { SortDir, SortKey } from "../../core/services/expense";
-import { VerticalSelect } from "../components/atoms/VerticalSelect";
 import { SORT_HINTS, SORT_PICKER_HINTS } from "../constants/hints";
 import { useData } from "../states/data";
 import {
@@ -147,8 +146,16 @@ export function ExpenseListSort(): JSX.Element {
 	}
 
 	useInput(
-		(input) => {
-			if (input === " ") toggleSlotDir();
+		(input, key) => {
+			if (key.upArrow) {
+				setSlotCursor((c) => (c > 0 ? c - 1 : SLOT_COUNT - 1));
+			} else if (key.downArrow) {
+				setSlotCursor((c) => (c < SLOT_COUNT - 1 ? c + 1 : 0));
+			} else if (key.return) {
+				openPicker(slotCursor);
+			} else if (input === " ") {
+				toggleSlotDir();
+			}
 		},
 		{ isActive: focus === "main" && picker === null },
 	);
@@ -179,23 +186,49 @@ export function ExpenseListSort(): JSX.Element {
 		{ isActive: focus === "input" && picker !== null },
 	);
 
-	function renderSlotRow(i: number, selected: boolean): JSX.Element {
+	if (!trip) {
+		return <Text dimColor>Loading...</Text>;
+	}
+
+	const slotLabels = Array.from({ length: SLOT_COUNT }, (_, i) => {
 		const slot = slots[i];
-		const label = slot
+		return slot
 			? `${i + 1}. ${COLUMN_LABEL[slot.key]}  ${dirArrow(slot.dir)}`
 			: `${i + 1}. <not set>`;
+	});
+	const leftWidth = Math.max(...slotLabels.map((l) => l.length));
+
+	const totalRows = picker
+		? Math.max(SLOT_COUNT, picker.slotIndex + picker.options.length)
+		: SLOT_COUNT;
+
+	function renderLeftRow(i: number): JSX.Element {
+		const isSlotRow = i < SLOT_COUNT;
+		const slot = isSlotRow ? slots[i] : undefined;
+		const showCursor = picker === null && i === slotCursor;
+		const label = isSlotRow ? (slotLabels[i] ?? "") : "";
+		const padded = label.padEnd(leftWidth);
+		const dim = isSlotRow && slot === null;
+		const showSeparator = picker !== null;
+		const trailing = showSeparator ? " |" : "";
 		return (
-			<Text inverse={selected} {...(slot === null ? { dimColor: true } : {})}>
-				{selected ? "> " : "  "}
-				{label}
+			<Text
+				// biome-ignore lint/suspicious/noArrayIndexKey: index is stable here
+				key={i}
+				{...(dim ? { dimColor: true } : {})}
+				inverse={showCursor}
+			>
+				{showCursor ? "> " : "  "}
+				{padded}
+				{trailing}
 			</Text>
 		);
 	}
 
-	function renderPicker(): JSX.Element {
-		if (!picker) return <Text />;
+	function renderPickerColumn(): JSX.Element | null {
+		if (!picker) return null;
 		return (
-			<Box flexDirection="column" marginLeft={4}>
+			<Box flexDirection="column" marginLeft={1} marginTop={picker.slotIndex}>
 				{picker.options.map((opt, idx) => {
 					const selected = idx === picker.cursor;
 					const text =
@@ -218,20 +251,12 @@ export function ExpenseListSort(): JSX.Element {
 		);
 	}
 
-	if (!trip) {
-		return <Text dimColor>Loading...</Text>;
-	}
-
 	return (
-		<Box flexDirection="column">
-			<VerticalSelect
-				rowCount={SLOT_COUNT}
-				renderRow={renderSlotRow}
-				onChange={(i) => openPicker(i)}
-				onHighlight={setSlotCursor}
-				isActive={focus === "main" && picker === null}
-			/>
-			{picker && renderPicker()}
+		<Box flexDirection="row">
+			<Box flexDirection="column">
+				{Array.from({ length: totalRows }, (_, i) => renderLeftRow(i))}
+			</Box>
+			{renderPickerColumn()}
 		</Box>
 	);
 }
