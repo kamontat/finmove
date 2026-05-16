@@ -17,15 +17,15 @@ import { useNavigation } from "../states/navigation";
 import { tripTitle } from "../utils/titles";
 
 export const EXPENSE_LIST_HEADERS: string[] = [
-	"Date",
 	"Account",
-	"Owners",
+	"Date",
 	"Payee",
 	"Category",
 	"Amount",
 	"Rate",
 	"THB",
-	"Tags",
+	"Owner",
+	"#Tags",
 ];
 
 function formatFinanceNumber(n: number): string {
@@ -113,14 +113,14 @@ export function buildExpenseListRows(trip: Trip): TableCell[][] {
 			: { text: `${data.thbNum.padStart(thbWidth)} THB` };
 
 		return [
-			{ text: e.date },
 			{ text: account?.name ?? e.accountId },
-			formatOwnersCell(e, trip, initialsMap),
+			{ text: e.date },
 			{ text: e.payee },
 			{ text: e.category },
 			amountCell,
 			rateCell,
 			thbCell,
+			formatOwnersCell(e, trip, initialsMap),
 			{ text: e.tags.length > 0 ? String(e.tags.length) : "" },
 		];
 	});
