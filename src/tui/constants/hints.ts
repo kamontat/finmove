@@ -42,5 +42,5 @@ export const SORT_PICKER_HINTS: HelpHint[] = [
 	{ key: "↑↓", label: "Navigate" },
 	{ key: "Space", label: "Direction" },
 	{ key: "Enter", label: "Confirm" },
-	{ key: "esc", label: "Cancel" },
+	{ key: "q/esc", label: "Cancel" },
 ];
