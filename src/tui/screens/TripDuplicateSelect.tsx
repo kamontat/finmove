@@ -1,12 +1,13 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import type { Trip } from "../../core/models";
-import { listTrips, type TripEntry } from "../../core/services/trip";
-import { ListSelect } from "../components/molecules/ListSelect";
+import { today } from "../../core/services/date";
+import { listTrips, sortTrips, type TripEntry } from "../../core/services/trip";
+import { TableSelect } from "../components/molecules/TableSelect";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
+import { buildTripListRows, TRIP_LIST_HEADERS } from "./TripList";
 
 export function TripDuplicateSelect(): JSX.Element {
 	const { setHints, setColor, setTitle, clearTitle } = useLayout();
@@ -15,10 +16,8 @@ export function TripDuplicateSelect(): JSX.Element {
 	const { dataDir = "./data" } = useRouteProps("/trips/duplicate");
 
 	// Only healthy trips can be duplicated — can't copy what we can't read.
-	const [trips] = useState<Trip[]>(() =>
-		listTrips(dataDir)
-			.filter((e): e is Extract<TripEntry, { kind: "ok" }> => e.kind === "ok")
-			.map((e) => e.trip),
+	const [entries] = useState<TripEntry[]>(() =>
+		sortTrips(listTrips(dataDir), today()).filter((e) => e.kind === "ok"),
 	);
 
 	useEffect(() => {
@@ -37,23 +36,20 @@ export function TripDuplicateSelect(): JSX.Element {
 		};
 	}, [setColor, setMenu, setHints, setTitle, clearTitle]);
 
-	if (trips.length === 0) {
+	if (entries.length === 0) {
 		return <Text dimColor>No trips.</Text>;
 	}
 
 	return (
-		<ListSelect
-			options={trips.map((t) => ({
-				label: t.settings.name,
-				value: t.dirPath,
-				detail: `(${t.settings.startDate} — ${t.settings.endDate})`,
-			}))}
-			onChange={(dirPath) => {
-				const trip = trips.find((t) => t.dirPath === dirPath);
-				if (!trip) return;
+		<TableSelect
+			headers={TRIP_LIST_HEADERS}
+			rows={buildTripListRows(entries, today())}
+			onChange={(rowIndex) => {
+				const entry = entries[rowIndex];
+				if (!entry || entry.kind !== "ok") return;
 				goTo("/trips/new", {
 					replace: true,
-					props: { dataDir, duplicateFromDirPath: trip.dirPath },
+					props: { dataDir, duplicateFromDirPath: entry.trip.dirPath },
 				});
 			}}
 			isActive
