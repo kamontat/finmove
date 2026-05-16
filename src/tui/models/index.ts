@@ -242,6 +242,7 @@ interface FormFieldBase {
 	key: string;
 	label: string;
 	required?: boolean;
+	editable?: boolean;
 }
 
 export type TextFormField = FormFieldBase & {
@@ -311,4 +312,39 @@ export function getBoolean(
 ): boolean {
 	const v = values[key];
 	return typeof v === "boolean" ? v : false;
+}
+
+// --- Form field strategies ---
+
+export interface FormFieldStrategyEditorProps<F extends FormFieldConfig> {
+	field: F;
+	value: FieldValue;
+	allValues: Record<string, FieldValue>;
+	onSubmit: (value: FieldValue) => void;
+	onCancel: () => void;
+}
+
+export interface FormFieldStrategy<
+	F extends FormFieldConfig = FormFieldConfig,
+> {
+	emptyValue: FieldValue;
+	hasUserValue(value: FieldValue): boolean;
+	isFilled(field: F, value: FieldValue): boolean;
+	normalizeForSubmit(field: F, value: FieldValue): FieldValue;
+	getDisplay(
+		field: F,
+		value: FieldValue,
+		allValues: Record<string, FieldValue>,
+	): string;
+	getPreview(
+		field: F,
+		allValues: Record<string, FieldValue>,
+	): string | undefined;
+	// Returns "edit" to enter inline edit mode, or a function to invoke externally
+	// (used by select with onEdit, and multiselect). The strategy encapsulates the
+	// onEdit lookup so Form.tsx never branches on field.type.
+	onEnterPress(field: F): "edit" | (() => void);
+	Editor: (
+		props: FormFieldStrategyEditorProps<F>,
+	) => import("react").JSX.Element;
 }
