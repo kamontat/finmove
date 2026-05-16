@@ -1,4 +1,4 @@
-export type FieldValue = string | string[] | boolean;
+export type FieldValue = string | string[] | boolean | number;
 export type FormValues = Record<string, FieldValue>;
 
 export class FormBufferStore {

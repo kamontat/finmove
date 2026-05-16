@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 
 export type FocusZone = "main" | "menu" | "input";
 
-export type FieldValue = string | string[] | boolean;
+export type FieldValue = string | string[] | boolean | number;
 
 export type NotificationSeverity = "info" | "warn" | "error";
 
@@ -277,12 +277,19 @@ export type MultiSelectFormField = FormFieldBase & {
 	display?: (selected: string[]) => string;
 };
 
+export type NumberFormField = FormFieldBase & {
+	type: "number";
+	defaultValue?: number;
+	placeholder?: string | ((values: Record<string, string>) => string);
+};
+
 export type FormFieldConfig =
 	| TextFormField
 	| SelectFormField
 	| BooleanFormField
 	| DateFormField
-	| MultiSelectFormField;
+	| MultiSelectFormField
+	| NumberFormField;
 
 export function getString(
 	values: Record<string, FieldValue>,
@@ -306,6 +313,14 @@ export function getBoolean(
 ): boolean {
 	const v = values[key];
 	return typeof v === "boolean" ? v : false;
+}
+
+export function getNumber(
+	values: Record<string, FieldValue>,
+	key: string,
+): number | undefined {
+	const v = values[key];
+	return typeof v === "number" ? v : undefined;
 }
 
 // --- Form field strategies ---

@@ -10,6 +10,7 @@ import { useFormBuffer } from "../../states/formBuffer";
 import { formFieldBooleanStrategy } from "../molecules/FormFieldBoolean";
 import { formFieldDateStrategy } from "../molecules/FormFieldDate";
 import { formFieldMultiselectStrategy } from "../molecules/FormFieldMultiselect";
+import { formFieldNumberStrategy } from "../molecules/FormFieldNumber";
 import { formFieldSelectStrategy } from "../molecules/FormFieldSelect";
 import { formFieldTextStrategy } from "../molecules/FormFieldText";
 
@@ -27,6 +28,7 @@ const STRATEGIES = {
 	boolean: formFieldBooleanStrategy,
 	date: formFieldDateStrategy,
 	multiselect: formFieldMultiselectStrategy,
+	number: formFieldNumberStrategy,
 } as const;
 
 function getStrategy(field: FormFieldConfig): FormFieldStrategy {
