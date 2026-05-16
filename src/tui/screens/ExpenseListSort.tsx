@@ -149,9 +149,8 @@ export function ExpenseListSort(): JSX.Element {
 		setSlots(next);
 	}
 
-	function cancelAll() {
+	function revertSlots() {
 		setSlots(initialSlotsRef.current);
-		goBack();
 	}
 
 	function applyAll() {
@@ -159,9 +158,10 @@ export function ExpenseListSort(): JSX.Element {
 	}
 
 	useInput(
-		(input) => {
+		(input, key) => {
 			if (input === " ") toggleSlotDir();
 			else if (input === "s") applyAll();
+			else if (key.escape || input === "q") revertSlots();
 		},
 		{ isActive: focus === "main" && picker === null },
 	);
@@ -242,7 +242,6 @@ export function ExpenseListSort(): JSX.Element {
 				renderRow={renderSlotRow}
 				onChange={(i) => openPicker(i)}
 				onHighlight={setSlotCursor}
-				onCancel={cancelAll}
 				isActive={focus === "main" && picker === null}
 			/>
 			{picker && renderPicker()}
