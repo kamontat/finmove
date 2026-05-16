@@ -28,3 +28,18 @@ export const SELECT_DUPLICATE_HINTS: HelpHint[] = [
 	{ key: "q/esc", label: "Back to list" },
 	{ key: "e", label: "Exit" },
 ];
+
+export const SORT_HINTS: HelpHint[] = [
+	{ key: "↑↓", label: "Navigate" },
+	{ key: "Enter", label: "Edit slot" },
+	{ key: "Space", label: "Direction" },
+	{ key: "q/esc", label: "Back" },
+	{ key: "e", label: "Exit" },
+];
+
+export const SORT_PICKER_HINTS: HelpHint[] = [
+	{ key: "↑↓", label: "Navigate" },
+	{ key: "Space", label: "Direction" },
+	{ key: "Enter", label: "Confirm" },
+	{ key: "q/esc", label: "Cancel" },
+];
