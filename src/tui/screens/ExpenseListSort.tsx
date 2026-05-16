@@ -210,13 +210,14 @@ export function ExpenseListSort(): JSX.Element {
 		const padded = label.padEnd(leftWidth);
 		const dim = isSlotRow && slot === null;
 		const showSeparator = picker !== null;
-		const trailing = showSeparator ? " |" : "";
 		return (
-			<Text key={i} {...(dim ? { dimColor: true } : {})} inverse={showCursor}>
-				{showCursor ? "> " : "  "}
-				{padded}
-				{trailing}
-			</Text>
+			<Box key={i}>
+				<Text {...(dim ? { dimColor: true } : {})} inverse={showCursor}>
+					{showCursor ? "> " : "  "}
+					{padded}
+				</Text>
+				{showSeparator && <Text> |</Text>}
+			</Box>
 		);
 	}
 
