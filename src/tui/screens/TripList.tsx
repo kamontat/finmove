@@ -17,7 +17,7 @@ import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
-const TRIP_LIST_HEADERS: string[] = ["Name", "Start", "End", "Days", "Status"];
+export const TRIP_LIST_HEADERS: string[] = ["Name", "Start", "End", "Days", "Status"];
 
 function getPhase(
 	startDate: string,
@@ -29,7 +29,7 @@ function getPhase(
 	return "ongoing";
 }
 
-function buildTripListRows(
+export function buildTripListRows(
 	entries: TripEntry[],
 	todayDate: string,
 ): TableCell[][] {
