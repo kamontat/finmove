@@ -1,6 +1,6 @@
 import { Box, Text, useInput } from "ink";
 import type { JSX } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { SortDir, SortKey } from "../../core/services/expense";
 import { VerticalSelect } from "../components/atoms/VerticalSelect";
 import { SORT_HINTS, SORT_PICKER_HINTS } from "../constants/hints";
@@ -13,7 +13,6 @@ import {
 import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
-import { useNavigation } from "../states/navigation";
 import { tripTitle } from "../utils/titles";
 
 const COLUMN_ORDER: SortKey[] = ["date", "thb", "account", "owner", "category"];
@@ -82,9 +81,7 @@ export function ExpenseListSort(): JSX.Element {
 	const { focus, setFocus } = useFocus();
 	const { setTitle, clearTitle, setHints, setColor } = useLayout();
 	const { setMenu } = useMenu();
-	const { goBack } = useNavigation();
 
-	const initialSlotsRef = useRef<Slot[]>(slots);
 	const [slotCursor, setSlotCursor] = useState(0);
 	const [picker, setPicker] = useState<PickerState | null>(null);
 
@@ -149,19 +146,9 @@ export function ExpenseListSort(): JSX.Element {
 		setSlots(next);
 	}
 
-	function revertSlots() {
-		setSlots(initialSlotsRef.current);
-	}
-
-	function applyAll() {
-		goBack();
-	}
-
 	useInput(
-		(input, key) => {
+		(input) => {
 			if (input === " ") toggleSlotDir();
-			else if (input === "s") applyAll();
-			else if (key.escape || input === "q") revertSlots();
 		},
 		{ isActive: focus === "main" && picker === null },
 	);

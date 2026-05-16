@@ -33,8 +33,7 @@ export const SORT_HINTS: HelpHint[] = [
 	{ key: "↑↓", label: "Navigate" },
 	{ key: "Enter", label: "Edit slot" },
 	{ key: "Space", label: "Direction" },
-	{ key: "s", label: "Apply" },
-	{ key: "q/esc", label: "Cancel" },
+	{ key: "q/esc", label: "Back" },
 	{ key: "e", label: "Exit" },
 ];
 
