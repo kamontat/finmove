@@ -1,4 +1,4 @@
-import type { Notification, NotificationSeverity } from "../models";
+import type { Notification, NotificationContext } from "../models";
 
 const MAX_HISTORY = 100;
 const AUTO_DISMISS_MS = 5000;
@@ -48,18 +48,16 @@ export class NotificationStore {
 
 	notify(
 		text: string,
-		severity: NotificationSeverity,
-		route: string,
+		context: Omit<NotificationContext, "firedAt">,
 		options: NotifyOptions = {},
 	): void {
 		this.cancelTimer();
 
+		const firedAt = (options.now ?? (() => new Date()))();
 		const notification: Notification = {
 			id: generateId(),
 			text,
-			severity,
-			route,
-			firedAt: (options.now ?? (() => new Date()))(),
+			context: { ...context, firedAt },
 		};
 
 		this.current = notification;

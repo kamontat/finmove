@@ -59,7 +59,9 @@ export function Default({ title, children }: DefaultLayoutProps): JSX.Element {
 					{title}
 				</Text>
 				{current !== null && (
-					<Text color={SEVERITY_COLORS[current.severity]}>{current.text}</Text>
+					<Text color={SEVERITY_COLORS[current.context.severity]}>
+						{current.text}
+					</Text>
 				)}
 			</Box>
 

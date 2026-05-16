@@ -13,15 +13,34 @@ describe("NotificationStore", () => {
 			schedule: () => 0,
 			cancel: () => {},
 		});
-		store.notify("hello", "info", "Trips", { now: () => new Date(0) });
+		store.notify(
+			"hello",
+			{ path: "/trips", trip: "Japan", severity: "info" },
+			{ now: () => new Date(0) },
+		);
 		const current = store.getCurrent();
 		expect(current).not.toBeNull();
 		expect(current?.text).toBe("hello");
-		expect(current?.severity).toBe("info");
-		expect(current?.route).toBe("Trips");
-		expect(current?.firedAt).toEqual(new Date(0));
+		expect(current?.context).toEqual({
+			path: "/trips",
+			trip: "Japan",
+			severity: "info",
+			firedAt: new Date(0),
+		});
 		expect(typeof current?.id).toBe("string");
 		expect(current?.id.length).toBeGreaterThan(0);
+	});
+
+	test("notify accepts context without trip", () => {
+		const store = new NotificationStore({
+			schedule: () => 0,
+			cancel: () => {},
+		});
+		store.notify("hello", { path: "/trips/new", severity: "info" });
+		const ctx = store.getCurrent()?.context;
+		expect(ctx?.path).toBe("/trips/new");
+		expect(ctx?.severity).toBe("info");
+		expect(ctx?.firedAt).toBeInstanceOf(Date);
 	});
 
 	test("notify appends to history in fire order", () => {
@@ -29,8 +48,8 @@ describe("NotificationStore", () => {
 			schedule: () => 0,
 			cancel: () => {},
 		});
-		store.notify("first", "info", "A");
-		store.notify("second", "warn", "B");
+		store.notify("first", { path: "/a", severity: "info" });
+		store.notify("second", { path: "/b", severity: "warn" });
 		const history = store.getHistory();
 		expect(history.length).toBe(2);
 		expect(history[0]?.text).toBe("first");
@@ -42,8 +61,8 @@ describe("NotificationStore", () => {
 			schedule: () => 0,
 			cancel: () => {},
 		});
-		store.notify("first", "info", "A");
-		store.notify("second", "warn", "B");
+		store.notify("first", { path: "/a", severity: "info" });
+		store.notify("second", { path: "/b", severity: "warn" });
 		expect(store.getCurrent()?.text).toBe("second");
 	});
 
@@ -52,7 +71,7 @@ describe("NotificationStore", () => {
 			schedule: () => 0,
 			cancel: () => {},
 		});
-		store.notify("hello", "info", "A");
+		store.notify("hello", { path: "/a", severity: "info" });
 		store.dismiss();
 		expect(store.getCurrent()).toBeNull();
 		expect(store.getHistory().length).toBe(1);
@@ -67,7 +86,7 @@ describe("NotificationStore", () => {
 			},
 			cancel: () => {},
 		});
-		store.notify("hello", "info", "A");
+		store.notify("hello", { path: "/a", severity: "info" });
 		expect(scheduled.length).toBe(1);
 		expect(scheduled[0]?.ms).toBe(5000);
 	});
@@ -81,7 +100,7 @@ describe("NotificationStore", () => {
 			},
 			cancel: () => {},
 		});
-		store.notify("hello", "info", "A");
+		store.notify("hello", { path: "/a", severity: "info" });
 		scheduled[0]?.fn();
 		expect(store.getCurrent()).toBeNull();
 		expect(store.getHistory().length).toBe(1);
@@ -100,7 +119,7 @@ describe("NotificationStore", () => {
 		store.subscribe(() => {
 			calls += 1;
 		});
-		store.notify("hello", "info", "A");
+		store.notify("hello", { path: "/a", severity: "info" });
 		scheduled[0]?.fn();
 		expect(calls).toBe(2);
 		expect(store.getCurrent()).toBeNull();
@@ -115,7 +134,11 @@ describe("NotificationStore", () => {
 			},
 			cancel: () => {},
 		});
-		store.notify("sticky", "error", "A", { persistent: true });
+		store.notify(
+			"sticky",
+			{ path: "/a", severity: "error" },
+			{ persistent: true },
+		);
 		expect(scheduled.length).toBe(0);
 		expect(store.getCurrent()?.text).toBe("sticky");
 	});
@@ -126,8 +149,8 @@ describe("NotificationStore", () => {
 			schedule: () => 42,
 			cancel: (token) => cancels.push(token as number),
 		});
-		store.notify("first", "info", "A");
-		store.notify("second", "info", "B");
+		store.notify("first", { path: "/a", severity: "info" });
+		store.notify("second", { path: "/b", severity: "info" });
 		expect(cancels).toEqual([42]);
 	});
 
@@ -137,7 +160,7 @@ describe("NotificationStore", () => {
 			schedule: () => 99,
 			cancel: (token) => cancels.push(token as number),
 		});
-		store.notify("hello", "info", "A");
+		store.notify("hello", { path: "/a", severity: "info" });
 		store.dismiss();
 		expect(cancels).toEqual([99]);
 	});
@@ -148,7 +171,7 @@ describe("NotificationStore", () => {
 			cancel: () => {},
 		});
 		for (let i = 0; i < 101; i++) {
-			store.notify(`msg-${i}`, "info", "A");
+			store.notify(`msg-${i}`, { path: "/a", severity: "info" });
 		}
 		const history = store.getHistory();
 		expect(history.length).toBe(100);
@@ -165,12 +188,12 @@ describe("NotificationStore", () => {
 		const unsubscribe = store.subscribe(() => {
 			calls += 1;
 		});
-		store.notify("a", "info", "A");
-		store.notify("b", "info", "B");
+		store.notify("a", { path: "/a", severity: "info" });
+		store.notify("b", { path: "/b", severity: "info" });
 		store.dismiss();
 		expect(calls).toBe(3);
 		unsubscribe();
-		store.notify("c", "info", "C");
+		store.notify("c", { path: "/c", severity: "info" });
 		expect(calls).toBe(3);
 	});
 });

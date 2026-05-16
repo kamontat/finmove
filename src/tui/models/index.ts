@@ -6,12 +6,17 @@ export type FieldValue = string | string[];
 
 export type NotificationSeverity = "info" | "warn" | "error";
 
+export interface NotificationContext {
+	path: string;
+	trip?: string;
+	severity: NotificationSeverity;
+	firedAt: Date;
+}
+
 export interface Notification {
 	id: string;
 	text: string;
-	severity: NotificationSeverity;
-	route: string;
-	firedAt: Date;
+	context: NotificationContext;
 }
 
 export interface RouteParams {

@@ -45,8 +45,11 @@ export function NotificationList(): JSX.Element {
 				<Box width={8}>
 					<Text bold>Level</Text>
 				</Box>
-				<Box width="40%">
-					<Text bold>Screen</Text>
+				<Box width="20%">
+					<Text bold>Trip</Text>
+				</Box>
+				<Box width="25%">
+					<Text bold>Path</Text>
 				</Box>
 				<Box flexGrow={1}>
 					<Text bold>Message</Text>
@@ -55,15 +58,18 @@ export function NotificationList(): JSX.Element {
 			{rows.map((n) => (
 				<Box key={n.id}>
 					<Box width={10}>
-						<Text>{formatTime(n.firedAt)}</Text>
+						<Text>{formatTime(n.context.firedAt)}</Text>
 					</Box>
 					<Box width={8}>
-						<Text color={SEVERITY_COLORS[n.severity]}>
-							{SEVERITY_LABELS[n.severity]}
+						<Text color={SEVERITY_COLORS[n.context.severity]}>
+							{SEVERITY_LABELS[n.context.severity]}
 						</Text>
 					</Box>
-					<Box width="40%">
-						<Text>{n.route}</Text>
+					<Box width="20%">
+						<Text>{n.context.trip ?? ""}</Text>
+					</Box>
+					<Box width="25%">
+						<Text>{n.context.path}</Text>
 					</Box>
 					<Box flexGrow={1}>
 						<Text>{n.text}</Text>
