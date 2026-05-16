@@ -32,10 +32,9 @@ export function Default({ title, children }: DefaultLayoutProps): JSX.Element {
 	const hasMenu = menuOptions.length > 0 && onMenuSelect !== null;
 
 	const titleHeight = 1;
-	const mainBorderHeight = 2;
 	const menuHeight = hasMenu ? 3 : 0;
 	const helpHeight = 1;
-	const reserved = titleHeight + mainBorderHeight + menuHeight + helpHeight;
+	const reserved = titleHeight + menuHeight + helpHeight;
 	const mainHeight = Math.max(3, terminalRows - reserved);
 
 	const activeBorderColor = colors.border ?? "cyan";
