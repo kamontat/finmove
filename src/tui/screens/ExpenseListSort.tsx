@@ -212,12 +212,7 @@ export function ExpenseListSort(): JSX.Element {
 		const showSeparator = picker !== null;
 		const trailing = showSeparator ? " |" : "";
 		return (
-			<Text
-				// biome-ignore lint/suspicious/noArrayIndexKey: index is stable here
-				key={i}
-				{...(dim ? { dimColor: true } : {})}
-				inverse={showCursor}
-			>
+			<Text key={i} {...(dim ? { dimColor: true } : {})} inverse={showCursor}>
 				{showCursor ? "> " : "  "}
 				{padded}
 				{trailing}
