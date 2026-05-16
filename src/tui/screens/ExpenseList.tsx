@@ -193,8 +193,8 @@ export function ExpenseList(): JSX.Element {
 
 		setMenu(
 			[
-				{ label: "Sort", value: "sort", key: "s" },
 				{ label: "Add", value: "add", key: "a" },
+				{ label: "Sort", value: "sort", key: "s" },
 				...(hasExpenses
 					? [
 							{
