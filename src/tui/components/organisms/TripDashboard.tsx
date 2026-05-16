@@ -102,11 +102,6 @@ function SpendBlock({ status }: Props): JSX.Element {
 				<Text>{"  "}</Text>
 				<Text bold>{formatThb(status.avgPerDayThb)}</Text>
 			</Box>
-			<Box>
-				<Text dimColor>{"Expenses".padEnd(labelWidth)}</Text>
-				<Text>{"  "}</Text>
-				<Text bold>{status.expenseCount}</Text>
-			</Box>
 			{status.byCurrency.length > 0 && (
 				<Box flexDirection="column">
 					<Box>
@@ -229,6 +224,11 @@ function CountsBlock({ status }: Props): JSX.Element {
 	return (
 		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Counts" />
+			<Box>
+				<Text dimColor>Expenses</Text>
+				<Text>{"    "}</Text>
+				<Text bold>{status.expenseCount}</Text>
+			</Box>
 			<Box>
 				<Text dimColor>Accounts</Text>
 				<Text>{"    "}</Text>
