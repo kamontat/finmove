@@ -1,14 +1,15 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
-import { today } from "../../core/services/date";
+import { daysBetween, today } from "../../core/services/date";
 import {
 	deleteTrip,
 	listTrips,
 	sortTrips,
 	type TripEntry,
 } from "../../core/services/trip";
-import { ListSelect } from "../components/molecules/ListSelect";
+import type { TableCell } from "../components/molecules/TableSelect";
+import { TableSelect } from "../components/molecules/TableSelect";
 import { LIST_HINTS } from "../constants/hints";
 import { useFocus } from "../states/focus";
 import { useFormBufferAdmin } from "../states/formBuffer";
@@ -16,7 +17,43 @@ import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
 
-const BROKEN_PREFIX = "__broken__:";
+const TRIP_LIST_HEADERS: string[] = ["Name", "Start", "End", "Days", "Status"];
+
+function getPhase(
+	startDate: string,
+	endDate: string,
+	todayDate: string,
+): "upcoming" | "ongoing" | "ended" {
+	if (todayDate < startDate) return "upcoming";
+	if (todayDate > endDate) return "ended";
+	return "ongoing";
+}
+
+function buildTripListRows(
+	entries: TripEntry[],
+	todayDate: string,
+): TableCell[][] {
+	return entries.map((e) => {
+		if (e.kind === "ok") {
+			const { name, startDate, endDate } = e.trip.settings;
+			const days = daysBetween(startDate, endDate) + 1;
+			return [
+				{ text: name },
+				{ text: startDate },
+				{ text: endDate },
+				{ text: String(days) },
+				{ text: getPhase(startDate, endDate, todayDate) },
+			];
+		}
+		return [
+			{ text: `⚠ ${e.dirName}` },
+			{ text: "—" },
+			{ text: "—" },
+			{ text: "—" },
+			{ text: "broken" },
+		];
+	});
+}
 
 export function TripList(): JSX.Element {
 	const { goTo, goBack } = useNavigation();
@@ -112,28 +149,13 @@ export function TripList(): JSX.Element {
 	}
 
 	return (
-		<ListSelect
-			options={entries.map((e) =>
-				e.kind === "ok"
-					? {
-							label: e.trip.settings.name,
-							value: e.trip.dirPath,
-							detail: `(${e.trip.settings.startDate} — ${e.trip.settings.endDate})`,
-						}
-					: {
-							label: `⚠ ${e.dirName} — ${e.error.name}`,
-							value: `${BROKEN_PREFIX}${e.dirPath}`,
-							detail: "(broken — press Enter for details)",
-						},
-			)}
-			onChange={(value) => {
-				if (value.startsWith(BROKEN_PREFIX)) {
-					const dirPath = value.slice(BROKEN_PREFIX.length);
-					const entry = entries.find(
-						(e): e is Extract<TripEntry, { kind: "broken" }> =>
-							e.kind === "broken" && e.dirPath === dirPath,
-					);
-					if (!entry) return;
+		<TableSelect
+			headers={TRIP_LIST_HEADERS}
+			rows={buildTripListRows(entries, today())}
+			onChange={(rowIndex) => {
+				const entry = entries[rowIndex];
+				if (!entry) return;
+				if (entry.kind === "broken") {
 					goTo("/trips/broken", {
 						props: {
 							dirName: entry.dirName,
@@ -144,21 +166,15 @@ export function TripList(): JSX.Element {
 					});
 					return;
 				}
-				const entry = entries.find(
-					(e): e is Extract<TripEntry, { kind: "ok" }> =>
-						e.kind === "ok" && e.trip.dirPath === value,
-				);
-				if (entry) {
-					goTo("/trips/overview", {
-						props: {
-							tripDirPath: entry.trip.dirPath,
-							tripName: entry.trip.settings.name,
-							dataDir,
-						},
-					});
-				}
+				goTo("/trips/overview", {
+					props: {
+						tripDirPath: entry.trip.dirPath,
+						tripName: entry.trip.settings.name,
+						dataDir,
+					},
+				});
 			}}
-			onHighlight={(_, i) => setActiveIndex(i)}
+			onHighlight={setActiveIndex}
 			armedRowIndex={armed?.index ?? null}
 			isActive={focus === "main"}
 		/>

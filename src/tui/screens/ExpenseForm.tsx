@@ -156,8 +156,8 @@ export function ExpenseForm(): JSX.Element {
 				label: "Amount",
 				type: "text",
 				required: true,
-				...(existingExpense
-					? { defaultValue: existingExpense.amount.toString() }
+				...(sourceForDefaults
+					? { defaultValue: sourceForDefaults.amount.toString() }
 					: {}),
 			},
 			{
@@ -209,7 +209,7 @@ export function ExpenseForm(): JSX.Element {
 					}),
 			},
 		];
-	}, [trip, existingExpense, sourceForDefaults, goTo, tripDirPath, formId]);
+	}, [trip, sourceForDefaults, goTo, tripDirPath, formId]);
 
 	if (!trip) {
 		return <Box />;
