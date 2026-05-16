@@ -24,6 +24,7 @@ import { ExpenseDelete } from "./screens/ExpenseDelete";
 import { ExpenseDuplicateSelect } from "./screens/ExpenseDuplicateSelect";
 import { ExpenseForm } from "./screens/ExpenseForm";
 import { ExpenseList } from "./screens/ExpenseList";
+import { ExpenseListSort } from "./screens/ExpenseListSort";
 import { ExportScreen } from "./screens/Export";
 import { NotificationList } from "./screens/NotificationList";
 import { OwnerCreate } from "./screens/OwnerCreate";
@@ -131,6 +132,9 @@ export const routes: Routes = {
 	},
 	"/trips/expenses/duplicate": {
 		component: ExpenseDuplicateSelect,
+	},
+	"/trips/expenses/sort": {
+		component: ExpenseListSort,
 	},
 	"/trips/expenses/form": {
 		component: ExpenseForm,

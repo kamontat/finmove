@@ -193,6 +193,7 @@ export function ExpenseList(): JSX.Element {
 
 		setMenu(
 			[
+				{ label: "Sort", value: "sort", key: "s" },
 				{ label: "Add", value: "add", key: "a" },
 				...(hasExpenses
 					? [
@@ -231,7 +232,9 @@ export function ExpenseList(): JSX.Element {
 					: []),
 			],
 			(value) => {
-				if (value === "add") {
+				if (value === "sort") {
+					goTo("/trips/expenses/sort", { props: { tripDirPath } });
+				} else if (value === "add") {
 					goTo("/trips/expenses/form", { props: { tripDirPath } });
 				} else if (value === "duplicate" && hasExpenses) {
 					goTo("/trips/expenses/duplicate", { props: { tripDirPath } });

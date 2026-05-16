@@ -55,6 +55,9 @@ export interface RouteParams {
 	"/trips/expenses/duplicate": {
 		tripDirPath: string;
 	};
+	"/trips/expenses/sort": {
+		tripDirPath: string;
+	};
 	"/trips/expenses/delete": {
 		tripDirPath: string;
 	};
