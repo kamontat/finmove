@@ -12,6 +12,7 @@ import { Form } from "../components/organisms/Form";
 import {
 	type FieldValue,
 	type FormFieldConfig,
+	getNumber,
 	getString,
 	getStringArray,
 } from "../models";
@@ -154,10 +155,10 @@ export function ExpenseForm(): JSX.Element {
 			{
 				key: "amount",
 				label: "Amount",
-				type: "text",
+				type: "number",
 				required: true,
 				...(sourceForDefaults
-					? { defaultValue: sourceForDefaults.amount.toString() }
+					? { defaultValue: sourceForDefaults.amount }
 					: {}),
 			},
 			{
@@ -175,9 +176,9 @@ export function ExpenseForm(): JSX.Element {
 			{
 				key: "exchangeRate",
 				label: "Exchange Rate (1 currency = ? THB)",
-				type: "text",
+				type: "number",
 				...(sourceForDefaults?.exchangeRate !== undefined
-					? { defaultValue: sourceForDefaults.exchangeRate.toString() }
+					? { defaultValue: sourceForDefaults.exchangeRate }
 					: {}),
 			},
 			{
@@ -220,7 +221,7 @@ export function ExpenseForm(): JSX.Element {
 		const ownerList = getStringArray(values, "owners");
 
 		const currency = getString(values, "currency") || "THB";
-		const exchangeRateStr = getString(values, "exchangeRate");
+		const exchangeRate = getNumber(values, "exchangeRate");
 
 		const id =
 			existingExpense?.id ??
@@ -232,10 +233,10 @@ export function ExpenseForm(): JSX.Element {
 			date: getString(values, "date"),
 			payee: getString(values, "payee"),
 			category: getString(values, "category"),
-			amount: Number.parseFloat(getString(values, "amount") || "0"),
+			amount: getNumber(values, "amount") ?? 0,
 			currency,
-			...(exchangeRateStr && currency !== "THB"
-				? { exchangeRate: Number.parseFloat(exchangeRateStr) }
+			...(exchangeRate !== undefined && currency !== "THB"
+				? { exchangeRate }
 				: {}),
 			...(ownerList.length > 0 ? { owners: ownerList } : {}),
 			description: getString(values, "description"),
