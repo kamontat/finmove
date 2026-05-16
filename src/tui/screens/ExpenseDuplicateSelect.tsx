@@ -38,7 +38,7 @@ export function ExpenseDuplicateSelect(): JSX.Element {
 	}
 
 	const headers = EXPENSE_LIST_HEADERS;
-	const rows = buildExpenseListRows(trip);
+	const rows = buildExpenseListRows(trip, trip.expenses);
 
 	return (
 		<TableSelect

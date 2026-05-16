@@ -55,11 +55,14 @@ function formatOwnersCell(
 	return { text: parts.join(", ") };
 }
 
-export function buildExpenseListRows(trip: Trip): TableCell[][] {
+export function buildExpenseListRows(
+	trip: Trip,
+	expenses: Expense[],
+): TableCell[][] {
 	const initialsMap = computeInitials(trip.owners.map((o) => o.name));
 
 	// First pass: compute raw numeric strings per row for the Amount and THB columns.
-	const numericData = trip.expenses.map((e) => {
+	const numericData = expenses.map((e) => {
 		const amountNum = formatFinanceNumber(e.amount);
 
 		const tripRate = trip.settings.currencies[e.currency]?.exchangeRate;
@@ -90,7 +93,7 @@ export function buildExpenseListRows(trip: Trip): TableCell[][] {
 		0,
 	);
 
-	return trip.expenses.map((e, i) => {
+	return expenses.map((e, i) => {
 		const account = trip.accounts.find((a) => a.id === e.accountId);
 		const data = numericData[i];
 		if (!data) throw new Error("invariant: numericData index missing");
@@ -216,7 +219,7 @@ export function ExpenseList(): JSX.Element {
 	}
 
 	const headers = EXPENSE_LIST_HEADERS;
-	const rows = buildExpenseListRows(trip);
+	const rows = buildExpenseListRows(trip, trip.expenses);
 
 	return (
 		<TableSelect
