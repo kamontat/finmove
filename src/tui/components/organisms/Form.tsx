@@ -3,6 +3,7 @@ import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
 import type { FieldValue, FormFieldConfig } from "../../models";
 import { useFocus } from "../../states/focus";
 import { useFormBuffer } from "../../states/formBuffer";
+import { CheckboxInput } from "../atoms/CheckboxInput";
 import { DateInput } from "../atoms/DateInput";
 import { SelectInput } from "../atoms/SelectInput";
 import { TextInput } from "../atoms/TextInput";
@@ -65,6 +66,9 @@ export function Form({
 			if (field.type === "multiselect") {
 				return Array.isArray(v) && v.length > 0;
 			}
+			if (field.type === "boolean") {
+				return typeof v === "boolean" || field.defaultValue !== undefined;
+			}
 			if (typeof v === "string" && v !== "") return true;
 			return field.defaultValue !== undefined;
 		},
@@ -80,6 +84,9 @@ export function Form({
 			const v = values[field.key];
 			if (field.type === "multiselect") {
 				return Array.isArray(v) && v.length > 0;
+			}
+			if (field.type === "boolean") {
+				return typeof v === "boolean";
 			}
 			return typeof v === "string" && v !== "";
 		});
@@ -99,6 +106,14 @@ export function Form({
 			const v = values[field.key];
 			if (field.type === "multiselect") {
 				result[field.key] = Array.isArray(v) ? v : [];
+			} else if (field.type === "boolean") {
+				if (typeof v === "boolean") {
+					result[field.key] = v;
+				} else if (field.defaultValue !== undefined) {
+					result[field.key] = field.defaultValue;
+				} else {
+					result[field.key] = false;
+				}
 			} else if (typeof v === "string" && v !== "") {
 				result[field.key] = v;
 			} else if (field.defaultValue !== undefined) {
@@ -128,6 +143,14 @@ export function Form({
 
 	const setStringValue = useCallback(
 		(key: string, value: string) => {
+			setValue(key, value);
+			exitEdit();
+		},
+		[setValue, exitEdit],
+	);
+
+	const setBooleanValue = useCallback(
+		(key: string, value: boolean) => {
 			setValue(key, value);
 			exitEdit();
 		},
@@ -193,6 +216,13 @@ export function Form({
 				) {
 					const found = field.options.find((o) => o.value === currentValue);
 					displayValue = found?.label ?? currentValue;
+				} else if (
+					field.type === "boolean" &&
+					typeof currentValue === "boolean"
+				) {
+					displayValue = currentValue
+						? (field.trueLabel ?? "Yes")
+						: (field.falseLabel ?? "No");
 				} else if (typeof currentValue === "string") {
 					displayValue = currentValue;
 				}
@@ -200,12 +230,20 @@ export function Form({
 				const hasValue =
 					field.type === "multiselect"
 						? Array.isArray(currentValue) && currentValue.length > 0
-						: typeof currentValue === "string" && currentValue !== "";
+						: field.type === "boolean"
+							? typeof currentValue === "boolean"
+							: typeof currentValue === "string" && currentValue !== "";
 				const optionalSuffix = !field.required ? " (optional)" : "";
 
 				let preview: string | undefined;
 				if (field.type === "multiselect") {
 					preview = undefined;
+				} else if (field.type === "boolean") {
+					if (field.defaultValue !== undefined) {
+						preview = field.defaultValue
+							? (field.trueLabel ?? "Yes")
+							: (field.falseLabel ?? "No");
+					}
 				} else if (field.defaultValue !== undefined) {
 					if (field.type === "select") {
 						const found = field.options.find(
@@ -299,6 +337,23 @@ export function Form({
 											),
 										)}
 										onChange={(val) => setStringValue(field.key, val)}
+										onCancel={cancelEdit}
+									/>
+								)}
+								{field.type === "boolean" && (
+									<CheckboxInput
+										defaultValue={
+											typeof currentValue === "boolean"
+												? currentValue
+												: (field.defaultValue ?? false)
+										}
+										{...(field.trueLabel !== undefined
+											? { trueLabel: field.trueLabel }
+											: {})}
+										{...(field.falseLabel !== undefined
+											? { falseLabel: field.falseLabel }
+											: {})}
+										onSubmit={(val) => setBooleanValue(field.key, val)}
 										onCancel={cancelEdit}
 									/>
 								)}
