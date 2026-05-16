@@ -1,3 +1,4 @@
+import { basename } from "node:path";
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect } from "react";
@@ -76,6 +77,12 @@ export function TripSettings(): JSX.Element {
 	const { settings } = trip;
 
 	const fields: FormFieldConfig[] = [
+		{
+			key: "dirName",
+			label: "Directory",
+			type: "display",
+			value: basename(trip.dirPath),
+		},
 		{
 			key: "name",
 			label: "Name",
