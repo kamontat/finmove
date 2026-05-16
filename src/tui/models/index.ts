@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 
 export type FocusZone = "main" | "menu" | "input";
 
-export type FieldValue = string | string[];
+export type FieldValue = string | string[] | boolean;
 
 export type NotificationSeverity = "info" | "warn" | "error";
 
@@ -257,6 +257,13 @@ export type SelectFormField = FormFieldBase & {
 	onEdit?: () => void;
 };
 
+export type BooleanFormField = FormFieldBase & {
+	type: "boolean";
+	defaultValue?: boolean;
+	trueLabel?: string;
+	falseLabel?: string;
+};
+
 export type DateFormField = FormFieldBase & {
 	type: "date";
 	defaultValue?: string;
@@ -272,6 +279,7 @@ export type MultiSelectFormField = FormFieldBase & {
 export type FormFieldConfig =
 	| TextFormField
 	| SelectFormField
+	| BooleanFormField
 	| DateFormField
 	| MultiSelectFormField;
 
@@ -289,4 +297,12 @@ export function getStringArray(
 ): string[] {
 	const v = values[key];
 	return Array.isArray(v) ? v : [];
+}
+
+export function getBoolean(
+	values: Record<string, FieldValue>,
+	key: string,
+): boolean {
+	const v = values[key];
+	return typeof v === "boolean" ? v : false;
 }
