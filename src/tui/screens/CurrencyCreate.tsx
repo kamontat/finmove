@@ -4,7 +4,7 @@ import type { CurrencyConfig } from "../../core/models";
 import { updateSettings } from "../../core/services/trip";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import { type FormFieldConfig, getString } from "../models";
+import { type FormFieldConfig, getNumber, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
@@ -21,7 +21,7 @@ const FIELDS: FormFieldConfig[] = [
 	{
 		key: "exchangeRate",
 		label: "Exchange Rate (to THB)",
-		type: "text",
+		type: "number",
 		required: false,
 		placeholder: "e.g. 0.23",
 	},
@@ -49,11 +49,9 @@ export function CurrencyCreate(): JSX.Element | null {
 					goBack();
 					return;
 				}
-				const rateStr = getString(values, "exchangeRate").trim();
-				const rate = rateStr === "" ? Number.NaN : Number.parseFloat(rateStr);
-				const config: CurrencyConfig = Number.isFinite(rate)
-					? { exchangeRate: rate }
-					: {};
+				const rate = getNumber(values, "exchangeRate");
+				const config: CurrencyConfig =
+					rate !== undefined ? { exchangeRate: rate } : {};
 				const updated: Record<string, CurrencyConfig> = {
 					...trip.settings.currencies,
 					[code]: config,
