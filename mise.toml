@@ -1,6 +1,6 @@
 [tools]
 bun = "1.3.12"
-claude = "2.1.142"
+claude = "2.1.143"
 
 [shell_alias]
 start-dev = "bun run start"
