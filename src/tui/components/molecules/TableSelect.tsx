@@ -38,8 +38,8 @@ export function TableSelect({
 		text.padEnd(colWidths[i] ?? 0);
 
 	return (
-		<Box flexDirection="column">
-			<Box>
+		<Box flexDirection="column" flexGrow={1}>
+			<Box flexShrink={0}>
 				<Text bold>
 					{"  "}
 					{headers.map((h, i) => padCell(h, i)).join("")}

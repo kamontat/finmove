@@ -1,4 +1,11 @@
-import { Box, useInput } from "ink";
+import {
+	Box,
+	type DOMElement,
+	measureElement,
+	Text,
+	useInput,
+	useStdout,
+} from "ink";
 import type { JSX, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -50,7 +57,7 @@ export function VerticalSelect({
 			} else if (key.downArrow) {
 				setCursor((c) => (c < rowCount - 1 ? c + 1 : 0));
 			} else if (key.return) {
-				if (cursor < rowCount) onChange(cursor);
+				onChange(safeCursor);
 			} else if ((key.escape || input === "q") && onCancel) {
 				onCancel();
 			}
@@ -58,12 +65,54 @@ export function VerticalSelect({
 		{ isActive },
 	);
 
+	const outerRef = useRef<DOMElement>(null);
+	const [viewportHeight, setViewportHeight] = useState(0);
+
+	const { stdout } = useStdout();
+	const termRows = stdout?.rows ?? 0;
+	const termCols = stdout?.columns ?? 0;
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: termRows/termCols re-trigger measurement on resize
+	useEffect(() => {
+		if (!outerRef.current) return;
+		setViewportHeight(measureElement(outerRef.current).height);
+	}, [termRows, termCols]);
+
+	const visibleRows = Math.max(1, viewportHeight);
+
+	const [scrollOffset, setScrollOffset] = useState(0);
+
+	useEffect(() => {
+		setScrollOffset((o) => {
+			if (safeCursor < o) return safeCursor;
+			if (safeCursor >= o + visibleRows) return safeCursor - visibleRows + 1;
+			return Math.min(o, Math.max(0, rowCount - visibleRows));
+		});
+	}, [safeCursor, visibleRows, rowCount]);
+
+	const start = scrollOffset;
+	const end = Math.min(rowCount, start + visibleRows);
+	const overflowing = rowCount > visibleRows;
+
 	return (
-		<Box flexDirection="column">
-			{Array.from({ length: rowCount }, (_, i) => (
-				// biome-ignore lint/suspicious/noArrayIndexKey: index is the stable id here
-				<Box key={i}>{renderRow(i, isActive && i === safeCursor)}</Box>
-			))}
+		<Box ref={outerRef} flexGrow={1} flexDirection="column" overflow="hidden">
+			<Box flexDirection="column" flexShrink={0}>
+				{Array.from({ length: end - start }, (_, i) => {
+					const idx = start + i;
+					return (
+						<Box key={idx}>
+							{renderRow(idx, isActive && idx === safeCursor)}
+						</Box>
+					);
+				})}
+			</Box>
+			{overflowing && (
+				<Box position="absolute" bottom={0} right={0}>
+					<Text dimColor>
+						{safeCursor + 1}/{rowCount}
+					</Text>
+				</Box>
+			)}
 		</Box>
 	);
 }
