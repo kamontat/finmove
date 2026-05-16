@@ -1,38 +1,31 @@
 import { Text } from "ink";
 import type { JSX } from "react";
 import { useEffect, useState } from "react";
+import { today } from "../../core/services/date";
 import {
 	deleteTrip,
 	listTrips,
+	sortTrips,
 	type TripEntry,
 } from "../../core/services/trip";
-import { RemoveSelector } from "../components/molecules/RemoveSelector";
+import { TableSelect } from "../components/molecules/TableSelect";
 import { SELECT_REMOVE_HINTS } from "../constants/hints";
+import { useFocus } from "../states/focus";
 import { useLayout } from "../states/layout";
 import { useMenu } from "../states/menu";
 import { useNavigation, useRouteProps } from "../states/navigation";
-
-function entryLabel(entry: TripEntry): string {
-	return entry.kind === "ok" ? entry.trip.settings.name : `⚠ ${entry.dirName}`;
-}
-
-function entryDirPath(entry: TripEntry): string {
-	return entry.kind === "ok" ? entry.trip.dirPath : entry.dirPath;
-}
-
-function entryDetail(entry: TripEntry): string {
-	return entry.kind === "ok"
-		? `(${entry.trip.settings.startDate} — ${entry.trip.settings.endDate})`
-		: `(broken — ${entry.error.name})`;
-}
+import { buildTripListRows, TRIP_LIST_HEADERS } from "./TripList";
 
 export function TripDelete(): JSX.Element {
+	const { focus } = useFocus();
 	const { setHints, setColor, setTitle, clearTitle } = useLayout();
 	const { setMenu } = useMenu();
 	const { goBack } = useNavigation();
 	const { dataDir = "./data" } = useRouteProps("/trips/delete");
 
-	const [entries, setEntries] = useState<TripEntry[]>(() => listTrips(dataDir));
+	const [entries, setEntries] = useState<TripEntry[]>(() =>
+		sortTrips(listTrips(dataDir), today()),
+	);
 
 	useEffect(() => {
 		setColor({ border: "red", title: "red" });
@@ -50,20 +43,22 @@ export function TripDelete(): JSX.Element {
 	}
 
 	return (
-		<RemoveSelector
-			options={entries.map((e) => ({
-				label: entryLabel(e),
-				value: entryDirPath(e),
-				detail: entryDetail(e),
-			}))}
-			onConfirm={(dirPath) => {
+		<TableSelect
+			headers={TRIP_LIST_HEADERS}
+			rows={buildTripListRows(entries, today())}
+			onChange={(rowIndex) => {
+				const entry = entries[rowIndex];
+				if (!entry) return;
+				const dirPath =
+					entry.kind === "ok" ? entry.trip.dirPath : entry.dirPath;
 				deleteTrip(dirPath);
-				const next = listTrips(dataDir);
+				const next = sortTrips(listTrips(dataDir), today());
 				setEntries(next);
 				if (next.length === 0) {
 					goBack();
 				}
 			}}
+			isActive={focus === "main"}
 		/>
 	);
 }
