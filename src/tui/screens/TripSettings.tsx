@@ -80,8 +80,9 @@ export function TripSettings(): JSX.Element {
 		{
 			key: "dirName",
 			label: "Directory",
-			type: "display",
-			value: basename(trip.dirPath),
+			type: "text",
+			editable: false,
+			defaultValue: basename(trip.dirPath),
 		},
 		{
 			key: "name",

@@ -1,9 +1,6 @@
 import { Box } from "ink";
 import type { JSX } from "react";
-import type {
-	FormFieldStrategy,
-	MultiSelectFormField,
-} from "../../models";
+import type { FormFieldStrategy, MultiSelectFormField } from "../../models";
 
 export const FormFieldMultiselect: FormFieldStrategy<MultiSelectFormField> = {
 	emptyValue: [],

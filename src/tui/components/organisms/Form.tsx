@@ -1,12 +1,17 @@
 import { Box, Text, useInput } from "ink";
 import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
-import type { FieldValue, FormFieldConfig } from "../../models";
+import type {
+	FieldValue,
+	FormFieldConfig,
+	FormFieldStrategy,
+} from "../../models";
 import { useFocus } from "../../states/focus";
 import { useFormBuffer } from "../../states/formBuffer";
-import { CheckboxInput } from "../atoms/CheckboxInput";
-import { DateInput } from "../atoms/DateInput";
-import { SelectInput } from "../atoms/SelectInput";
-import { TextInput } from "../atoms/TextInput";
+import { FormFieldBoolean } from "../molecules/FormFieldBoolean";
+import { FormFieldDate } from "../molecules/FormFieldDate";
+import { FormFieldMultiselect } from "../molecules/FormFieldMultiselect";
+import { FormFieldSelect } from "../molecules/FormFieldSelect";
+import { FormFieldText } from "../molecules/FormFieldText";
 
 interface FormProps {
 	fields: FormFieldConfig[];
@@ -14,6 +19,22 @@ interface FormProps {
 	submitLabel?: string;
 	submitKey?: string;
 	formId?: string;
+}
+
+const STRATEGIES = {
+	text: FormFieldText,
+	select: FormFieldSelect,
+	boolean: FormFieldBoolean,
+	date: FormFieldDate,
+	multiselect: FormFieldMultiselect,
+} as const;
+
+function getStrategy(field: FormFieldConfig): FormFieldStrategy {
+	return STRATEGIES[field.type] as FormFieldStrategy;
+}
+
+function isEditable(field: FormFieldConfig): boolean {
+	return field.editable !== false;
 }
 
 export function Form({
@@ -36,8 +57,8 @@ export function Form({
 		() => {
 			const initial: Record<string, FieldValue> = {};
 			for (const field of fields) {
-				if (field.type === "display") continue;
-				initial[field.key] = field.type === "multiselect" ? [] : "";
+				if (!isEditable(field)) continue;
+				initial[field.key] = getStrategy(field).emptyValue;
 			}
 			return initial;
 		},
@@ -58,47 +79,26 @@ export function Form({
 	);
 
 	const [cursor, setCursor] = useState(() => {
-		const idx = fields.findIndex((f) => f.type !== "display");
+		const idx = fields.findIndex(isEditable);
 		return idx === -1 ? fields.length : idx;
 	});
 	const [editing, setEditing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	const isFilled = useCallback(
-		(field: FormFieldConfig): boolean => {
-			if (field.type === "display") return true;
-			const v = values[field.key];
-			if (field.type === "multiselect") {
-				return Array.isArray(v) && v.length > 0;
-			}
-			if (field.type === "boolean") {
-				return typeof v === "boolean" || field.defaultValue !== undefined;
-			}
-			if (typeof v === "string" && v !== "") return true;
-			return field.defaultValue !== undefined;
-		},
-		[values],
-	);
-
 	const canSubmit = useMemo(() => {
 		const allRequiredFilled = fields.every((field) => {
-			if (field.type === "display") return true;
+			if (!isEditable(field)) return true;
 			if (!field.required) return true;
-			return isFilled(field);
+			const strategy = getStrategy(field);
+			return strategy.isFilled(field, values[field.key] ?? strategy.emptyValue);
 		});
-		const hasAnyChange = fields.some((field) => {
-			if (field.type === "display") return false;
-			const v = values[field.key];
-			if (field.type === "multiselect") {
-				return Array.isArray(v) && v.length > 0;
-			}
-			if (field.type === "boolean") {
-				return typeof v === "boolean";
-			}
-			return typeof v === "string" && v !== "";
+		const hasAnyUserValue = fields.some((field) => {
+			if (!isEditable(field)) return false;
+			const strategy = getStrategy(field);
+			return strategy.hasUserValue(values[field.key] ?? strategy.emptyValue);
 		});
-		return allRequiredFilled && hasAnyChange;
-	}, [fields, values, isFilled]);
+		return allRequiredFilled && hasAnyUserValue;
+	}, [fields, values]);
 
 	const totalItems = canSubmit ? fields.length + 1 : fields.length;
 
@@ -110,25 +110,12 @@ export function Form({
 		if (!canSubmit) return;
 		const result: Record<string, FieldValue> = {};
 		for (const field of fields) {
-			if (field.type === "display") continue;
-			const v = values[field.key];
-			if (field.type === "multiselect") {
-				result[field.key] = Array.isArray(v) ? v : [];
-			} else if (field.type === "boolean") {
-				if (typeof v === "boolean") {
-					result[field.key] = v;
-				} else if (field.defaultValue !== undefined) {
-					result[field.key] = field.defaultValue;
-				} else {
-					result[field.key] = false;
-				}
-			} else if (typeof v === "string" && v !== "") {
-				result[field.key] = v;
-			} else if (field.defaultValue !== undefined) {
-				result[field.key] = field.defaultValue;
-			} else {
-				result[field.key] = "";
-			}
+			if (!isEditable(field)) continue;
+			const strategy = getStrategy(field);
+			result[field.key] = strategy.normalizeForSubmit(
+				field,
+				values[field.key] ?? strategy.emptyValue,
+			);
 		}
 		try {
 			onSubmit(result);
@@ -149,31 +136,19 @@ export function Form({
 		setFocus("main");
 	}, [setFocus]);
 
-	const setStringValue = useCallback(
-		(key: string, value: string) => {
+	const handleFieldSubmit = useCallback(
+		(key: string, value: FieldValue) => {
 			setValue(key, value);
 			exitEdit();
 		},
 		[setValue, exitEdit],
 	);
-
-	const setBooleanValue = useCallback(
-		(key: string, value: boolean) => {
-			setValue(key, value);
-			exitEdit();
-		},
-		[setValue, exitEdit],
-	);
-
-	const cancelEdit = useCallback(() => {
-		exitEdit();
-	}, [exitEdit]);
 
 	const isStop = useCallback(
 		(index: number): boolean => {
 			if (index === fields.length) return true; // submit row
 			const field = fields[index];
-			return !!field && field.type !== "display";
+			return !!field && isEditable(field);
 		},
 		[fields],
 	);
@@ -208,17 +183,12 @@ export function Form({
 					handleSubmit();
 				} else {
 					const field = fields[cursor];
-					if (!field || field.type === "display") return;
-					if (field.type === "multiselect") {
-						field.onEdit();
-					} else if (field.type === "select") {
-						if (field.onEdit) {
-							field.onEdit();
-						} else {
-							enterEdit();
-						}
-					} else {
+					if (!field || !isEditable(field)) return;
+					const action = getStrategy(field).onEnterPress(field);
+					if (action === "edit") {
 						enterEdit();
+					} else {
+						action();
 					}
 				}
 			} else if (input === submitKey && canSubmit) {
@@ -231,93 +201,44 @@ export function Form({
 	return (
 		<Box flexDirection="column">
 			{fields.map((field, index) => {
-				if (field.type === "display") {
+				const strategy = getStrategy(field);
+
+				if (!isEditable(field)) {
+					const display = strategy.getDisplay(
+						field,
+						field.defaultValue ?? strategy.emptyValue,
+						values,
+					);
 					return (
 						<Box key={field.key} flexDirection="column">
 							<Text dimColor>
 								{"  "}
-								{field.label}: {field.value}
+								{field.label}: {display}
 							</Text>
 						</Box>
 					);
 				}
 
 				const isCursor = cursor === index;
-				const currentValue = values[field.key];
-				const isEditing = editing && isCursor;
+				const currentValue = values[field.key] ?? strategy.emptyValue;
+				const action = strategy.onEnterPress(field);
+				const isEditingThisRow = editing && isCursor && action === "edit";
 
-				let displayValue = "";
-				if (field.type === "multiselect") {
-					const arr = Array.isArray(currentValue)
-						? currentValue
-						: (field.defaultValue ?? []);
-					displayValue = field.display
-						? field.display(arr)
-						: arr.length === 0
-							? "(none)"
-							: arr.join(", ");
-				} else if (
-					field.type === "select" &&
-					typeof currentValue === "string" &&
-					currentValue !== ""
-				) {
-					const found = field.options.find((o) => o.value === currentValue);
-					displayValue = found?.label ?? currentValue;
-				} else if (
-					field.type === "boolean" &&
-					typeof currentValue === "boolean"
-				) {
-					displayValue = currentValue
-						? (field.trueLabel ?? "Yes")
-						: (field.falseLabel ?? "No");
-				} else if (typeof currentValue === "string") {
-					displayValue = currentValue;
-				}
-
-				const hasValue =
-					field.type === "multiselect"
-						? Array.isArray(currentValue) && currentValue.length > 0
-						: field.type === "boolean"
-							? typeof currentValue === "boolean"
-							: typeof currentValue === "string" && currentValue !== "";
+				const display = strategy.getDisplay(field, currentValue, values);
+				const preview = strategy.getPreview(field, values);
 				const optionalSuffix = !field.required ? " (optional)" : "";
 
-				let preview: string | undefined;
-				if (field.type === "multiselect") {
-					preview = undefined;
-				} else if (field.type === "boolean") {
-					if (field.defaultValue !== undefined) {
-						preview = field.defaultValue
-							? (field.trueLabel ?? "Yes")
-							: (field.falseLabel ?? "No");
-					}
-				} else if (field.defaultValue !== undefined) {
-					if (field.type === "select") {
-						const found = field.options.find(
-							(o) => o.value === field.defaultValue,
-						);
-						preview = found?.label ?? (field.defaultValue as string);
-					} else {
-						preview = field.defaultValue as string;
-					}
-				} else if (field.type === "text" && field.placeholder !== undefined) {
-					preview =
-						typeof field.placeholder === "function"
-							? field.placeholder(stringValuesOnly(values))
-							: field.placeholder;
-				}
+				const labelTail =
+					display !== ""
+						? display
+						: preview !== undefined
+							? `(${preview})`
+							: "";
 
 				const labelText = (
 					<>
 						{field.label}
-						{optionalSuffix}:{" "}
-						{field.type === "multiselect"
-							? displayValue
-							: hasValue
-								? displayValue
-								: preview !== undefined
-									? `(${preview})`
-									: ""}
+						{optionalSuffix}: {labelTail}
 					</>
 				);
 
@@ -336,74 +257,15 @@ export function Form({
 							)}
 						</Text>
 
-						{isEditing && field.type !== "multiselect" && (
+						{isEditingThisRow && (
 							<Box marginLeft={4}>
-								{field.type === "text" && (
-									<TextInput
-										{...(field.placeholder !== undefined
-											? {
-													placeholder:
-														typeof field.placeholder === "function"
-															? field.placeholder(stringValuesOnly(values))
-															: field.placeholder,
-												}
-											: {})}
-										{...(typeof currentValue === "string" && currentValue !== ""
-											? { defaultValue: currentValue }
-											: field.defaultValue !== undefined
-												? { defaultValue: field.defaultValue }
-												: {})}
-										onSubmit={(val) => setStringValue(field.key, val)}
-										onCancel={cancelEdit}
-									/>
-								)}
-								{field.type === "date" && (
-									<DateInput
-										defaultValue={
-											typeof currentValue === "string" && currentValue !== ""
-												? currentValue
-												: (field.defaultValue ?? "2026-01-01")
-										}
-										onSubmit={(val) => setStringValue(field.key, val)}
-										onCancel={cancelEdit}
-									/>
-								)}
-								{field.type === "select" && !field.onEdit && (
-									<SelectInput
-										options={field.options}
-										isActive={true}
-										initialIndex={Math.max(
-											0,
-											field.options.findIndex(
-												(o) =>
-													o.value ===
-													(typeof currentValue === "string" &&
-													currentValue !== ""
-														? currentValue
-														: field.defaultValue),
-											),
-										)}
-										onChange={(val) => setStringValue(field.key, val)}
-										onCancel={cancelEdit}
-									/>
-								)}
-								{field.type === "boolean" && (
-									<CheckboxInput
-										defaultValue={
-											typeof currentValue === "boolean"
-												? currentValue
-												: (field.defaultValue ?? false)
-										}
-										{...(field.trueLabel !== undefined
-											? { trueLabel: field.trueLabel }
-											: {})}
-										{...(field.falseLabel !== undefined
-											? { falseLabel: field.falseLabel }
-											: {})}
-										onSubmit={(val) => setBooleanValue(field.key, val)}
-										onCancel={cancelEdit}
-									/>
-								)}
+								<strategy.Editor
+									field={field}
+									value={currentValue}
+									allValues={values}
+									onSubmit={(val) => handleFieldSubmit(field.key, val)}
+									onCancel={exitEdit}
+								/>
 							</Box>
 						)}
 					</Box>
@@ -439,14 +301,4 @@ export function Form({
 			)}
 		</Box>
 	);
-}
-
-function stringValuesOnly(
-	values: Record<string, FieldValue>,
-): Record<string, string> {
-	const out: Record<string, string> = {};
-	for (const [k, v] of Object.entries(values)) {
-		if (typeof v === "string") out[k] = v;
-	}
-	return out;
 }

@@ -277,18 +277,12 @@ export type MultiSelectFormField = FormFieldBase & {
 	display?: (selected: string[]) => string;
 };
 
-export type DisplayFormField = FormFieldBase & {
-	type: "display";
-	value: string;
-};
-
 export type FormFieldConfig =
 	| TextFormField
 	| SelectFormField
 	| BooleanFormField
 	| DateFormField
-	| MultiSelectFormField
-	| DisplayFormField;
+	| MultiSelectFormField;
 
 export function getString(
 	values: Record<string, FieldValue>,

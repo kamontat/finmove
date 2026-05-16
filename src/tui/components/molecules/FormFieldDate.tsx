@@ -1,8 +1,5 @@
 import type { JSX } from "react";
-import type {
-	DateFormField,
-	FormFieldStrategy,
-} from "../../models";
+import type { DateFormField, FormFieldStrategy } from "../../models";
 import { DateInput } from "../atoms/DateInput";
 
 export const FormFieldDate: FormFieldStrategy<DateFormField> = {

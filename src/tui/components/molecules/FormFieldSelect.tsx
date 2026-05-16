@@ -1,8 +1,5 @@
 import type { JSX } from "react";
-import type {
-	FormFieldStrategy,
-	SelectFormField,
-} from "../../models";
+import type { FormFieldStrategy, SelectFormField } from "../../models";
 import { SelectInput } from "../atoms/SelectInput";
 
 export const FormFieldSelect: FormFieldStrategy<SelectFormField> = {
@@ -41,9 +38,7 @@ export const FormFieldSelect: FormFieldStrategy<SelectFormField> = {
 
 	Editor({ field, value, onSubmit, onCancel }): JSX.Element {
 		const target =
-			typeof value === "string" && value !== ""
-				? value
-				: field.defaultValue;
+			typeof value === "string" && value !== "" ? value : field.defaultValue;
 		const initialIndex = Math.max(
 			0,
 			field.options.findIndex((o) => o.value === target),

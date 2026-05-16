@@ -1,8 +1,5 @@
 import type { JSX } from "react";
-import type {
-	BooleanFormField,
-	FormFieldStrategy,
-} from "../../models";
+import type { BooleanFormField, FormFieldStrategy } from "../../models";
 import { CheckboxInput } from "../atoms/CheckboxInput";
 
 function labelFor(field: BooleanFormField, value: boolean): string {
