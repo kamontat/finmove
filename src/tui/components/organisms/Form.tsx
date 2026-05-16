@@ -56,12 +56,10 @@ export function Form({
 		[usingBuffer, buffer],
 	);
 
-	const initialCursor = useMemo(() => {
+	const [cursor, setCursor] = useState(() => {
 		const idx = fields.findIndex((f) => f.type !== "display");
 		return idx === -1 ? fields.length : idx;
-	}, [fields]);
-
-	const [cursor, setCursor] = useState(initialCursor);
+	});
 	const [editing, setEditing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
