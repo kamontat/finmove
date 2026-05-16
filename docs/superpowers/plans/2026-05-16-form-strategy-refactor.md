@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Refactor `src/tui/components/organisms/Form.tsx` from a 405-line file with field-type discrimination in 6 places into an orchestrator that delegates to per-field-type strategy modules.
+**Goal:** Refactor `src/tui/components/organisms/Form.tsx` (~450 lines) from a file with field-type discrimination in 6 places + display-type branching in 9 places into an orchestrator that delegates to per-field-type strategy modules. Replace the standalone `DisplayFormField` type with a uniform `editable?: boolean` property on `FormFieldBase` that any field type can carry.
 
-**Architecture:** Each field type (`text`, `select`, `boolean`, `date`, `multiselect`) gets a strategy module in `molecules/` that owns its own `isFilled`, `hasUserValue`, `normalizeForSubmit`, `getDisplay`, `getPreview`, `onEnterPress`, and `Editor`. `Form.tsx` keeps state/keyboard/orchestration only, with a single registry lookup `getStrategy(field)`.
+**Architecture:** Each editable field type (`text`, `select`, `boolean`, `date`, `multiselect`) gets a strategy module in `molecules/` that owns its own `isFilled`, `hasUserValue`, `normalizeForSubmit`, `getDisplay`, `getPreview`, `onEnterPress`, and `Editor`. `Form.tsx` keeps state/keyboard/orchestration only, with a single registry lookup `getStrategy(field)`. Non-editability is handled by Form.tsx checking `field.editable !== false` — same property check regardless of field type, no `field.type === "display"` branches anywhere.
 
 **Tech Stack:** React + Ink (terminal UI), TypeScript with `exactOptionalPropertyTypes`, Bun runtime. No new tests added (spec excludes them — no existing Ink test harness in this repo). Verification = `bun run check:type` + `bun run check` + manual smoke per consumer screen.
 
@@ -16,32 +16,51 @@
 
 Read these before starting:
 
-- `src/tui/components/organisms/Form.tsx` — current implementation (the file being refactored)
-- `src/tui/models/index.ts` — `FormFieldConfig` union, `FieldValue`, `TextFormField`, `SelectFormField`, `BooleanFormField`, `DateFormField`, `MultiSelectFormField`
+- `src/tui/components/organisms/Form.tsx` — current implementation (~450 lines, the file being refactored)
+- `src/tui/models/index.ts` — `FormFieldConfig` union, `FieldValue`, `TextFormField`, `SelectFormField`, `BooleanFormField`, `DateFormField`, `MultiSelectFormField`, `DisplayFormField` (the last is being removed)
 - `src/tui/components/atoms/TextInput.tsx`, `SelectInput.tsx`, `CheckboxInput.tsx`, `DateInput.tsx` — the atoms each Editor will wrap
-- `src/tui/components/molecules/FormField.tsx` — existing molecule, **do not touch** (used elsewhere)
+- `src/tui/components/molecules/FormField.tsx` — existing molecule, **do not touch** (used elsewhere, unrelated)
+- `src/tui/screens/TripSettings.tsx` — the sole consumer of `DisplayFormField` (will be migrated in Task 7)
 - `CLAUDE.md` — naming conventions, TUI conventions (no `index.ts` re-exports in TUI; PascalCase for TUI files)
 
 Key behavior invariants to preserve exactly:
 
 1. `isFilled` for boolean returns `true` when `defaultValue !== undefined`, even without user input.
-2. `canSubmit` requires at least one user-touched field (`hasUserValue` over the field set), not just defaults.
+2. `canSubmit` requires at least one user-touched field (`hasUserValue` over the field set), not just defaults. Non-editable fields don't count toward either side.
 3. Select with `field.onEdit` set must NOT enter inline edit mode on Enter — it must call `field.onEdit()`.
 4. Multiselect always calls `field.onEdit()` on Enter (it's a required prop).
 5. Text placeholder function receives only string values, filtered from `values`.
 6. Date editor defaults to `"2026-01-01"` when neither current value nor `defaultValue` is set.
 7. Conditional prop spreading is required for optional Ink props (`exactOptionalPropertyTypes` is on).
+8. Non-editable rows: dim, no cursor caret, cursor `↑↓` skips them, excluded from submit, no `(optional)` suffix, no preview brackets.
 
 ---
 
-## Task 1: Add FormFieldStrategy types to `src/tui/models/index.ts`
+## Task 1: Add `editable?: boolean` + FormFieldStrategy types to `src/tui/models/index.ts`
 
 **Files:**
-- Modify: `src/tui/models/index.ts` (append at end, after the `FormFieldConfig` union and `getString`/`getStringArray`/`getBoolean` helpers)
+- Modify: `src/tui/models/index.ts`
 
-- [ ] **Step 1: Append the strategy interface to `src/tui/models/index.ts`**
+This task is purely additive — `DisplayFormField` stays in the union for now (removed in Task 7).
 
-Add these exports at the end of the file, after `getBoolean`:
+- [ ] **Step 1: Add `editable?: boolean` to `FormFieldBase`**
+
+Find the `FormFieldBase` interface (around line 241). Modify it to add `editable?: boolean`:
+
+```ts
+interface FormFieldBase {
+	key: string;
+	label: string;
+	required?: boolean;
+	editable?: boolean;
+}
+```
+
+All field type variants (`TextFormField`, `SelectFormField`, `BooleanFormField`, `DateFormField`, `MultiSelectFormField`, `DisplayFormField`) inherit this via intersection — no other changes to the type variants are needed.
+
+- [ ] **Step 2: Append the strategy interface at the end of the file**
+
+After the existing `getBoolean` function, append:
 
 ```ts
 // --- Form field strategies ---
@@ -80,17 +99,21 @@ export interface FormFieldStrategy<
 }
 ```
 
-- [ ] **Step 2: Type check**
+- [ ] **Step 3: Type check**
 
 Run: `bun run check:type`
-Expected: PASS (interface-only addition, no usages yet)
+Expected: PASS (additive change — `editable` is optional, strategy types are new exports, no existing usages need updating yet)
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add src/tui/models/index.ts
 git commit -m "$(cat <<'EOF'
-feat(tui): add FormFieldStrategy interface to models
+feat(tui): add editable flag and FormFieldStrategy interface
+
+Adds editable?: boolean to FormFieldBase (default true) so any field type
+can be marked read-only. Adds FormFieldStrategy / FormFieldStrategyEditorProps
+interfaces for the upcoming per-type strategy modules.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -188,11 +211,12 @@ export const FormFieldText: FormFieldStrategy<TextFormField> = {
 Notes:
 - `onSubmit` typed as `(v: FieldValue) => void` is assignable to TextInput's `onSubmit: (v: string) => void` via TypeScript's contravariant function parameters.
 - Conditional spreading of `placeholder` and `defaultValue` is required because of `exactOptionalPropertyTypes`.
+- For non-editable text fields (handled by Form.tsx in Task 7), `getDisplay` is called with `field.defaultValue ?? ""` — it returns that string directly, which is exactly what the dim row needs.
 
 - [ ] **Step 2: Type check**
 
 Run: `bun run check:type`
-Expected: PASS (not yet imported anywhere; just a new file)
+Expected: PASS (not yet imported anywhere)
 
 - [ ] **Step 3: Commit**
 
@@ -374,7 +398,7 @@ export const FormFieldBoolean: FormFieldStrategy<BooleanFormField> = {
 ```
 
 Notes:
-- `emptyValue` is `""` (string) — boolean fields stay as empty string until the user toggles, matching the current Form's `useState` init that uses `""` for everything except multiselect. This is intentional: `hasUserValue` checks `typeof === "boolean"` so the empty-string initial state correctly signals "not yet touched".
+- `emptyValue` is `""` (string) — boolean fields stay as empty string until the user toggles, matching the current Form's `useState` init that uses `""` for everything except multiselect.
 - `onSubmit` typed `(v: FieldValue) => void` is assignable to `CheckboxInput.onSubmit: (v: boolean) => void` via contravariance.
 
 - [ ] **Step 2: Type check**
@@ -552,14 +576,50 @@ EOF
 
 ---
 
-## Task 7: Rewrite `Form.tsx` to use the strategy registry
+## Task 7: Atomic cutover — migrate TripSettings, rewrite Form.tsx, remove DisplayFormField
+
+This task is **one atomic commit** that simultaneously:
+1. Migrates `TripSettings.tsx` from `type: "display"` to `type: "text", editable: false`.
+2. Rewrites `Form.tsx` to use the strategy registry and treat `field.editable !== false` as the editability gate.
+3. Removes `DisplayFormField` from `FormFieldConfig` in `src/tui/models/index.ts`.
+
+These must happen together because the type system only validates the final state — between any pair of these changes the code would not compile.
 
 **Files:**
+- Modify: `src/tui/screens/TripSettings.tsx`
 - Modify: `src/tui/components/organisms/Form.tsx` (full rewrite)
+- Modify: `src/tui/models/index.ts` (remove `DisplayFormField` type and from the union)
 
-- [ ] **Step 1: Replace the contents of `src/tui/components/organisms/Form.tsx`**
+- [ ] **Step 1: Update `src/tui/screens/TripSettings.tsx`**
 
-Overwrite the file with this exact contents:
+Find the field config that uses `type: "display"` (around line 80-85):
+
+```tsx
+{
+    key: "dirName",
+    label: "Directory",
+    type: "display",
+    value: basename(trip.dirPath),
+},
+```
+
+Replace it with:
+
+```tsx
+{
+    key: "dirName",
+    label: "Directory",
+    type: "text",
+    editable: false,
+    defaultValue: basename(trip.dirPath),
+},
+```
+
+Leave the rest of the file unchanged.
+
+- [ ] **Step 2: Replace the contents of `src/tui/components/organisms/Form.tsx`**
+
+Overwrite the entire file with:
 
 ```tsx
 import { Box, Text, useInput } from "ink";
@@ -597,6 +657,10 @@ function getStrategy(field: FormFieldConfig): FormFieldStrategy {
 	return STRATEGIES[field.type] as FormFieldStrategy;
 }
 
+function isEditable(field: FormFieldConfig): boolean {
+	return field.editable !== false;
+}
+
 export function Form({
 	fields,
 	onSubmit,
@@ -617,6 +681,7 @@ export function Form({
 		() => {
 			const initial: Record<string, FieldValue> = {};
 			for (const field of fields) {
+				if (!isEditable(field)) continue;
 				initial[field.key] = getStrategy(field).emptyValue;
 			}
 			return initial;
@@ -637,18 +702,23 @@ export function Form({
 		[usingBuffer, buffer],
 	);
 
-	const [cursor, setCursor] = useState(0);
+	const [cursor, setCursor] = useState(() => {
+		const idx = fields.findIndex(isEditable);
+		return idx === -1 ? fields.length : idx;
+	});
 	const [editing, setEditing] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const canSubmit = useMemo(() => {
 		const allRequiredFilled = fields.every((field) => {
+			if (!isEditable(field)) return true;
 			if (!field.required) return true;
 			return getStrategy(field).isFilled(field, values[field.key]);
 		});
-		const hasAnyUserValue = fields.some((field) =>
-			getStrategy(field).hasUserValue(values[field.key]),
-		);
+		const hasAnyUserValue = fields.some((field) => {
+			if (!isEditable(field)) return false;
+			return getStrategy(field).hasUserValue(values[field.key]);
+		});
 		return allRequiredFilled && hasAnyUserValue;
 	}, [fields, values]);
 
@@ -662,6 +732,7 @@ export function Form({
 		if (!canSubmit) return;
 		const result: Record<string, FieldValue> = {};
 		for (const field of fields) {
+			if (!isEditable(field)) continue;
 			result[field.key] = getStrategy(field).normalizeForSubmit(
 				field,
 				values[field.key],
@@ -694,18 +765,46 @@ export function Form({
 		[setValue, exitEdit],
 	);
 
+	const isStop = useCallback(
+		(index: number): boolean => {
+			if (index === fields.length) return true; // submit row
+			const field = fields[index];
+			return !!field && isEditable(field);
+		},
+		[fields],
+	);
+
+	const moveCursor = useCallback(
+		(from: number, direction: 1 | -1): number => {
+			let next = from;
+			for (let i = 0; i < totalItems; i++) {
+				next =
+					direction === 1
+						? next < totalItems - 1
+							? next + 1
+							: 0
+						: next > 0
+							? next - 1
+							: totalItems - 1;
+				if (isStop(next)) return next;
+			}
+			return from;
+		},
+		[isStop, totalItems],
+	);
+
 	useInput(
 		(input, key) => {
 			if (key.upArrow) {
-				setCursor((c) => (c > 0 ? c - 1 : totalItems - 1));
+				setCursor((c) => moveCursor(c, -1));
 			} else if (key.downArrow) {
-				setCursor((c) => (c < totalItems - 1 ? c + 1 : 0));
+				setCursor((c) => moveCursor(c, 1));
 			} else if (key.return) {
 				if (cursor === fields.length) {
 					handleSubmit();
 				} else {
 					const field = fields[cursor];
-					if (!field) return;
+					if (!field || !isEditable(field)) return;
 					const action = getStrategy(field).onEnterPress(field);
 					if (action === "edit") {
 						enterEdit();
@@ -723,11 +822,28 @@ export function Form({
 	return (
 		<Box flexDirection="column">
 			{fields.map((field, index) => {
+				const strategy = getStrategy(field);
+
+				if (!isEditable(field)) {
+					const display = strategy.getDisplay(
+						field,
+						field.defaultValue ?? strategy.emptyValue,
+						values,
+					);
+					return (
+						<Box key={field.key} flexDirection="column">
+							<Text dimColor>
+								{"  "}
+								{field.label}: {display}
+							</Text>
+						</Box>
+					);
+				}
+
 				const isCursor = cursor === index;
 				const currentValue = values[field.key];
-				const strategy = getStrategy(field);
 				const action = strategy.onEnterPress(field);
-				const isEditing = editing && isCursor && action === "edit";
+				const isEditingThisRow = editing && isCursor && action === "edit";
 
 				const display = strategy.getDisplay(field, currentValue, values);
 				const preview = strategy.getPreview(field, values);
@@ -762,7 +878,7 @@ export function Form({
 							)}
 						</Text>
 
-						{isEditing && (
+						{isEditingThisRow && (
 							<Box marginLeft={4}>
 								<strategy.Editor
 									field={field}
@@ -810,42 +926,85 @@ export function Form({
 ```
 
 Key changes from the original:
-- No `field.type` branches anywhere; everything goes through `getStrategy(field)`.
-- `localValues` init uses `strategy.emptyValue`.
-- `canSubmit` uses `strategy.isFilled` + `strategy.hasUserValue`.
-- `handleSubmit` uses `strategy.normalizeForSubmit`.
-- Enter handling: `const action = strategy.onEnterPress(field)`; either calls `action()` or `enterEdit()`.
-- Row rendering: `strategy.getDisplay` + `strategy.getPreview` + render `<strategy.Editor />` when `editing && isCursor && action === "edit"`.
+- No `field.type` branches anywhere — registry lookup only.
+- No `field.type === "display"` branches anywhere — replaced by `isEditable(field)` (= `field.editable !== false`).
+- `localValues` init skips non-editable fields and uses `strategy.emptyValue` for editable ones.
+- Initial cursor lands on first editable field via `fields.findIndex(isEditable)`.
+- `canSubmit`, `handleSubmit`, the Enter handler, and `isStop` all guard with `isEditable`.
+- Row rendering has one early-return branch for non-editable rows (renders dim label + `strategy.getDisplay(field, field.defaultValue ?? emptyValue, values)`).
+- The editable row's `display`-or-`(preview)` rendering is unified — `labelTail` defaults to the display string when present, falls back to `(preview)`, then to empty.
 - `stringValuesOnly` helper moved into `FormFieldText.tsx`.
-- The label rendering uses a unified `labelTail` (display if non-empty, else `(preview)`, else `""`). Multiselect's display always returns something (`"(none)"` / join / `field.display(arr)`), so it shows correctly without special casing.
 
-- [ ] **Step 2: Type check**
+- [ ] **Step 3: Remove `DisplayFormField` from `src/tui/models/index.ts`**
+
+Find the `DisplayFormField` type definition (around line 279-282):
+
+```ts
+export type DisplayFormField = FormFieldBase & {
+	type: "display";
+	value: string;
+};
+```
+
+**Delete it entirely.**
+
+Then find the `FormFieldConfig` union (around line 284-290):
+
+```ts
+export type FormFieldConfig =
+	| TextFormField
+	| SelectFormField
+	| BooleanFormField
+	| DateFormField
+	| MultiSelectFormField
+	| DisplayFormField;
+```
+
+Remove the `| DisplayFormField` line so it reads:
+
+```ts
+export type FormFieldConfig =
+	| TextFormField
+	| SelectFormField
+	| BooleanFormField
+	| DateFormField
+	| MultiSelectFormField;
+```
+
+- [ ] **Step 4: Type check**
 
 Run: `bun run check:type`
 Expected: PASS
 
-If TypeScript errors about variance between `(v: FieldValue) => void` and `(v: string) => void` in any of the Editors (TextInput/SelectInput/DateInput) or `(v: boolean) => void` (CheckboxInput), wrap the prop in a one-line closure: `onSubmit={(v) => onSubmit(v)}` inside the strategy module. Function parameter contravariance should make the direct passing work in strict mode, but the closure is the safe fallback.
+If TypeScript complains about variance between `(v: FieldValue) => void` and the atom's narrower `onSubmit` signature in any strategy Editor, wrap with a closure: `onSubmit={(v) => onSubmit(v)}`. Strict-mode contravariance should make direct passing work, but the closure is a safe fallback.
 
-- [ ] **Step 3: Lint**
+If TypeScript complains that `field.defaultValue` doesn't exist on `FormFieldConfig`, double-check that all five remaining variants have `defaultValue?: ...` of some type — they should. The intersection narrows to `string | boolean | string[] | undefined`, which is compatible with `FieldValue | undefined`.
+
+- [ ] **Step 5: Lint**
 
 Run: `bun run check`
-Expected: PASS (no biome warnings). If formatting differs, run `bun run fix` and re-run.
+Expected: PASS. If formatting differs, run `bun run fix` and re-stage modified files.
 
-- [ ] **Step 4: Run existing tests**
+- [ ] **Step 6: Run existing tests**
 
 Run: `bun test`
-Expected: PASS (no Form tests exist; this confirms we didn't break unrelated code paths in `src/core/`).
+Expected: PASS (no Form tests exist; confirms unrelated code paths in `src/core/` aren't affected).
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 7: Commit atomically**
 
 ```bash
-git add src/tui/components/organisms/Form.tsx
+git add src/tui/models/index.ts src/tui/components/organisms/Form.tsx src/tui/screens/TripSettings.tsx
 git commit -m "$(cat <<'EOF'
 refactor(tui): replace Form.tsx if-else chains with strategy registry
 
 Form.tsx now delegates per-field-type behavior to strategy modules in
-molecules/. Eliminates six places of field.type branching, leaving Form
-as a focused orchestrator (state, cursor, keyboard, submit).
+molecules/ (text, select, boolean, date, multiselect). Six places of
+field.type branching collapse into a single registry lookup.
+
+Non-editability is unified under field.editable !== false. The
+DisplayFormField type is removed; TripSettings migrates its directory
+row to type: "text", editable: false. Nine places of "display"-type
+branching collapse into checks of a uniform property.
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
@@ -856,7 +1015,7 @@ EOF
 
 ## Task 8: Manual smoke verification
 
-Run the app and verify each field type still works end-to-end. The 17 consumer screens do not need code edits — Form's public API is unchanged.
+Run the app and verify each field type still works end-to-end. The other 16 consumer screens do not need code edits — Form's public API is unchanged.
 
 - [ ] **Step 1: Start the app**
 
@@ -896,7 +1055,7 @@ Verify:
 
 - [ ] **Step 5: Boolean**
 
-Navigate to `Trips → [trip] → Settings → Tags → New Tag` (or similar — find a form using a boolean field via `git grep '"boolean"' src/tui/screens`).
+Navigate to `Trips → [trip] → Settings → Tags → New Tag`.
 
 Verify:
 - `[Enter]` enters edit mode showing `CheckboxInput`.
@@ -913,16 +1072,26 @@ Verify:
 - `↑/↓` changes the active segment.
 - `[Enter]` confirms; `[Esc]` cancels.
 
-- [ ] **Step 7: Keyboard behaviors**
+- [ ] **Step 7: Non-editable text (TripSettings directory row)**
+
+Navigate to `Trips → [trip] → Settings`.
+
+Verify:
+- The `Directory:` row appears dim with the directory basename visible (e.g., `my-trip-2026`).
+- Pressing `↑/↓` cycles between the OTHER fields and the submit row but never lands on `Directory`.
+- Pressing `[s]` submits the form; the submit result does NOT contain `dirName`.
+- After submission, the form behaves normally.
+
+- [ ] **Step 8: Keyboard behaviors**
 
 In any form:
 - `[Tab]` switches focus between main and menu (when a menu is registered).
 - `[?]` toggles help bar (when help hints are registered).
 - `[q]` goes back from the form.
-- Cursor wraps at top and bottom with `↑/↓`.
+- Cursor wraps at top and bottom with `↑/↓`, skipping non-editable rows.
 - After all required fields are filled, the `[s] Submit` row appears and is reachable via cursor.
 
-- [ ] **Step 8: Buffer (formId) integration**
+- [ ] **Step 9: Buffer (formId) integration**
 
 In `New Expense` (which uses `formId`):
 - Enter a value in the description.
@@ -930,7 +1099,7 @@ In `New Expense` (which uses `formId`):
 - Verify the description is still populated AND the currency now shows the picked value.
 - Repeat for account / category.
 
-- [ ] **Step 9: Submit error path**
+- [ ] **Step 10: Submit error path**
 
 Trigger a validation error from a consumer screen (e.g. duplicate trip name in `New Trip`).
 
@@ -938,20 +1107,20 @@ Verify:
 - The error message renders in red below the submit row.
 - After fixing the value and resubmitting, the error clears.
 
-- [ ] **Step 10: If anything regresses**
+- [ ] **Step 11: If anything regresses**
 
-Fix the strategy module responsible (most regressions will be in display/preview/normalize). Run `bun run check:type` + `bun run check` after each fix. Commit fixes individually:
+Fix the strategy module responsible (most regressions will be in display/preview/normalize) or `Form.tsx`. Run `bun run check:type` + `bun run check` after each fix. Commit fixes individually:
 
 ```bash
 git commit -m "$(cat <<'EOF'
-fix(tui): <specific bug> in <strategy module>
+fix(tui): <specific bug> in <strategy module or Form>
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
 EOF
 )"
 ```
 
-- [ ] **Step 11: Final verification**
+- [ ] **Step 12: Final verification**
 
 Run all of:
 - `bun run check:type` → PASS
@@ -972,11 +1141,12 @@ If all pass and smoke succeeded, refactor is complete.
 - `src/tui/components/molecules/FormFieldMultiselect.tsx` (~45 lines)
 
 **Modified:**
-- `src/tui/models/index.ts` (+~30 lines for strategy interface)
-- `src/tui/components/organisms/Form.tsx` (~150 lines, down from ~405)
+- `src/tui/models/index.ts` — add `editable?: boolean` to `FormFieldBase`, add `FormFieldStrategy` interface, remove `DisplayFormField`.
+- `src/tui/components/organisms/Form.tsx` — full rewrite, ~180 lines (down from ~450).
+- `src/tui/screens/TripSettings.tsx` — single field config migrated from `type: "display"` to `type: "text", editable: false`.
 
 **Untouched:**
-- All 17 consumer screens.
+- All other 16 consumer screens.
 - `src/tui/components/molecules/FormField.tsx` (separate, unrelated molecule).
 - `useFormBuffer`, focus/help/layout contexts.
 - `src/core/` (zero dependency on TUI).
