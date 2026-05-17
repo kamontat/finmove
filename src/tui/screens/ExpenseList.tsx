@@ -23,8 +23,8 @@ import { useNavigation } from "../states/navigation";
 import { tripTitle } from "../utils/titles";
 
 export const EXPENSE_LIST_HEADERS: string[] = [
-	"Account",
 	"Date",
+	"Account",
 	"Payee",
 	"Category",
 	"Amount",
@@ -122,8 +122,8 @@ export function buildExpenseListRows(
 			: { text: `${data.thbNum.padStart(thbWidth)} THB` };
 
 		return [
-			{ text: account?.name ?? e.accountId },
 			{ text: e.date },
+			{ text: account?.name ?? e.accountId },
 			{ text: e.payee },
 			{ text: e.category },
 			amountCell,
