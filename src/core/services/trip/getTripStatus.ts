@@ -21,7 +21,12 @@ export interface TripStatus {
 	categoryCount: { used: number; total: number };
 	tagCount: { used: number; total: number };
 
-	ownerBalances: { ownerId: string; name: string; balanceThb: number }[];
+	ownerBalances: {
+		ownerId: string;
+		name: string;
+		shareThb: number;
+		balanceThb: number;
+	}[];
 	accountCount: number;
 	byAccount: {
 		accountId: string;
@@ -193,6 +198,7 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 	const ownerBalances = trip.owners.map((o) => ({
 		ownerId: o.id,
 		name: o.name,
+		shareThb: round2(share.get(o.id) ?? 0),
 		balanceThb: round2((paid.get(o.id) ?? 0) - (share.get(o.id) ?? 0)),
 	}));
 

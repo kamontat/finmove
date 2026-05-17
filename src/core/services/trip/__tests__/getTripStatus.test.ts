@@ -581,7 +581,9 @@ describe("getTripStatus — owner balances", () => {
 		const s = getTripStatus(trip, "2026-04-20");
 		const alice = s.ownerBalances.find((o) => o.ownerId === "alice");
 		const bob = s.ownerBalances.find((o) => o.ownerId === "bob");
+		expect(alice?.shareThb).toBe(500);
 		expect(alice?.balanceThb).toBe(500); // paid 1000, share 500
+		expect(bob?.shareThb).toBe(500);
 		expect(bob?.balanceThb).toBe(-500); // paid 0, share 500
 	});
 

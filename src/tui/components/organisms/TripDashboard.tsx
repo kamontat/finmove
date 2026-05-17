@@ -165,15 +165,25 @@ function formatSigned(amount: number): string {
 }
 
 function OwnersBlock({ status }: Props): JSX.Element {
+	const nameWidth = 14;
+	const shareWidth = 12;
 	return (
-		<Box flexDirection="column" width={40}>
+		<Box flexDirection="column" width={50}>
 			<SectionHeader label="Owners" />
+			<Box>
+				<Text>{"".padEnd(nameWidth)}</Text>
+				<Text dimColor>{"Share".padStart(shareWidth)}</Text>
+				<Text>{"  "}</Text>
+				<Text dimColor>Balance</Text>
+			</Box>
 			{status.ownerBalances.map((o) => {
 				const color =
 					o.balanceThb > 0 ? "green" : o.balanceThb < 0 ? "red" : undefined;
 				return (
 					<Box key={o.ownerId}>
-						<Text>{o.name.padEnd(14)}</Text>
+						<Text>{o.name.padEnd(nameWidth)}</Text>
+						<Text dimColor>{formatThb(o.shareThb).padStart(shareWidth)}</Text>
+						<Text>{"  "}</Text>
 						<Text bold {...(color ? { color } : { dimColor: true })}>
 							{formatSigned(o.balanceThb)}
 						</Text>
