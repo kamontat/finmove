@@ -1,12 +1,5 @@
-import {
-	Box,
-	type DOMElement,
-	measureElement,
-	Text,
-	useInput,
-	useStdout,
-} from "ink";
-import type { JSX, ReactNode } from "react";
+import { Box, type DOMElement, Text, useBoxMetrics, useInput } from "ink";
+import type { JSX, ReactNode, RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 
 interface VerticalSelectProps {
@@ -66,46 +59,41 @@ export function VerticalSelect({
 	);
 
 	const outerRef = useRef<DOMElement>(null);
-	const [viewportHeight, setViewportHeight] = useState(0);
-
-	const { stdout } = useStdout();
-	const termRows = stdout?.rows ?? 0;
-	const termCols = stdout?.columns ?? 0;
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: termRows/termCols re-trigger measurement on resize
-	useEffect(() => {
-		if (!outerRef.current) return;
-		setViewportHeight(measureElement(outerRef.current).height);
-	}, [termRows, termCols]);
+	const { height: viewportHeight, hasMeasured } = useBoxMetrics(
+		outerRef as RefObject<DOMElement>,
+	);
 
 	const visibleRows = Math.max(1, viewportHeight);
 
 	const [scrollOffset, setScrollOffset] = useState(0);
 
 	useEffect(() => {
+		if (!hasMeasured) return;
 		setScrollOffset((o) => {
 			if (safeCursor < o) return safeCursor;
 			if (safeCursor >= o + visibleRows) return safeCursor - visibleRows + 1;
 			return Math.min(o, Math.max(0, rowCount - visibleRows));
 		});
-	}, [safeCursor, visibleRows, rowCount]);
+	}, [hasMeasured, safeCursor, visibleRows, rowCount]);
 
 	const start = scrollOffset;
 	const end = Math.min(rowCount, start + visibleRows);
-	const overflowing = rowCount > visibleRows;
+	const overflowing = hasMeasured && rowCount > visibleRows;
 
 	return (
 		<Box ref={outerRef} flexGrow={1} flexDirection="column" overflow="hidden">
-			<Box flexDirection="column" flexShrink={0}>
-				{Array.from({ length: end - start }, (_, i) => {
-					const idx = start + i;
-					return (
-						<Box key={idx}>
-							{renderRow(idx, isActive && idx === safeCursor)}
-						</Box>
-					);
-				})}
-			</Box>
+			{hasMeasured && (
+				<Box flexDirection="column" flexShrink={0}>
+					{Array.from({ length: end - start }, (_, i) => {
+						const idx = start + i;
+						return (
+							<Box key={idx}>
+								{renderRow(idx, isActive && idx === safeCursor)}
+							</Box>
+						);
+					})}
+				</Box>
+			)}
 			{overflowing && (
 				<Box position="absolute" bottom={0} right={0}>
 					<Text dimColor>

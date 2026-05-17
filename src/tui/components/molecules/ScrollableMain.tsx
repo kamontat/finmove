@@ -1,12 +1,5 @@
-import {
-	Box,
-	type DOMElement,
-	measureElement,
-	Text,
-	useInput,
-	useStdout,
-} from "ink";
-import type { JSX, ReactNode } from "react";
+import { Box, type DOMElement, Text, useBoxMetrics, useInput } from "ink";
+import type { JSX, ReactNode, RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 
 interface ScrollableMainProps {
@@ -18,27 +11,24 @@ export function ScrollableMain({
 	isActive,
 	children,
 }: ScrollableMainProps): JSX.Element {
-	const { stdout } = useStdout();
-	const rows = stdout?.rows ?? 0;
-	const cols = stdout?.columns ?? 0;
-
 	const outerRef = useRef<DOMElement>(null);
 	const contentRef = useRef<DOMElement>(null);
 	const [offset, setOffset] = useState(0);
-	const [viewportHeight, setViewportHeight] = useState(0);
-	const [contentHeight, setContentHeight] = useState(0);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: rows/cols deps re-trigger measurement on terminal resize
-	useEffect(() => {
-		if (!outerRef.current || !contentRef.current) return;
-		const v = measureElement(outerRef.current).height;
-		const c = measureElement(contentRef.current).height;
-		setViewportHeight(v);
-		setContentHeight(c);
-		setOffset((o) => Math.min(o, Math.max(0, c - v)));
-	}, [rows, cols]);
+	const { height: viewportHeight, hasMeasured: outerMeasured } = useBoxMetrics(
+		outerRef as RefObject<DOMElement>,
+	);
+	const { height: contentHeight, hasMeasured: contentMeasured } = useBoxMetrics(
+		contentRef as RefObject<DOMElement>,
+	);
+	const hasMeasured = outerMeasured && contentMeasured;
 
 	const maxOffset = Math.max(0, contentHeight - viewportHeight);
+
+	useEffect(() => {
+		if (!hasMeasured) return;
+		setOffset((o) => Math.min(o, maxOffset));
+	}, [hasMeasured, maxOffset]);
 
 	useInput(
 		(_, key) => {
@@ -51,7 +41,7 @@ export function ScrollableMain({
 		{ isActive },
 	);
 
-	const overflows = contentHeight > viewportHeight;
+	const overflows = hasMeasured && contentHeight > viewportHeight;
 	let glyph: string | null = null;
 	if (overflows) {
 		if (offset === 0) glyph = "↓";
@@ -65,7 +55,7 @@ export function ScrollableMain({
 				ref={contentRef}
 				flexDirection="column"
 				flexShrink={0}
-				marginTop={-offset}
+				marginTop={hasMeasured ? -offset : 0}
 			>
 				{children}
 			</Box>
