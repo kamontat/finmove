@@ -126,7 +126,7 @@ export function ExpenseForm(): JSX.Element {
 				label: "Date",
 				type: "date",
 				required: true,
-				defaultValue: sourceForDefaults?.date ?? today(),
+				defaultValue: sourceForDefaults?.date ?? trip.settings.startDate,
 			},
 			{
 				key: "payee",
