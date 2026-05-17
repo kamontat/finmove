@@ -14,18 +14,21 @@ export const formFieldMultiselectStrategy: FormFieldStrategy<MultiSelectFormFiel
 		emptyValue: [],
 
 		hasUserValue(value) {
-			return Array.isArray(value) && value.length > 0;
+			return (Array.isArray(value) && value.length > 0) || value === null;
 		},
 
 		isFilled(_field, value) {
+			if (value === null) return false;
 			return Array.isArray(value) && value.length > 0;
 		},
 
 		normalizeForSubmit(_field, value) {
+			if (value === null) return [];
 			return Array.isArray(value) ? value : [];
 		},
 
 		getDisplay(field, value) {
+			if (value === null) return "(none)";
 			const arr = Array.isArray(value) ? value : (field.defaultValue ?? []);
 			if (field.display) return field.display(arr);
 			return arr.length === 0 ? "(none)" : arr.join(", ");

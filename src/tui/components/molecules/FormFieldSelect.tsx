@@ -33,16 +33,18 @@ export const formFieldSelectStrategy: FormFieldStrategy<SelectFormField> = {
 	emptyValue: "",
 
 	hasUserValue(value) {
-		return typeof value === "string" && value !== "";
+		return (typeof value === "string" && value !== "") || value === null;
 	},
 
 	isFilled(field, value) {
 		if (typeof value === "string" && value !== "") return true;
+		if (value === null) return false;
 		return field.defaultValue !== undefined;
 	},
 
 	normalizeForSubmit(field, value) {
 		if (typeof value === "string" && value !== "") return value;
+		if (value === null) return "";
 		if (field.defaultValue !== undefined) return field.defaultValue;
 		return "";
 	},
@@ -53,7 +55,8 @@ export const formFieldSelectStrategy: FormFieldStrategy<SelectFormField> = {
 		return found?.label ?? value;
 	},
 
-	getPreview(field) {
+	getPreview(field, allValues) {
+		if (allValues[field.key] === null) return undefined;
 		if (field.defaultValue === undefined) return undefined;
 		const found = field.options.find((o) => o.value === field.defaultValue);
 		return found?.label ?? field.defaultValue;

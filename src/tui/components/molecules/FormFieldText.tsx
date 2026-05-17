@@ -35,15 +35,20 @@ export const FormFieldText = ({
 	onCancel,
 }: FormFieldStrategyEditorProps<TextFormField>): JSX.Element => {
 	const placeholder = resolvePlaceholder(field, allValues);
+	const isCleared = value === null;
 	const currentString = typeof value === "string" ? value : "";
-	const defaultValue =
-		currentString !== "" ? currentString : field.defaultValue;
+	const defaultValue = isCleared
+		? undefined
+		: currentString !== ""
+			? currentString
+			: field.defaultValue;
 	return (
 		<TextInput
 			{...(placeholder !== undefined ? { placeholder } : {})}
 			{...(defaultValue !== undefined ? { defaultValue } : {})}
 			onSubmit={onSubmit}
 			onCancel={onCancel}
+			{...(field.required ? {} : { onClear: () => onSubmit(null) })}
 		/>
 	);
 };
@@ -52,16 +57,18 @@ export const formFieldTextStrategy: FormFieldStrategy<TextFormField> = {
 	emptyValue: "",
 
 	hasUserValue(value) {
-		return typeof value === "string" && value !== "";
+		return (typeof value === "string" && value !== "") || value === null;
 	},
 
 	isFilled(field, value) {
 		if (typeof value === "string" && value !== "") return true;
+		if (value === null) return false;
 		return field.defaultValue !== undefined;
 	},
 
 	normalizeForSubmit(field, value) {
 		if (typeof value === "string" && value !== "") return value;
+		if (value === null) return "";
 		if (field.defaultValue !== undefined) return field.defaultValue;
 		return "";
 	},
@@ -71,6 +78,7 @@ export const formFieldTextStrategy: FormFieldStrategy<TextFormField> = {
 	},
 
 	getPreview(field, allValues) {
+		if (allValues[field.key] === null) return undefined;
 		if (field.defaultValue !== undefined) return field.defaultValue;
 		return resolvePlaceholder(field, allValues);
 	},

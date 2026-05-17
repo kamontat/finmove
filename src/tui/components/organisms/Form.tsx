@@ -39,6 +39,16 @@ function isEditable(field: FormFieldConfig): boolean {
 	return field.editable !== false;
 }
 
+// Use `in` rather than `??` so that an explicit `null` (the "cleared"
+// sentinel) is preserved instead of being replaced by emptyValue.
+function readValue(
+	values: Record<string, FieldValue>,
+	key: string,
+	emptyValue: FieldValue,
+): FieldValue {
+	return key in values ? (values[key] as FieldValue) : emptyValue;
+}
+
 export function Form({
 	fields,
 	onSubmit,
@@ -92,12 +102,17 @@ export function Form({
 			if (!isEditable(field)) return true;
 			if (!field.required) return true;
 			const strategy = getStrategy(field);
-			return strategy.isFilled(field, values[field.key] ?? strategy.emptyValue);
+			return strategy.isFilled(
+				field,
+				readValue(values, field.key, strategy.emptyValue),
+			);
 		});
 		const hasAnyUserValue = fields.some((field) => {
 			if (!isEditable(field)) return false;
 			const strategy = getStrategy(field);
-			return strategy.hasUserValue(values[field.key] ?? strategy.emptyValue);
+			return strategy.hasUserValue(
+				readValue(values, field.key, strategy.emptyValue),
+			);
 		});
 		return allRequiredFilled && hasAnyUserValue;
 	}, [fields, values]);
@@ -116,7 +131,7 @@ export function Form({
 			const strategy = getStrategy(field);
 			result[field.key] = strategy.normalizeForSubmit(
 				field,
-				values[field.key] ?? strategy.emptyValue,
+				readValue(values, field.key, strategy.emptyValue),
 			);
 		}
 		try {
@@ -222,7 +237,7 @@ export function Form({
 				}
 
 				const isCursor = cursor === index;
-				const currentValue = values[field.key] ?? strategy.emptyValue;
+				const currentValue = readValue(values, field.key, strategy.emptyValue);
 				const action = strategy.onEnterPress(field);
 				const isEditingThisRow = editing && isCursor && action === "edit";
 

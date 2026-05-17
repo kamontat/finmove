@@ -2,7 +2,7 @@ import type { ComponentType } from "react";
 
 export type FocusZone = "main" | "menu" | "input";
 
-export type FieldValue = string | string[] | boolean | number;
+export type FieldValue = string | string[] | boolean | number | null;
 
 export type NotificationSeverity = "info" | "warn" | "error";
 

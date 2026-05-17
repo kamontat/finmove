@@ -6,6 +6,7 @@ interface NumberInputProps {
 	placeholder?: string;
 	onSubmit: (value: number) => void;
 	onCancel?: () => void;
+	onClear?: () => void;
 }
 
 function parseNumber(s: string): number | undefined {
@@ -28,6 +29,7 @@ export function NumberInput({
 	placeholder,
 	onSubmit,
 	onCancel,
+	onClear,
 }: NumberInputProps): JSX.Element {
 	const [buffer, setBuffer] = useState<string>(
 		defaultValue !== undefined ? String(defaultValue) : "",
@@ -41,6 +43,7 @@ export function NumberInput({
 		if (key.return) {
 			const parsed = parseNumber(buffer);
 			if (parsed !== undefined) onSubmit(parsed);
+			else if (buffer.trim() === "" && onClear) onClear();
 			else onCancel?.();
 			return;
 		}

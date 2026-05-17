@@ -7,6 +7,7 @@ interface TextInputProps {
 	defaultValue?: string;
 	onSubmit: (value: string) => void;
 	onCancel?: () => void;
+	onClear?: () => void;
 }
 
 export function TextInput({
@@ -14,6 +15,7 @@ export function TextInput({
 	defaultValue,
 	onSubmit,
 	onCancel,
+	onClear,
 }: TextInputProps): JSX.Element {
 	useInput((_input, key) => {
 		if (key.escape && onCancel) {
@@ -21,11 +23,19 @@ export function TextInput({
 		}
 	});
 
+	const handleSubmit = (value: string) => {
+		if (value === "" && onClear) {
+			onClear();
+			return;
+		}
+		onSubmit(value);
+	};
+
 	return (
 		<InkTextInput
 			{...(placeholder !== undefined ? { placeholder } : {})}
 			{...(defaultValue !== undefined ? { defaultValue } : {})}
-			onSubmit={onSubmit}
+			onSubmit={handleSubmit}
 		/>
 	);
 }

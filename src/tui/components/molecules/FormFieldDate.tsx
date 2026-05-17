@@ -29,16 +29,18 @@ export const formFieldDateStrategy: FormFieldStrategy<DateFormField> = {
 	emptyValue: "",
 
 	hasUserValue(value) {
-		return typeof value === "string" && value !== "";
+		return (typeof value === "string" && value !== "") || value === null;
 	},
 
 	isFilled(field, value) {
 		if (typeof value === "string" && value !== "") return true;
+		if (value === null) return false;
 		return field.defaultValue !== undefined;
 	},
 
 	normalizeForSubmit(field, value) {
 		if (typeof value === "string" && value !== "") return value;
+		if (value === null) return "";
 		if (field.defaultValue !== undefined) return field.defaultValue;
 		return "";
 	},
@@ -47,7 +49,8 @@ export const formFieldDateStrategy: FormFieldStrategy<DateFormField> = {
 		return typeof value === "string" ? value : "";
 	},
 
-	getPreview(field) {
+	getPreview(field, allValues) {
+		if (allValues[field.key] === null) return undefined;
 		return field.defaultValue;
 	},
 

@@ -35,16 +35,18 @@ export const formFieldBooleanStrategy: FormFieldStrategy<BooleanFormField> = {
 	emptyValue: "",
 
 	hasUserValue(value) {
-		return typeof value === "boolean";
+		return typeof value === "boolean" || value === null;
 	},
 
 	isFilled(field, value) {
 		if (typeof value === "boolean") return true;
+		if (value === null) return false;
 		return field.defaultValue !== undefined;
 	},
 
 	normalizeForSubmit(field, value) {
 		if (typeof value === "boolean") return value;
+		if (value === null) return false;
 		if (field.defaultValue !== undefined) return field.defaultValue;
 		return false;
 	},
@@ -54,7 +56,8 @@ export const formFieldBooleanStrategy: FormFieldStrategy<BooleanFormField> = {
 		return labelFor(field, value);
 	},
 
-	getPreview(field) {
+	getPreview(field, allValues) {
+		if (allValues[field.key] === null) return undefined;
 		if (field.defaultValue === undefined) return undefined;
 		return labelFor(field, field.defaultValue);
 	},

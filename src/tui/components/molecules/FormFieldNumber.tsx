@@ -36,13 +36,17 @@ export const FormFieldNumber = ({
 }: FormFieldStrategyEditorProps<NumberFormField>): JSX.Element => {
 	const placeholder = resolvePlaceholder(field, allValues);
 	const currentNumber = typeof value === "number" ? value : undefined;
-	const defaultValue = currentNumber ?? field.defaultValue;
+	const isCleared = value === null;
+	const defaultValue = isCleared
+		? undefined
+		: (currentNumber ?? field.defaultValue);
 	return (
 		<NumberInput
 			{...(placeholder !== undefined ? { placeholder } : {})}
 			{...(defaultValue !== undefined ? { defaultValue } : {})}
 			onSubmit={onSubmit}
 			onCancel={onCancel}
+			{...(field.required ? {} : { onClear: () => onSubmit(null) })}
 		/>
 	);
 };
@@ -51,16 +55,18 @@ export const formFieldNumberStrategy: FormFieldStrategy<NumberFormField> = {
 	emptyValue: "",
 
 	hasUserValue(value) {
-		return typeof value === "number";
+		return typeof value === "number" || value === null;
 	},
 
 	isFilled(field, value) {
 		if (typeof value === "number") return true;
+		if (value === null) return false;
 		return field.defaultValue !== undefined;
 	},
 
 	normalizeForSubmit(field, value) {
 		if (typeof value === "number") return value;
+		if (value === null) return "";
 		if (field.defaultValue !== undefined) return field.defaultValue;
 		return "";
 	},
@@ -70,6 +76,7 @@ export const formFieldNumberStrategy: FormFieldStrategy<NumberFormField> = {
 	},
 
 	getPreview(field, allValues) {
+		if (allValues[field.key] === null) return undefined;
 		if (field.defaultValue !== undefined) return String(field.defaultValue);
 		return resolvePlaceholder(field, allValues);
 	},
