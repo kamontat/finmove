@@ -3,6 +3,7 @@ import type { JSX } from "react";
 import { useEffect, useState } from "react";
 import { daysBetween, today } from "../../core/services/date";
 import {
+	backupTrip,
 	deleteTrip,
 	listTrips,
 	sortTrips,
@@ -106,6 +107,20 @@ export function TripList(): JSX.Element {
 					},
 				},
 				{
+					label: "Backup",
+					value: "backup",
+					key: "b",
+					mainAction: {
+						check: (i) => entries[i]?.kind === "ok",
+						onConfirm: (i) => {
+							const e = entries[i];
+							if (!e || e.kind !== "ok") return;
+							backupTrip(dataDir, e.trip.dirPath);
+							setEntries(sortTrips(listTrips(dataDir), today()));
+						},
+					},
+				},
+				{
 					label: "Delete",
 					value: "delete",
 					key: "x",
@@ -130,6 +145,8 @@ export function TripList(): JSX.Element {
 					goTo("/trips/new", { props: { dataDir } });
 				} else if (value === "duplicate" && hasOk) {
 					goTo("/trips/duplicate", { props: { dataDir } });
+				} else if (value === "backup" && hasOk) {
+					goTo("/trips/backup", { props: { dataDir } });
 				} else if (value === "delete" && entries.length > 0) {
 					goTo("/trips/delete", { props: { dataDir } });
 				}

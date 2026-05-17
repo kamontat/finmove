@@ -22,6 +22,7 @@ export interface Notification {
 export interface RouteParams {
 	"/trips": { dataDir?: string };
 	"/trips/duplicate": { dataDir?: string };
+	"/trips/backup": { dataDir?: string };
 	"/trips/delete": { dataDir?: string };
 	"/notifications": Record<string, never>;
 	"/trips/broken": {

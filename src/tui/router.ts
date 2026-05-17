@@ -38,6 +38,7 @@ import { TagDelete } from "./screens/TagDelete";
 import { TagEdit } from "./screens/TagEdit";
 import { TagList } from "./screens/TagList";
 import { TagSelect } from "./screens/TagSelect";
+import { TripBackupSelect } from "./screens/TripBackupSelect";
 import { TripBroken } from "./screens/TripBroken";
 import { TripCreateCountryAdd } from "./screens/TripCreateCountryAdd";
 import { TripCreateCountryDelete } from "./screens/TripCreateCountryDelete";
@@ -74,6 +75,9 @@ export const routes: Routes = {
 	},
 	"/trips/duplicate": {
 		component: TripDuplicateSelect,
+	},
+	"/trips/backup": {
+		component: TripBackupSelect,
 	},
 	"/notifications": {
 		component: NotificationList,
