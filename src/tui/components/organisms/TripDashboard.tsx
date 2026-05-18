@@ -210,19 +210,28 @@ function AccountsBlock({ status }: Props): JSX.Element {
 		<Box flexDirection="column" width={40}>
 			<SectionHeader label="Accounts" />
 			{status.byAccount.map((a) => {
-				const cells = Math.max(1, Math.round((a.totalThb / max) * barWidth));
+				const hasSpend = a.totalThb > 0;
+				const cells = hasSpend
+					? Math.max(1, Math.round((a.totalThb / max) * barWidth))
+					: 0;
 				const countStr = `×${a.expenseCount}`.padStart(4);
 				return (
 					<Box key={a.accountId}>
-						<Text>{formatAccountName(a.name)}</Text>
+						<Text dimColor={!hasSpend}>{formatAccountName(a.name)}</Text>
 						<Text> </Text>
 						<Text dimColor>({typeAbbrev(a.type)})</Text>
 						<Text> </Text>
 						<Text dimColor>{countStr}</Text>
 						<Text> </Text>
-						<Text bold>{formatThb(a.totalThb).padStart(10)}</Text>
-						<Text> </Text>
-						<Text color="magenta">{"█".repeat(cells)}</Text>
+						<Text bold={hasSpend} dimColor={!hasSpend}>
+							{formatThb(a.totalThb).padStart(10)}
+						</Text>
+						{hasSpend && (
+							<>
+								<Text> </Text>
+								<Text color="magenta">{"█".repeat(cells)}</Text>
+							</>
+						)}
 					</Box>
 				);
 			})}
@@ -279,7 +288,7 @@ export function TripDashboard({
 	isActive,
 }: DashboardProps): JSX.Element {
 	const hasOwners = status.ownerBalances.length > 0;
-	const hasAccountSpend = status.byAccount.length > 0;
+	const hasAccounts = status.byAccount.length > 0;
 	return (
 		<ScrollableMain isActive={isActive}>
 			<Box flexDirection="column" gap={1}>
@@ -290,7 +299,7 @@ export function TripDashboard({
 					<SpendBlock status={status} />
 					{hasOwners && <OwnersBlock status={status} />}
 					<CategoriesBlock status={status} />
-					{hasAccountSpend && <AccountsBlock status={status} />}
+					{hasAccounts && <AccountsBlock status={status} />}
 					<CountsBlock status={status} />
 				</Box>
 
