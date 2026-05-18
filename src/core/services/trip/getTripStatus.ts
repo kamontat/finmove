@@ -202,14 +202,17 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 		balanceThb: round2((paid.get(o.id) ?? 0) - (share.get(o.id) ?? 0)),
 	}));
 
-	const byAccount = [...accountAggregates.entries()]
-		.map(([accountId, agg]) => ({
-			accountId,
-			name: agg.name,
-			type: agg.type,
-			totalThb: round2(agg.totalThb),
-			expenseCount: agg.expenseCount,
-		}))
+	const byAccount = trip.accounts
+		.map((account) => {
+			const agg = accountAggregates.get(account.id);
+			return {
+				accountId: account.id,
+				name: account.name,
+				type: account.type,
+				totalThb: agg ? round2(agg.totalThb) : 0,
+				expenseCount: agg?.expenseCount ?? 0,
+			};
+		})
 		.sort((a, b) => {
 			if (b.totalThb !== a.totalThb) return b.totalThb - a.totalThb;
 			return a.name.localeCompare(b.name);

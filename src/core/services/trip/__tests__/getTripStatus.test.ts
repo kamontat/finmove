@@ -1076,7 +1076,7 @@ describe("getTripStatus — byAccount", () => {
 		expect(s.byAccount.map((a) => a.name)).toEqual(["Alpha", "Zeta"]);
 	});
 
-	test("excludes configured accounts with zero spend", () => {
+	test("includes configured accounts with zero spend, sorted after spent ones", () => {
 		const s = getTripStatus(
 			makeTrip({
 				accounts: [
@@ -1099,7 +1099,22 @@ describe("getTripStatus — byAccount", () => {
 			}),
 			"2026-04-20",
 		);
-		expect(s.byAccount.map((a) => a.accountId)).toEqual(["a1"]);
+		expect(s.byAccount).toEqual([
+			{
+				accountId: "a1",
+				name: "Used",
+				type: AccountType.Debit,
+				totalThb: 100,
+				expenseCount: 1,
+			},
+			{
+				accountId: "a2",
+				name: "Unused",
+				type: AccountType.Debit,
+				totalThb: 0,
+				expenseCount: 0,
+			},
+		]);
 	});
 
 	test("excludes expenses referencing an unknown accountId", () => {
@@ -1190,7 +1205,7 @@ describe("getTripStatus — byAccount", () => {
 		]);
 	});
 
-	test("byAccount is empty when there are no qualifying expenses", () => {
+	test("byAccount lists configured accounts with zero totals when no qualifying expenses", () => {
 		const s = getTripStatus(
 			makeTrip({
 				accounts: [
@@ -1199,6 +1214,19 @@ describe("getTripStatus — byAccount", () => {
 			}),
 			"2026-04-20",
 		);
+		expect(s.byAccount).toEqual([
+			{
+				accountId: "a1",
+				name: "Acc",
+				type: AccountType.Debit,
+				totalThb: 0,
+				expenseCount: 0,
+			},
+		]);
+	});
+
+	test("byAccount is empty when no accounts are configured", () => {
+		const s = getTripStatus(makeTrip(), "2026-04-20");
 		expect(s.byAccount).toEqual([]);
 	});
 
