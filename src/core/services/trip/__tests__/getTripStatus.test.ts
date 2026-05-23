@@ -7,6 +7,7 @@ function makeTrip(overrides: Partial<Trip> = {}): Trip {
 	return {
 		dirPath: "/tmp/trip",
 		settings: {
+			version: 2,
 			name: "Test Trip",
 			startDate: "2026-04-15",
 			endDate: "2026-04-30",
@@ -360,7 +361,11 @@ describe("getTripStatus — categories and tags", () => {
 		const trip = makeTrip({
 			settings: {
 				...makeTrip().settings,
-				categories: ["Food", "Transport", "Lodging"],
+				categories: [
+					{ value: "Food", excluded: false },
+					{ value: "Transport", excluded: false },
+					{ value: "Lodging", excluded: false },
+				],
 			},
 			expenses: [
 				{
@@ -477,7 +482,11 @@ describe("getTripStatus — categories and tags", () => {
 		const trip = makeTrip({
 			settings: {
 				...makeTrip().settings,
-				categories: ["Food", "Transport", "Lodging"],
+				categories: [
+					{ value: "Food", excluded: false },
+					{ value: "Transport", excluded: false },
+					{ value: "Lodging", excluded: false },
+				],
 			},
 			expenses: [
 				{
@@ -1283,5 +1292,212 @@ describe("getTripStatus — byAccount", () => {
 				expenseCount: 3,
 			},
 		]);
+	});
+});
+
+describe("getTripStatus — exclusion totals and per-person", () => {
+	test("totalSpendExcludedThb equals totalSpendThb when no categories excluded", () => {
+		const trip = makeTrip({
+			settings: {
+				...makeTrip().settings,
+				categories: [{ value: "Food", excluded: false }],
+			},
+			expenses: [
+				{
+					id: "1",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 500,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.totalSpendThb).toBe(500);
+		expect(s.totalSpendExcludedThb).toBe(500);
+		expect(s.hasExcludedCategories).toBe(false);
+	});
+
+	test("excludes flagged category amounts from totalSpendExcludedThb", () => {
+		const trip = makeTrip({
+			settings: {
+				...makeTrip().settings,
+				categories: [
+					{ value: "Food", excluded: false },
+					{ value: "Shopping", excluded: true },
+				],
+			},
+			expenses: [
+				{
+					id: "1",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Food",
+					amount: 500,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+				{
+					id: "2",
+					accountId: "a",
+					date: "2026-04-16",
+					payee: "",
+					category: "Shopping",
+					amount: 2000,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-20");
+		expect(s.totalSpendThb).toBe(2500);
+		expect(s.totalSpendExcludedThb).toBe(500);
+		expect(s.hasExcludedCategories).toBe(true);
+	});
+
+	test("avgPerDay variants compute against correct totals", () => {
+		const trip = makeTrip({
+			settings: {
+				...makeTrip().settings,
+				categories: [
+					{ value: "Food", excluded: false },
+					{ value: "Shopping", excluded: true },
+				],
+			},
+			expenses: [
+				{
+					id: "1",
+					accountId: "a",
+					date: "2026-04-15",
+					payee: "",
+					category: "Food",
+					amount: 400,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+				{
+					id: "2",
+					accountId: "a",
+					date: "2026-04-15",
+					payee: "",
+					category: "Shopping",
+					amount: 1600,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		// today=end → elapsedDays = 16
+		const s = getTripStatus(trip, "2026-04-30");
+		expect(s.avgPerDayThb).toBe(125); // 2000 / 16
+		expect(s.avgPerDayExcludedThb).toBe(25); // 400 / 16
+	});
+
+	test("per-person averages divide by owner count", () => {
+		const trip = makeTrip({
+			owners: [
+				{ id: "o1", name: "A" },
+				{ id: "o2", name: "B" },
+			],
+			settings: {
+				...makeTrip().settings,
+				categories: [
+					{ value: "Food", excluded: false },
+					{ value: "Shopping", excluded: true },
+				],
+			},
+			expenses: [
+				{
+					id: "1",
+					accountId: "a",
+					date: "2026-04-15",
+					payee: "",
+					category: "Food",
+					amount: 400,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+				{
+					id: "2",
+					accountId: "a",
+					date: "2026-04-15",
+					payee: "",
+					category: "Shopping",
+					amount: 1600,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-30");
+		// 16 elapsed days, 2 owners
+		expect(s.avgPerDayPerPersonThb).toBe(62.5); // 2000 / 16 / 2
+		expect(s.avgPerDayPerPersonExcludedThb).toBe(12.5); // 400 / 16 / 2
+	});
+
+	test("per-person fields are 0 when no owners", () => {
+		const trip = makeTrip({
+			owners: [],
+			expenses: [
+				{
+					id: "1",
+					accountId: "a",
+					date: "2026-04-15",
+					payee: "",
+					category: "Food",
+					amount: 100,
+					currency: "THB",
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-30");
+		expect(s.avgPerDayPerPersonThb).toBe(0);
+		expect(s.avgPerDayPerPersonExcludedThb).toBe(0);
+	});
+
+	test("averages are 0 before trip starts", () => {
+		const s = getTripStatus(makeTrip(), "2026-04-10");
+		expect(s.avgPerDayThb).toBe(0);
+		expect(s.avgPerDayExcludedThb).toBe(0);
+		expect(s.avgPerDayPerPersonThb).toBe(0);
+		expect(s.avgPerDayPerPersonExcludedThb).toBe(0);
+	});
+
+	test("missing-rate expenses do not affect excluded total", () => {
+		const trip = makeTrip({
+			settings: {
+				...makeTrip().settings,
+				categories: [{ value: "Food", excluded: true }],
+			},
+			expenses: [
+				{
+					id: "1",
+					accountId: "a",
+					date: "2026-04-15",
+					payee: "",
+					category: "Food",
+					amount: 100,
+					currency: "JPY", // no rate
+					description: "",
+					tags: [],
+				},
+			],
+		});
+		const s = getTripStatus(trip, "2026-04-30");
+		expect(s.totalSpendThb).toBe(0);
+		expect(s.totalSpendExcludedThb).toBe(0);
 	});
 });

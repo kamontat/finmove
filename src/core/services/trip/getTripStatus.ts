@@ -13,7 +13,12 @@ export interface TripStatus {
 	remainingDays: number;
 
 	totalSpendThb: number;
+	totalSpendExcludedThb: number;
 	avgPerDayThb: number;
+	avgPerDayExcludedThb: number;
+	avgPerDayPerPersonThb: number;
+	avgPerDayPerPersonExcludedThb: number;
+	hasExcludedCategories: boolean;
 	expenseCount: number;
 	byCurrency: { currency: string; amount: number }[];
 
@@ -78,6 +83,10 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 	const remainingDays = totalDays - elapsedDays;
 
 	// --- Spend + Categories + Tags ---
+	const excludedCategorySet = new Set(
+		settings.categories.filter((c) => c.excluded).map((c) => c.value),
+	);
+	let totalSpendExcludedThb = 0;
 	let totalSpendThb = 0;
 	let missingRateCount = 0;
 	const currencyTotals = new Map<string, number>();
@@ -110,6 +119,9 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 			missingRateCount += 1;
 		} else {
 			totalSpendThb += thb;
+			if (!excludedCategorySet.has(expense.category)) {
+				totalSpendExcludedThb += thb;
+			}
 			categoryTotals.set(
 				expense.category,
 				(categoryTotals.get(expense.category) ?? 0) + thb,
@@ -159,9 +171,22 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 		}
 	}
 	totalSpendThb = round2(totalSpendThb);
+	totalSpendExcludedThb = round2(totalSpendExcludedThb);
 
+	const ownerCount = trip.owners.length;
 	const avgPerDayThb =
 		elapsedDays > 0 ? round2(totalSpendThb / elapsedDays) : 0;
+	const avgPerDayExcludedThb =
+		elapsedDays > 0 ? round2(totalSpendExcludedThb / elapsedDays) : 0;
+	const avgPerDayPerPersonThb =
+		elapsedDays > 0 && ownerCount > 0
+			? round2(totalSpendThb / elapsedDays / ownerCount)
+			: 0;
+	const avgPerDayPerPersonExcludedThb =
+		elapsedDays > 0 && ownerCount > 0
+			? round2(totalSpendExcludedThb / elapsedDays / ownerCount)
+			: 0;
+	const hasExcludedCategories = excludedCategorySet.size > 0;
 
 	const byCurrency = [...currencyTotals.entries()]
 		.map(([currency, amount]) => ({ currency, amount: round2(amount) }))
@@ -242,7 +267,12 @@ export function getTripStatus(trip: Trip, today: string): TripStatus {
 		elapsedDays,
 		remainingDays,
 		totalSpendThb,
+		totalSpendExcludedThb,
 		avgPerDayThb,
+		avgPerDayExcludedThb,
+		avgPerDayPerPersonThb,
+		avgPerDayPerPersonExcludedThb,
+		hasExcludedCategories,
 		expenseCount: trip.expenses.length,
 		byCurrency,
 		topCategories,
