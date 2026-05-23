@@ -9,7 +9,6 @@ import {
 	type SortLevel,
 	sortExpenses,
 } from "../../core/services/expense";
-import { computeInitials } from "../../core/services/owner";
 import type { TableCell } from "../components/molecules/TableSelect";
 import { TableSelect } from "../components/molecules/TableSelect";
 import { LIST_HINTS } from "../constants/hints";
@@ -41,11 +40,7 @@ function formatFinanceNumber(n: number): string {
 	});
 }
 
-function formatOwnersCell(
-	expense: Expense,
-	trip: Trip,
-	initialsMap: Record<string, string>,
-): TableCell {
+function formatOwnersCell(expense: Expense): TableCell {
 	if (!expense.owners || expense.owners.length === 0) {
 		return { text: "" };
 	}
@@ -55,8 +50,7 @@ function formatOwnersCell(
 	const parts: string[] = [];
 	for (const entry of expense.owners) {
 		const id = typeof entry === "string" ? entry : entry.id;
-		const owner = trip.owners.find((o) => o.id === id);
-		parts.push(owner ? (initialsMap[owner.name] ?? owner.name) : id);
+		parts.push(id);
 	}
 	return { text: parts.join(", ") };
 }
@@ -65,8 +59,6 @@ export function buildExpenseListRows(
 	trip: Trip,
 	expenses: Expense[],
 ): TableCell[][] {
-	const initialsMap = computeInitials(trip.owners.map((o) => o.name));
-
 	// First pass: compute raw numeric strings per row for the Amount and THB columns.
 	const numericData = expenses.map((e) => {
 		const amountNum = formatFinanceNumber(e.amount);
@@ -129,7 +121,7 @@ export function buildExpenseListRows(
 			amountCell,
 			rateCell,
 			thbCell,
-			formatOwnersCell(e, trip, initialsMap),
+			formatOwnersCell(e),
 			{ text: e.tags.length > 0 ? String(e.tags.length) : "" },
 		];
 	});
