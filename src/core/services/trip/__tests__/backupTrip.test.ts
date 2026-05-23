@@ -19,14 +19,14 @@ function writeTrip(dataDir: string, dirName: string, settings: Settings): void {
 
 function makeSettings(name: string): Settings {
 	return {
-		version: 1,
+		version: 2,
 		name,
 		startDate: "2026-05-01",
 		endDate: "2026-05-07",
 		countries: ["Japan"],
 		baseCurrency: "THB",
 		currencies: { JPY: { exchangeRate: 0.23 } },
-		categories: ["Food"],
+		categories: [{ value: "Food", excluded: false }],
 		tags: [],
 		exportPath: "./out.csv",
 	};

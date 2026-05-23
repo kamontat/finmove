@@ -6,14 +6,14 @@ import { validateOwners } from "../validateOwners";
 import { validateSettings } from "../validateSettings";
 
 const validSettings: Settings = {
-	version: 1,
+	version: 2,
 	name: "Test",
 	startDate: "2026-01-01",
 	endDate: "2026-01-07",
 	countries: ["Japan"],
 	baseCurrency: "THB",
 	currencies: { JPY: { exchangeRate: 0.23 } },
-	categories: ["Eating"],
+	categories: [{ value: "Eating", excluded: false }],
 	tags: [],
 	exportPath: "./expenses.csv",
 };

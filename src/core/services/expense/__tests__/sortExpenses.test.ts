@@ -23,14 +23,17 @@ function makeTrip(expenses: Expense[]): Trip {
 	return {
 		dirPath: "/test",
 		settings: {
-			version: 1,
+			version: 2,
 			name: "Test",
 			startDate: "2026-01-01",
 			endDate: "2026-01-31",
 			countries: ["TH"],
 			baseCurrency: "THB",
 			currencies: { USD: { exchangeRate: 35 }, EUR: { exchangeRate: 38 } },
-			categories: ["Food", "Transport"],
+			categories: [
+				{ value: "Food", excluded: false },
+				{ value: "Transport", excluded: false },
+			],
 			tags: [],
 			exportPath: "/tmp/test.csv",
 		},

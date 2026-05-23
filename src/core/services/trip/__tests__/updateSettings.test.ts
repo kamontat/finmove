@@ -9,14 +9,17 @@ import { updateSettings } from "../updateSettings";
 const TEST_DIR = join(import.meta.dir, "__fixtures__");
 
 const sampleSettings: Settings = {
-	version: 1,
+	version: 2,
 	name: "Test Trip",
 	startDate: "2026-05-01",
 	endDate: "2026-05-07",
 	countries: ["Japan"],
 	baseCurrency: "THB",
 	currencies: { JPY: { exchangeRate: 0.23 } },
-	categories: ["Flight", "Hotels"],
+	categories: [
+		{ value: "Flight", excluded: false },
+		{ value: "Hotels", excluded: false },
+	],
 	tags: [{ value: "test", default: false }],
 	exportPath: "./expenses.csv",
 };
@@ -87,7 +90,10 @@ describe("updateSettings", () => {
 
 		const trip = loadTrip(tripDir);
 		expect(trip.settings.tags).toEqual([{ value: "test", default: false }]);
-		expect(trip.settings.categories).toEqual(["Flight", "Hotels"]);
+		expect(trip.settings.categories).toEqual([
+			{ value: "Flight", excluded: false },
+			{ value: "Hotels", excluded: false },
+		]);
 		expect(trip.settings.currencies).toEqual({
 			JPY: { exchangeRate: 0.23 },
 		});

@@ -26,10 +26,11 @@ const legacySettings = {
 	exportPath: "./expenses.csv",
 };
 
-// Modern (v1) shape — has `version: 1`. Tests that assert "no rewrite" use this.
+// Modern (v2) shape — has `version: 2`. Tests that assert "no rewrite" use this.
 const modernSettings = {
-	version: 1 as const,
 	...legacySettings,
+	version: 2 as const,
+	categories: [{ value: "Food", excluded: false }],
 };
 
 beforeEach(() => {

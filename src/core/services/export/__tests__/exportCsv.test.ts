@@ -12,7 +12,7 @@ function makeTripFixture(): Trip {
 			countries: ["Japan"],
 			baseCurrency: "THB",
 			currencies: { JPY: { exchangeRate: 0.23 } },
-			categories: ["Eating"],
+			categories: [{ value: "Eating", excluded: false }],
 			tags: [],
 			exportPath: "./expenses.csv",
 		},

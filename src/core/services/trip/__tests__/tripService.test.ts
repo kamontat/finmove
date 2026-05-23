@@ -13,7 +13,7 @@ import { toDirName } from "../toDirName";
 const TEST_DIR = join(import.meta.dir, "__fixtures__");
 
 const sampleSettings: Settings = {
-	version: 1,
+	version: 2,
 	name: "Test Trip",
 	startDate: "2026-05-01",
 	endDate: "2026-05-07",
@@ -21,12 +21,12 @@ const sampleSettings: Settings = {
 	baseCurrency: "THB",
 	currencies: { JPY: { exchangeRate: 0.23 } },
 	categories: [
-		"Flight",
-		"Hotels",
-		"Transportation",
-		"Shopping",
-		"Eating",
-		"Activities",
+		{ value: "Flight", excluded: false },
+		{ value: "Hotels", excluded: false },
+		{ value: "Transportation", excluded: false },
+		{ value: "Shopping", excluded: false },
+		{ value: "Eating", excluded: false },
+		{ value: "Activities", excluded: false },
 	],
 	tags: [{ value: "test", default: false }],
 	exportPath: "./expenses.csv",
@@ -163,14 +163,17 @@ describe("duplicateTrip", () => {
 	beforeEach(() => {
 		mkdirSync(sourcePath, { recursive: true });
 		const sourceSettings: Settings = {
-			version: 1,
+			version: 2,
 			name: "Source Trip",
 			startDate: "2026-01-01",
 			endDate: "2026-01-07",
 			countries: ["Japan"],
 			baseCurrency: "THB",
 			currencies: { JPY: { exchangeRate: 0.23 } },
-			categories: ["Food", "Transport"],
+			categories: [
+				{ value: "Food", excluded: false },
+				{ value: "Transport", excluded: false },
+			],
 			tags: [{ value: "business", default: false }],
 			exportPath: "./out.csv",
 		};
@@ -214,7 +217,10 @@ describe("duplicateTrip", () => {
 
 		expect(trip.settings.baseCurrency).toBe("THB");
 		expect(trip.settings.currencies).toEqual({ JPY: { exchangeRate: 0.23 } });
-		expect(trip.settings.categories).toEqual(["Food", "Transport"]);
+		expect(trip.settings.categories).toEqual([
+			{ value: "Food", excluded: false },
+			{ value: "Transport", excluded: false },
+		]);
 		expect(trip.settings.tags).toEqual([{ value: "business", default: false }]);
 		expect(trip.settings.exportPath).toBe("./out.csv");
 	});
