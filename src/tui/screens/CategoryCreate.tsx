@@ -1,9 +1,10 @@
 import type { JSX } from "react";
 import { useEffect } from "react";
 import { updateSettings } from "../../core/services/trip";
+import { validateCategory } from "../../core/validators";
 import { Form } from "../components/organisms/Form";
 import { FORM_HINTS } from "../constants/hints";
-import { type FormFieldConfig, getString } from "../models";
+import { type FormFieldConfig, getBoolean, getString } from "../models";
 import { useData } from "../states/data";
 import { useLayout } from "../states/layout";
 import { useNavigation } from "../states/navigation";
@@ -16,6 +17,13 @@ const FIELDS: FormFieldConfig[] = [
 		type: "text",
 		required: true,
 		placeholder: "e.g. Flight",
+	},
+	{
+		key: "excluded",
+		label: "Exclude from total",
+		type: "boolean",
+		required: true,
+		defaultValue: false,
 	},
 ];
 
@@ -37,12 +45,15 @@ export function CategoryCreate(): JSX.Element | null {
 			fields={FIELDS}
 			onSubmit={(values) => {
 				const value = getString(values, "value").trim();
-				if (value) {
-					updateSettings(trip.dirPath, {
-						categories: [...trip.settings.categories, value],
-					});
-					reloadTrip();
+				const errors = validateCategory(value, trip.settings.categories);
+				if (errors.length > 0) {
+					throw new Error(errors[0]);
 				}
+				const excluded = getBoolean(values, "excluded");
+				updateSettings(trip.dirPath, {
+					categories: [...trip.settings.categories, { value, excluded }],
+				});
+				reloadTrip();
 				goBack();
 			}}
 		/>
