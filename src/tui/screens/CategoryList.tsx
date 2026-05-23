@@ -88,7 +88,7 @@ export function CategoryList(): JSX.Element {
 	return (
 		<ListSelect
 			options={categories.map((c) => ({
-				label: `${c.excluded ? "[ ]" : "[✓]"} ${c.value}`,
+				label: c.excluded ? `${c.value} [excluded]` : c.value,
 				value: c.value,
 			}))}
 			onChange={(value) => {
