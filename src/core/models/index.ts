@@ -1,5 +1,6 @@
 export type { Account } from "./account";
 export { AccountType } from "./account";
+export type { Category } from "./category";
 export type { Expense, ExpenseOwnerSplit } from "./expense";
 export { SplitType } from "./expense";
 export type { Owner } from "./owner";
