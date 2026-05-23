@@ -288,9 +288,7 @@ describe("loadConfig with tripConfig — end-to-end", () => {
 			{ value: "work", default: false },
 			{ value: "fun", default: false },
 		]);
-		expect(reparsed.categories).toEqual([
-			{ value: "Food", excluded: false },
-		]);
+		expect(reparsed.categories).toEqual([{ value: "Food", excluded: false }]);
 	});
 
 	test("leaves a v2 settings.yaml byte-identical on load", () => {
