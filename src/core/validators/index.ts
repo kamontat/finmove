@@ -1,3 +1,4 @@
+export { validateCategory } from "./category";
 export { validateTag } from "./tag";
 export { validateAccounts } from "./validateAccounts";
 export { validateExpenses } from "./validateExpenses";
