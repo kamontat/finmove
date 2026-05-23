@@ -11,8 +11,10 @@ import {
 	writeTripConfig,
 } from "../trip/io";
 import { tripV0ToV1 } from "../trip/migrations/v0_to_v1";
+import { tripV1ToV2 } from "../trip/migrations/v1_to_v2";
 import { tripV0Schema } from "../trip/schemas/v0";
 import { tripV1Schema } from "../trip/schemas/v1";
+import { tripV2Schema } from "../trip/schemas/v2";
 
 const baseV0Settings = {
 	name: "Trip",
@@ -72,6 +74,70 @@ describe("tripV0ToV1 migration", () => {
 
 		expect(out.settings.tags).toEqual([]);
 		expect(out.settings.version).toBe(1);
+	});
+});
+
+const baseV1Settings = {
+	version: 1 as const,
+	name: "Trip",
+	startDate: "2026-05-01",
+	endDate: "2026-05-07",
+	countries: ["Japan"],
+	baseCurrency: "THB" as const,
+	currencies: {},
+	tags: [],
+	exportPath: "./expenses.csv",
+};
+
+describe("tripV1ToV2 migration", () => {
+	test("stamps version: 2 and normalizes string categories", () => {
+		const input = tripV1Schema.parse({
+			settings: { ...baseV1Settings, categories: ["Food", "Hotels"] },
+			owners: [],
+			accounts: [],
+			expenses: [],
+		});
+
+		const out = tripV1ToV2(input);
+
+		expect(out.settings.version).toBe(2);
+		expect(out.settings.categories).toEqual([
+			{ value: "Food", excluded: false },
+			{ value: "Hotels", excluded: false },
+		]);
+		expect(() => tripV2Schema.parse(out)).not.toThrow();
+	});
+
+	test("passes through already-normalized Category objects", () => {
+		const input = tripV1Schema.parse({
+			settings: {
+				...baseV1Settings,
+				categories: [{ value: "Food", excluded: true }],
+			},
+			owners: [],
+			accounts: [],
+			expenses: [],
+		});
+
+		const out = tripV1ToV2(input);
+
+		expect(out.settings.categories).toEqual([
+			{ value: "Food", excluded: true },
+		]);
+	});
+
+	test("handles empty categories", () => {
+		const input = tripV1Schema.parse({
+			settings: { ...baseV1Settings, categories: [] },
+			owners: [],
+			accounts: [],
+			expenses: [],
+		});
+
+		const out = tripV1ToV2(input);
+
+		expect(out.settings.categories).toEqual([]);
+		expect(out.settings.version).toBe(2);
 	});
 });
 

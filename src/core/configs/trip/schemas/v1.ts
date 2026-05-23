@@ -18,7 +18,12 @@ const settingsSchemaV1 = z.object({
 	countries: z.array(z.string()),
 	baseCurrency: z.literal("THB"),
 	currencies: z.record(z.string(), currencyConfigSchema),
-	categories: z.array(z.string()),
+	categories: z.array(
+		z.union([
+			z.string(),
+			z.object({ value: z.string(), excluded: z.boolean() }),
+		]),
+	),
 	tags: z.array(tagSchema),
 	exportPath: z.string(),
 });
@@ -57,7 +62,10 @@ const expenseSchema = z.object({
 });
 
 export interface TripV1 {
-	settings: Settings;
+	settings: Omit<Settings, "version" | "categories"> & {
+		version: 1;
+		categories: Array<string | { value: string; excluded: boolean }>;
+	};
 	owners: Owner[];
 	accounts: Account[];
 	expenses: Expense[];
