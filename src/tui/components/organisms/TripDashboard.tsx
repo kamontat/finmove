@@ -88,20 +88,50 @@ function SectionHeader({ label }: { label: string }): JSX.Element {
 }
 
 function SpendBlock({ status }: Props): JSX.Element {
-	const labelWidth = "By currency".length;
+	const hasExcluded = status.hasExcludedCategories;
+	const hasOwners = status.ownerBalances.length > 0;
+	const labelWidth = "Avg/day/person excl.".length;
 	return (
-		<Box flexDirection="column" width={40}>
+		<Box flexDirection="column" width={46}>
 			<SectionHeader label="Spend" />
 			<Box>
 				<Text dimColor>{"Total".padEnd(labelWidth)}</Text>
 				<Text>{"  "}</Text>
 				<Text bold>{formatThb(status.totalSpendThb)}</Text>
 			</Box>
+			{hasExcluded && (
+				<Box>
+					<Text dimColor>{"Excl.".padEnd(labelWidth)}</Text>
+					<Text>{"  "}</Text>
+					<Text bold>{formatThb(status.totalSpendExcludedThb)}</Text>
+				</Box>
+			)}
 			<Box>
 				<Text dimColor>{"Avg/day".padEnd(labelWidth)}</Text>
 				<Text>{"  "}</Text>
 				<Text bold>{formatThb(status.avgPerDayThb)}</Text>
 			</Box>
+			{hasExcluded && (
+				<Box>
+					<Text dimColor>{"Avg/day excl.".padEnd(labelWidth)}</Text>
+					<Text>{"  "}</Text>
+					<Text bold>{formatThb(status.avgPerDayExcludedThb)}</Text>
+				</Box>
+			)}
+			{hasOwners && (
+				<Box>
+					<Text dimColor>{"Avg/day/person".padEnd(labelWidth)}</Text>
+					<Text>{"  "}</Text>
+					<Text bold>{formatThb(status.avgPerDayPerPersonThb)}</Text>
+				</Box>
+			)}
+			{hasOwners && hasExcluded && (
+				<Box>
+					<Text dimColor>{"Avg/day/person excl.".padEnd(labelWidth)}</Text>
+					<Text>{"  "}</Text>
+					<Text bold>{formatThb(status.avgPerDayPerPersonExcludedThb)}</Text>
+				</Box>
+			)}
 			{status.byCurrency.length > 0 && (
 				<Box flexDirection="column">
 					<Box>
