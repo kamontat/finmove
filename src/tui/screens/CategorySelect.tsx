@@ -40,8 +40,8 @@ export function CategorySelect(): JSX.Element {
 	const initialValue = typeof initialRaw === "string" ? initialRaw : undefined;
 
 	const options = trip.settings.categories.map((c) => ({
-		label: c,
-		value: c,
+		label: c.value,
+		value: c.value,
 	}));
 
 	return (

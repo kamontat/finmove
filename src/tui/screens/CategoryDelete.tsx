@@ -39,9 +39,9 @@ export function CategoryDelete(): JSX.Element {
 
 	return (
 		<RemoveSelector
-			options={categories.map((c) => ({ label: c, value: c }))}
+			options={categories.map((c) => ({ label: c.value, value: c.value }))}
 			onConfirm={(value) => {
-				const remaining = categories.filter((c) => c !== value);
+				const remaining = categories.filter((c) => c.value !== value);
 				updateSettings(trip.dirPath, { categories: remaining });
 				reloadTrip();
 				if (remaining.length === 0) {

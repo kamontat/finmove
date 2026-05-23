@@ -141,8 +141,8 @@ export function ExpenseForm(): JSX.Element {
 				type: "select",
 				required: true,
 				options: trip.settings.categories.map((c) => ({
-					label: c,
-					value: c,
+					label: c.value,
+					value: c.value,
 				})),
 				onEdit: () =>
 					goTo("/trips/expenses/form/category", {
