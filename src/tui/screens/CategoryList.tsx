@@ -46,7 +46,9 @@ export function CategoryList(): JSX.Element {
 									onConfirm: (i: number) => {
 										const target = categories[i];
 										if (target === undefined) return;
-										const remaining = categories.filter((c) => c !== target);
+										const remaining = categories.filter(
+											(c) => c.value !== target.value,
+										);
 										updateSettings(trip.dirPath, { categories: remaining });
 										reloadTrip();
 										if (remaining.length === 0) {
@@ -85,7 +87,10 @@ export function CategoryList(): JSX.Element {
 
 	return (
 		<ListSelect
-			options={categories.map((c) => ({ label: c, value: c }))}
+			options={categories.map((c) => ({
+				label: `${c.excluded ? "[ ]" : "[✓]"} ${c.value}`,
+				value: c.value,
+			}))}
 			onChange={(value) => {
 				goTo("/trips/settings/categories/edit", {
 					props: {
