@@ -243,12 +243,13 @@ describe("readTripConfig — errors", () => {
 });
 
 describe("loadConfig with tripConfig — end-to-end", () => {
-	test("loads a v1 trip without migration", () => {
-		const dir = join(TEST_DIR, "v1-trip");
+	test("loads a v2 trip without migration", () => {
+		const dir = join(TEST_DIR, "v2-trip");
 		writeTripFiles(dir, {
 			settings: {
 				...baseV0Settings,
-				version: 1,
+				version: 2,
+				categories: [{ value: "Food", excluded: false }],
 				tags: [{ value: "biz", default: false }],
 			},
 			owners: [],
@@ -259,13 +260,13 @@ describe("loadConfig with tripConfig — end-to-end", () => {
 		const result = loadConfig(tripConfig, dir);
 
 		expect(result.migrated).toBe(false);
-		expect(result.data.settings.version).toBe(1);
+		expect(result.data.settings.version).toBe(2);
 		expect(result.data.settings.tags).toEqual([
 			{ value: "biz", default: false },
 		]);
 	});
 
-	test("migrates a v0 trip with string tags to v1 and rewrites settings.yaml", () => {
+	test("migrates a v0 trip with string tags to v2 and rewrites settings.yaml", () => {
 		const dir = join(TEST_DIR, "v0-trip");
 		writeTripFiles(dir, {
 			settings: { ...baseV0Settings, tags: ["work", "fun"] },
@@ -278,21 +279,29 @@ describe("loadConfig with tripConfig — end-to-end", () => {
 
 		expect(result.migrated).toBe(true);
 		expect(result.fromVersion).toBe(0);
-		expect(result.toVersion).toBe(1);
-		expect(result.data.settings.version).toBe(1);
+		expect(result.toVersion).toBe(2);
+		expect(result.data.settings.version).toBe(2);
 
 		const reparsed = parse(readFileSync(join(dir, "settings.yaml"), "utf-8"));
-		expect(reparsed.version).toBe(1);
+		expect(reparsed.version).toBe(2);
 		expect(reparsed.tags).toEqual([
 			{ value: "work", default: false },
 			{ value: "fun", default: false },
 		]);
+		expect(reparsed.categories).toEqual([
+			{ value: "Food", excluded: false },
+		]);
 	});
 
-	test("leaves a v1 settings.yaml byte-identical on load", () => {
-		const dir = join(TEST_DIR, "v1-untouched");
+	test("leaves a v2 settings.yaml byte-identical on load", () => {
+		const dir = join(TEST_DIR, "v2-untouched");
 		writeTripFiles(dir, {
-			settings: { ...baseV0Settings, version: 1, tags: [] },
+			settings: {
+				...baseV0Settings,
+				version: 2,
+				categories: [{ value: "Food", excluded: false }],
+				tags: [],
+			},
 			owners: [],
 			accounts: [],
 			expenses: [],

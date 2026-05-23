@@ -1,3 +1,3 @@
 export { tripConfig } from "./definition";
-export type { TripV1 } from "./schemas/v1";
-export { tripV1Schema } from "./schemas/v1";
+export type { TripV2 } from "./schemas/v2";
+export { tripV2Schema } from "./schemas/v2";
